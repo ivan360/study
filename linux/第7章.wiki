@@ -1,0 +1,314 @@
+= 7.1 RAID磁盘冗余阵列 =
+RAID独立磁盘冗余阵列(Redundant Array of Independent Disks)
+RAID技术就是将许多块硬盘设备组合成一个容量更大、更安全的硬盘组，可以将数据切割成多个区段后分别存放在各个不同物理硬盘设备上，然后利用分散读写需求来提升硬盘组整体的性能，同时将重要数据同步保存多份到不同的物理硬盘设备上，起到非常好的数据冗余备份效果。
+
+不仅增加了存储设备的IO读写速度，还很大程度上降低了硬盘设备损坏后丢失数据的可能性
+
+`RAID0硬盘组`，将多块物理硬盘设备通过硬件或软件的方式串联在一起，成为一个大的卷组
+将数据依次分别写入到各个物理硬盘中，使得读写性能提升数倍，若任意一块硬盘故障则会让整个系统的数据都受到破坏
+
+通俗来说RAID0硬盘组技术至少需要两块物理硬盘设备，有效提高硬盘的性能和吞吐量，但没有冗余和错误修复能力
+
+数据是被分开存放的，任何其中的一块硬盘出现了问题都会破坏数据的完整性
+
+`RAID1硬盘组`,是将两块以上的存储设备进行绑定，让数据被多块硬盘同时写入，某一块硬盘损坏后一般可以通过热交换方式来恢复数据的正常使用
+注重数据的安全性，但硬盘空间的真实可用率只有50%，提高硬盘组整体的成本，也会增加一定系统计算功能的负载。
+
+`RAID5硬盘组`,将其它存储设备中的数据奇偶校验信息互相保存到硬盘设备中
+有两项技术特色
+第一，数据的奇偶校验信息分别互相存储到其它每一块硬盘设备上，当其中任何一设备损坏后不至于出现致命缺陷
+第二，RAID5硬盘组并不是备份真真正正的硬盘实际数据信息，而是当设备出现问题后通过奇偶校验信息来尝试重建损坏的数据，“妥协”的兼顾了存储设备性能、数据安全性与存储成本问题。
+
+生产环境中主要使用的RAID10硬盘组技术，就是对RAID1+RAID0硬盘组技术的一个“组合体”
+
+`RAID10硬盘组`,需要至少4块硬盘来组建，其中先分别两两制作成RAID1硬盘组，保证数据的安全性，然后再对两个RAID1硬盘组实施RAID0技术，进一步的提高存储设备的读写速度
+RAID10硬盘组技术继承了RAID0更高的读写速度和RAID1更安全的数据保障
+
+== 7.1.1 部署磁盘阵列组 ==
+`mdadm命令用于管理系统软件RAID硬盘阵列，格式为："mdadm [模式] <RAID设备名称> [选项] [成员设备名称]"`
+-a   检测设备名称
+-n   指定设备数量
+-l   指定raid级别
+-C   创建
+-v   显示过程
+-f   模拟设备损坏
+-r   移除设备
+-Q   查看摘要信息
+-D   查看详细信息
+-S   停止阵列
+1. 第1步:使用mdadm命令创建RAID10,名称为"/dev/md0"
+
+-C参数代表创建一个RAID阵列卡
+-v参数来显示出创建的过程，同时就在后面追加一个设备名称/dev/md0
+-a yes参数代表自动创建设备文件
+-n 4参数代表使用4块硬盘来制作这个RAID磁盘阵列组
+-l 10参数则代表RAID10方案，最后面再加上4块硬盘设备的名称就搞定啦：
+
+# mdadm -Cv /dev/md0 -a yes -n 4 -l 10 /dev/sdb /dev/sdc /dev/sdd /dev/sde
+
+2. 第2步:将制作好的RAID磁盘阵列组格式化为ext4格式
+# mkfs.ext4 /dev/md0
+
+3. 第3步:创建挂载点然后将存储设备进行挂载操作，挂载成功后可看到可用空间为40G
+# mkdir /RAID
+# mount /dev/md0 /RAID
+# df -h
+Filesystem   Size   Used   Avail   Use%   Mounted   on
+/dev/md0     40G    49M    38G     1%     /RAID
+
+4. 第4步:查看/dev/md0磁盘阵列设备组详细信息，并将挂载信息写入到配置文件中永久生效
+
+# cat /proc/mdstat
+或者
+# mdadm -D /dev/md0
+/dev/md0        :
+Version         : 1.2
+Creation Time   : Tue May 5 07:43:26 2017
+Raid Level      : raid10
+Array Size      : 41909248 (39.97 GiB 42.92 GB)
+Used Dev Size   : 20954624 (19.98 GiB 21.46 GB)
+Raid Devices    : 4
+Total Devices   : 4
+Persistence     : Superblock is persistent
+Update Time     : Tue May 5 07:46:59 2017
+State           : clean
+Active Devices  : 4
+Working Devices : 4
+Failed Devices  : 0
+Spare Devices   : 0
+Layout          : near=2
+Chunk Size      : 512K
+Name            : localhost.localdomain: 0 (local to host localhost.localdomain)
+UUID            : cc9a87d4: 1e89e175: 5383e1e8 : a78ec62c
+Events          : 17
+Number   Major   Minor   RaidDevice   State
+0        8       16      0            active   sync   /dev/sdb
+1        8       32      1            active   sync   /dev/sdc
+2        8       48      2            active   sync   /dev/sdd
+3        8       64      3            active   sync   /dev/sde
+
+# echo "/dev/md0 /RAID ext4 defaults 0 0" >> /etc/fstab
+
+== 7.1.2 损坏磁盘阵列及修复 ==
+当确认有一块物理硬盘设备出现损坏不能再继续正常使用后，使用mdadm命令来予以移除之后查看下RAID磁盘阵列组的状态已经被改变：
+
+模拟损坏
+# mdadm /dev/md0 -f /dev/sdb
+mdadm: set /dev/sdb faulty in /dev/md0
+
+查看
+# mdadm -D /dev/md0
+Number   Major   Minor   RaidDevice   State
+0        0       0       0            removed
+1        8       32      1            active    sync       /dev/sdc
+2        8       48      2            active    sync       /dev/sdd
+3        8       64      3            active    sync       /dev/sde
+0        8       16      -            faulty    /dev/sdb
+
+RAID10级别的磁盘阵列组允许一组RAID1硬盘组中存在一个故障盘而不影响使用
+
+移除损坏的磁盘：
+# mdadm /dev/md0 -r /dev/sdb
+
+当购买了新的硬盘存储设备后再使用mdadm命令来予以恢复即可
+
+# umount /RAID
+# mdadm /dev/md0 -a /dev/sdb
+# mdadm -D /dev/md0
+
+== 7.1.3 磁盘阵列组+备份盘 ==
+RAID10最多允许损坏50%的硬盘设备，但如果同一组中的设备同时全部损坏也会导致数据丢失
+使用RAID备份盘技术来预防这类事故，准备一块足够大的硬盘，平时是闲置状态不用工作
+一旦RAID磁盘阵列组中有硬盘出现故障后则会马上自动顶替上去
+
+RAID5磁盘阵列组技术至少需要3块盘来做，加上1块备份盘
+
+创建一个RAID5磁盘阵列组+备份盘
+-n 3参数代表创建这个RAID5所需的硬盘个数
+-l 5参数代表RAID磁盘阵列的级别
+-x 1参数则代表有1块备份盘,当我们查看/dev/md0磁盘阵列组的时候就能看到有一块备份盘在等待中了
+
+# mdadm -Cv /dev/md0 -n 3 -l 5 -x 1 /dev/sdb /dev/sdc /dev/sdd /dev/sde
+
+# mdadm -D /dev/md0
+Number   Major   Minor   RaidDevice   State
+0        8       16      0            active   sync       /dev/sdb
+1        8       32      1            active   sync       /dev/sdc
+4        8       48      2            active   sync       /dev/sdd
+3        8       64      -            spare    /dev/sde
+
+# mkfs.ext4 /dev/md0
+# echo "/dev/md0 /RAID ext4 defaults 0 0" >> /etc/fstab
+# mkdir /RAID
+# mount -a
+
+将硬盘设备/dev/sdb移出磁盘阵列组，快速看下/dev/md0磁盘阵列组的状态就会发现备份盘已经被自动顶替上去
+
+# mdadm /dev/md0 -f /dev/sdb
+mdadm: set /dev/sdb faulty in /dev/md0
+
+# mdadm -D /dev/md0
+Number   Major   Minor   RaidDevice   State
+3        8       64      0            spare    rebuilding   /dev/sde
+1        8       32      1            active   sync         /dev/sdc
+4        8       48      2            active   sync         /dev/sdd
+0        8       16      -            faulty   /dev/sdb
+
+= 7.2 LVM逻辑卷管理器 =
+LVM逻辑卷管理器(Logical Volume Manager)
+在磁盘分区和文件系统之间添加的逻辑层，它提供了一个抽象的卷组，可以使得多块硬盘进行卷组合并，让用户不必关心物理硬盘设备的底层结构，从而实现对分区的灵活动态调整。
+
+吃馒头但面粉不够了，分别从隔壁老王家、老李家、老张家借来一些面粉，蒸出馒头后大家一起来吃
+首先需要将这些面粉（物理卷PV，Physical Volume）合并成一个大面团（卷组VG，Volume Group）
+然后把这一大团面再分割成一个个小馒头（逻辑卷LV，Logical Volume）
+
+每个小馒头的重量必须是每勺面粉（基本单元PE，Physical Extent）的倍数
+
+物理卷是处于逻辑卷管理器中最底层的资源，可以理解成是物理硬盘、硬盘分区或者RAID磁盘阵列组都可以
+而卷组是建立在物理卷之上的，一个卷组中可以包含多个物理卷，当然在卷组创建之后也可以继续向其中添加新的物理卷
+而逻辑卷是建立于卷组之上的，将卷组中空闲的资源建立出新的逻辑卷，并且逻辑卷建立后可以动态的扩展或缩小空间
+
+== 7.2.1 部署逻辑卷 ==
+功能/命令   物理卷管理   卷组管理    逻辑卷管理
+扫描        pvscan       vgscan      lvscan
+建立        pvcreate     vgcreate    lvcreate
+显示        pvdisplay    vgdisplay   lvdisplay
+删除        pvremove     vgremove    lvremove
+扩展                     vgextend    lvextend
+
+1. 第1步：让新添加的两块硬盘设备支持LVM逻辑卷管理器技术：
+
+# pvcreate /dev/sdb /dev/sdc
+
+2. 第2步：将两块硬盘设备都加入到storage卷组中，然后查看下卷组的状态：
+
+# vgcreate storage /dev/sdb /dev/sdc
+
+# vgdisplay
+
+3. 第3步：切割出一个约为150M的逻辑卷设备：
+
+在LVM逻辑卷管理器对LV逻辑卷的切割上面有两种计量单位
+第一种是常见以-L参数来以容量单位为对象，例如使用-L 150M来生成一个大小为150M的逻辑卷
+还可以使用-l参数来指定要使用PE基本单元的个数，默认每个PE的大小为4M，因此允许使用-l 37来生成一个大小为37*4M=148M的逻辑卷：
+
+# lvcreate -n vo -l 37 storage
+ Logical volume "vo" created
+
+# lvdisplay 
+
+4. 第4步：将生成好的逻辑卷格式化后挂载使用：
+
+逻辑卷设备存放在/dev设备目录中（实际上是做了一个符号链接，但读者们无需关心）
+同时会以卷组的名称来建立一个目录，其中保存有逻辑卷的设备映射文件
+
+# mkfs.ext4 /dev/storage/vo 
+
+# mkdir /linuxprobe
+
+# mount /dev/storage/vo /linuxprobe
+
+5. 第5步：查看挂载状态，并写入到配置文件永久生效：
+
+# df -h
+
+# echo "/dev/storage/vo /linuxprobe ext4 defaults 0 0" >> /etc/fstab
+
+== 7.2.2 扩容逻辑卷 ==
+扩展前请一定要记得卸载设备和挂载点的关联
+# umount /linuxprobe
+
+1. 第1步：将上个实验中的逻辑卷vo扩展至290M：
+# lvextend -L 290M /dev/storage/vo
+
+2. 第2步：检查磁盘完整性，重置硬盘容量：
+# e2fsck -f /dev/storage/vo
+
+# resize2fs /dev/storage/vo
+
+3. 第3步：重新挂载硬盘设备并查看挂载状态：
+# mount -a
+# df -h
+
+== 7.2.3 缩小逻辑卷 ==
+对逻辑卷的缩小操作存在着更高丢失数据的风险，一定要留心记得提前备份好数据
+另外Linux系统规定对LVM逻辑卷的缩小操作需要先检查文件系统的完整性，操作前记得先把文件系统卸载掉：
+# umount /linuxprobe
+
+1. 第1步：检查文件系统的完整性：
+# e2fsck -f /dev/storage/vo
+
+2. 第2步：将LV逻辑卷的容量减小到120M：
+# resize2fs /dev/storage/vo 120M
+
+# lvreduce -L 120M /dev/storage/vo
+
+3. 第3步：将文件系统重新挂载并查看系统状态：
+# mount -a
+# df -h
+
+== 7.2.4 逻辑卷快照 ==
+LVM逻辑卷管理器的快照功能有两项特点
+第一是快照卷的大小应该尽量等同于LV逻辑卷的容量
+第二是快照功能仅一次有效，一旦被还原后则会被自动立即删除。我们首先应当查看下卷组的信息：
+
+# vgdisplay
+Alloc PE / Size 30    / 120.00 MiB
+Free PE  / Size 10208 / 39.88 GiB
+通过卷组的输出信息可以很清晰的看到卷组中已用120M，空闲资源有39.88G
+
+接下来咱们在逻辑卷设备所挂载的目录中用重定向写入一个文件吧：
+# echo "Welcome to Linuxprobe.com" > /linuxprobe/readme.txt
+# ls /linuxprobe
+-rw-r--r--. 1 root root 26 Feb 1 07:38 readme.txt
+
+1. 第1步：使用-s参数来生成一个快照卷，使用-L参数来指定切割的大小，另外要记得在后面写上这个快照是针对那个逻辑卷做的。
+#  lvcreate -L 120M -s -n SNAP /dev/storage/vo
+ Logical volume "SNAP" created
+
+# lvdisplay
+ LV snapshot status active destination for vo
+ LV Status available
+ Allocated to snapshot 0.01%
+
+2. 第2步：咱们在LV设备卷所挂载的目录中创建一个100M的垃圾文件，这样再来看快照卷的状态就会发现使用率上升了：
+# dd if=/dev/zero of=/linuxprobe/files count=1 bs=100M
+
+# lvdisplay
+ Allocated to snapshot 83.71%
+
+3. 第3步：为了校验SNAP快照卷的效果，咱们需要对逻辑卷进行快照合并还原操作，在这之前记得先卸载掉逻辑卷设备与目录的挂载~
+
+# umount /linuxprobe
+# lvconvert --merge /dev/storage/SNAP
+ Merging of volume SNAP started.
+ vo: Merged: 21.4%
+ vo: Merged: 100.0%
+ Merge of snapshot into logical volume vo has finished.
+ Logical volume "SNAP" successfully removed
+
+4. 第4步：快照卷会被自动删除掉，并且刚刚在逻辑卷设备被快照后再创建出来的100M垃圾文件也被清除了：
+
+# mount -a
+# ls /linuxprobe/
+lost+found readme.txt
+
+== 7.2.5 删除逻辑卷 ==
+1. 第1步：取消逻辑卷与目录的挂载关联，删除配置文件中永久生效的设备参数。
+
+# umount /linuxprobe
+# vim /etc/fstab
+
+2. 第2步：将LV逻辑卷设备删除，需要手工输入y来确认操作：
+
+# lvremove /dev/storage/vo 
+
+3. 第3步：将VG卷组删除，此处只需写卷组名称即可，而无需设备完整绝对路径：
+
+# vgremove storage
+
+4. 第4步：将PV物理卷设备移除：
+
+# pvremove /dev/sdb /dev/sdc
+
+分别执行下lvdisplay、vgdisplay、pvdisplay命令来查看逻辑卷管理器信息

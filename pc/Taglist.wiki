@@ -1,0 +1,58 @@
+
+= Taglist =
+    是vim的源代码浏览插件，可以以窗口方式查看函数列表，变量列表等。
+    能够列出源文件中的tag(function, class, variable, etc)并跳转, 实现了源代码结构和函数列表的展示
+
+[安装]：
+1. 下载解压后会发现有两个文件夹(doc,plugin)，将它们拷贝到~/.vim or ~/vimfiles or $VIM/vimfiels内即可.
+2. 进入Vim，在命令模式下输入命令 "  helptags ~/.vim/doc"即可完成Taglist的安装。
+3. 输入命令“:Tlist”检查是否安装成功。
+
+[配置]：
+    let Tlist_File_Fold_Auto_Close = 1      -- 除了当前窗口显示的文件，其它文件折叠。
+    let Tlist_Exit_OnlyWindow      = 1      -- 如果Tlist是最后一个窗口，自动退出vim。
+
+[使用 ]
+    :Tlist      --激活Taglist窗口
+                --按Ctrl-w w在两个窗口来回跳转
+    在Tlist窗口按F1
+    :help Tlist             查看Tlist命令帮助
+    :help 'Tlist*'          查看Tlist选项帮助
+    :e ~/.vim/taglist.txt   直接打开文档看帮助
+
+[快捷键]
+    nnoremap <silent><F2>   : TlistToggle<CR>
+    map <silent> <leader>tl : TlistToogle<cr>   --输入"\tl"，就可以打开/关闭taglist窗口
+    
+    在Tlist列表窗口中，以函数为例
+<CR>        -- 跳到光标下tag所定义的位置，用鼠标双击此tag功能也一样
+o           -- 在一个新打开的窗口中显示光标下tag
+- , +       -- 折叠/展开
+= , *       -- 全部折叠/全部展开
+<Space>     -- 显示光标下tag的原型定义
+[[ , ]]     -- 跳到前/后一个文件
+u           -- 更新taglist窗口中的tag
+s           -- 更改排序方式，在按名字排序和按出现顺序排序间切换
+x           -- taglist窗口放大和缩小，方便查看较长的tag
+q           -- 关闭taglist窗口
+<F1>        -- 显示帮助
+
+常用命令:
+
+:TlistToggle(或:Tlist)          -- 切换taglist窗口
+:help taglist                   -- 获取taglist插件帮助信息
+
+Tlist_Use_Right_Window          -- 如果为1则表示taglist窗口出现在右侧(默认为在左边)
+Tlist_File_Fold_Auto_Close      -- 1-当同时显示多个文件中的tag时，可使taglist只显示当前文件tag，其它文件的tag都被折叠起来。
+Tlist_Auto_Open                 -- 1-启动VIM后，自动打开taglist窗口；
+Tlist_Exit_OnlyWindow           -- 1表示taglist窗口是最后一个窗口时退出VIM
+Tlist_Ctags_Cmd                 -- 用于指定你的Exuberant ctags程序的位置，如果它没在你PATH变量所定义的路径中，需要使用此选项设置一下
+Tlist_Show_One_File             -- 显示多个文件中的tag,缺省为显示多个文件中的tag,如果不想同时显示多个文件可以将其设置为1，
+Tlist_Sort_Type                 -- 设置为”name”可以使taglist以tag名字进行排序，缺省是按tag在文件中出现的顺序进行排序。
+Tlist_Show_Menu                 -- 1-表示在gvim中显示taglist菜单
+Tlist_Use_SingleClick           -- 单击或双击一个tag时会跳到该tag定义的位置; 0(默认)=双击，1=单击
+Tlist_Close_On_Select           -- 1-选择了tag后自动关闭taglist窗口
+Tlist_Process_File_Always       -- 1-希望taglist始终解析文件中的tag，不管taglist窗口有没有打开
+Tlist_WinHeight，Tlist_WinWidth -- 设置taglist窗口的高度和宽度
+Tlist_Use_Horiz_Window          -- 设置taglist窗口横向显示
+

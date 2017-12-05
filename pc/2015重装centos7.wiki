@@ -1,0 +1,22 @@
+1. 开机修改root密码为fudao`12 [[centos7_passwd]]
+2. 用sh备份系统文件到/backup 
+3. 下载centos7.1
+    系统硬盘grub2启动安装 [[centos7.install.g2]]
+    设置intnet启动后自动联网,host:centos7
+    设置root,fudao`12；ivan,fudao123;
+
+4. 设置PS1颜色
+vim /etc/bashrc
+PS1='\[\033[01;32m\]\u@\h\[\033[01;34m\]:\w\[\e[01;31m\] \$\[\033[00m\] '
+
+
+5. 全局代理设置及安装软件
+    vim /etc/profile
+    或者，用户代理设置 vim ~/.bash_profile
+    http_proxy="http://lizhx:fudao360@10.242.8.12:8080"
+    export http_proxy
+    安装软件
+    设置yum仓库源 [[centos_soft]]
+安装samba
+yum -y install samba samba-client
+

@@ -1,0 +1,119 @@
+命令行参数说明
+────────────────────────────────
+BOOTICE [DEVICE] [/mbr, /pbr, /sectors, /partitions] [parameters]
+────────────────────────────────
+
+【DEVICE】
+────────────────────────────────
+/DEVICE=[m:n | X:]
+────────────────────────────────
+  m:n >> 指定磁盘m上的分区n (m: 0,1,2...; n: Grub4Dos 风格，0,1,2...)
+  X:  >> 盘符，通过盘符来指定磁盘号和分区号.
+
+【MBR 操作】
+────────────────────────────────
+BOOTICE [DEVICE] /mbr [/install /backup /restore] [parameters]
+────────────────────────────────
+/install          >> 安装某种 MBR 代码到磁盘上，需要type参数.
+    /type=[wee, GRUB4DOS, grub2, 1jf9z, 1jf9k, plop, usbhdd+, usbzip+, nt52, nt60]
+                  >> 如果没有指定type参数，将停在 MBR 界面等待用户操作.
+    /menu=xxx.lst >> 指定 WEE 的菜单文件
+/backup           >> 备份 MBR 到磁盘文件，需要 file 参数.
+    /file=xxx     >> 文件名，全路径名称或相对路径名称.
+    /sectors=n    >> 指定要备份的扇区数.
+/restore          >> 从 文件恢复 MBR，需要 file 参数.
+    /file=xxx     >> 文件名，全路径名称或相对路径名称.
+    /keep_dpt     >> 恢复时保留原磁盘签名和分区表.
+/boot_file=xxx    >> 指定启动文件，适用于 GRUB4DOS.
+
+【PBR 操作】
+────────────────────────────────
+BOOTICE [DEVICE] /pbr [/install /backup /restore] [parameters]
+────────────────────────────────
+/install >> 安装某种 PBR 程序到分区引导扇区，需要 /type= 参数.
+    /type=[msdos, GRUB4DOS, ntldr, bootmgr, syslinux]
+    如果没有指定 /type= 参数，程序将停在 PBR 界面等待用户操作.
+/backup >> 备份 PBR 到磁盘文件，需要 /file= 参数.
+    /file=xxx  >> 文件名，全路径名称或相对路径名称.
+    /sectors=n >> 指定要备份的扇区数.
+/restore >> 从文件恢复 PBR，需要 /file= 参数.
+    /file=xxx  >> 文件名，全路径名称或相对路径名称.
+    /keep_bpb  >> 恢复时保留 BPB 不改动.
+/boot_file=xxx >> 指定启动文件，适用于 GRUB4DOS，NTLDR，BOOTMGR.
+/v4            >> 安装 SYSLINUX v4.07（默认为 v5.10）.
+
+【扇区备份与恢复】
+────────────────────────────────
+BOOTICE [DEVICE] /sectors [/backup /restore] [parameters]
+────────────────────────────────
+/backup    >> 备份扇区到文件
+/restore   >> 从文件恢复扇区
+/lba=n     >> 指定起始扇区号
+/sectors=n >> 备份或恢复的扇区数
+/file=xxx  >> 文件名，全路径名称或相对路径名称.
+/keep_dpt  >> 恢复时保留原磁盘签名和分区表.
+/keep_bpb  >> 恢复时保留 BPB 不改动.
+
+【分区及格式化】
+────────────────────────────────
+BOOTICE [DEVICE] /partitions [operation]
+────────────────────────────────
+operation:
+/backup_dpt=xxx  >> 备份当前磁盘的分区表到文件 xxx
+/restore_dpt=xxx >> 从文件 xxx 恢复当前磁盘的分区表
+/hide            >> 隐藏 /device= 指定的分区
+/unhide          >> 显现 /device= 指定的分区
+/eisahide        >> 以 EISA 方式隐藏 /device= 指定的分区
+/set_id=XX       >> 修改指定分区 ID
+/activate        >> 激活指定分区
+/assign_letter   >> 为指定分区分配盘符（自动分配第一个可用盘符）
+/assign_letter=X >> 为指定分区分配盘符（盘符由用户指定）
+/delete_letter   >> 删除指定分区的盘符
+/repartition     >> 格式化 USB 移动存储介质
+    [/usb-fdd, /usb-zip, /usb-hdd] >> 磁盘结构
+    [/vollabel=xxx] >> 指定卷标，最大 11 个字符.
+    [/fstype=xxx]   >> /fstype=[fat16, fat32, ntfs, exfat]
+    [/startlba=nnn] >> 指定分区起始扇区号
+
+【特殊参数】
+────────────────────────────────
+1、/quiet
+如果使用了 /quiet 参数，BOOTICE 将在执行后不弹出确认对话框。
+（除非遇到错误）
+例外：为保证安全，格式化操作时将忽略此参数，此时需要手动执行。
+
+2、/nodriveletters
+使用此参数时，BOOTICE 将不进行任何盘符检测。
+
+3、/diskinfo
+此参数用于输出磁盘信息。此时，参数 /file=xxx 用于指定输出文件，
+如果没有指定输出文件，则以提示框的方式显示磁盘信息。
+
+4、/edit_bcd
+打开 BCD 编辑窗口进行 BCD 文件编辑。
+使用 /easymode 来指定经典模式，否则使用专业模式。
+使用 /file=xxx 来指定 BCD 文件，否则编辑系统 BCD。
+
+5、/edit_g4dmenu
+编辑 GRUB4DOS 菜单文件，支持 GRLDR 文件和 MENU.LST。
+使用 /file=xxx 参数来指定文件。
+
+6、用于 GRUB4DOS 的特别参数
+鉴于 GRUB4DOS 的广泛使用，实现了 GRUB4DOS 安装的全部参数：
+/v045：安装 0.4.5 版本
+/v046：安装 0.4.6 版本
+/mbr-bpb：复制第一个 FAT/NTFS 主分区的 BPB 到 MBR
+/mbr-disable-floppy：不从软驱搜索grldr
+/mbr-disable-osbr：不启动分区表无效的原MBR
+/duce：禁止无条件进入控制台
+/chs-no-tune：禁止改变磁盘集合参数
+/boot-prevmbr-first：优先启动原来的MBR
+/preferred-drive=m：优先磁盘号 
+/preferred-partition=n：优先分区号（LINUX风格）
+/hot-key=3920：指定热键，为四个十六进制的字符
+      前两个字符为扫描码，后两个字符为ASCII码
+/time-out=d：超时时间，秒
+/boot_file=xxx：这个参数实现 GRLDR 改名功能
+
+
+vim:set ft=txt:

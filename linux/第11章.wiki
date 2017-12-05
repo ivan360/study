@@ -1,0 +1,328 @@
+= 11.1 文件传输协议 =
+文件传输协议（FTP,File Transfer Protocol），即能够让用户在互联网中上传、下载文件的文件协议
+而FTP服务器就是支持FTP传输协议的主机，要想完成文件传输则需要FTP服务端和FTP客户端的配合才行。
+FTP协议占用两个端口号：
+    21端口:命令控制，用于接收客户端执行的FTP命令。
+    20端口:数据传输，用于上传、下载文件数据。
+ 
+= 11.2 安装vsftpd服务程序 =
+Vsftpd即“Very Secure FTP Daemon”是一款运行在类Unix操作系统的FTP服务端程序
+Vsftpd主打的是安全性、完全开源及免费、速率高、支持IPv6、虚拟用户功能等等其他FTP服务端软件不具备的功能。
+
+安装vsftpd服务程序包：
+# yum install vsftpd -y
+
+清空默认的防火墙默认规则：
+# iptables -F
+
+保存清空后的防火墙规则表：
+# service iptables save
+# iptables-save  centos7中方式
+
+Vsftpd的程序与配置文件：
+主程序                  /usr/sbin/vsftpd
+用户禁止登陆列表        /etc/vsftpd/ftpusers
+                        /etc/vsftpd/user_list
+主配置文件              /etc/vsftpd/vsftpd.conf
+
+# cat /etc/vsftpd/vsftpd.conf
+
+备份vsftpd的主配置文件：
+# mv /etc/vsftpd/vsftpd.conf /etc/vsftpd/vsftpd.conf_bak
+
+过滤掉所有包含#号的行，并将过滤结果写回到vsftpd.conf文件中：
+
+# grep -v "#" /etc/vsftpd/vsftpd.conf_bak > /etc/vsftpd/vsftpd.conf
+此时再分析下vsftpd程序的主配置文件吧：
+anonymous_enable     = YES
+local_enable         = YES
+write_enable         = YES
+local_umask          = 022
+dirmessage_enable    = YES
+xferlog_enable       = YES
+connect_from_port_20 = YES
+xferlog_std_format   = YES
+listen               = NO
+listen_ipv6          = YES
+pam_service_name     = vsftpd
+userlist_enable      = YES
+tcp_wrappers         = YES
+
+vsftpd程序配置文件参数的作用：
+listen=[YES|NO]                    是否以独立运行的方式监听服务。
+listen_address=IP地址              设置要监听的IP地址。
+listen_port=21                     设置FTP服务的监听端口。
+download_enable＝[YES|NO]          是否允许下载文件。
+userlist_enable=[YES|NO]
+userlist_deny=[YES|NO]             是否启用“禁止登陆用户名单”。
+max_clients=0                      最大客户端连接数，0为不限制。
+max_per_ip=0                       同一IP地址最大连接数，0位不限制。
+anonymous_enable=[YES|NO]          是否允许匿名用户访问。
+anon_upload_enable=[YES|NO]        是否允许匿名用户上传文件。
+anon_umask=022                     匿名用户上传文件的umask值。
+anon_root=/var/ftp                 匿名用户的FTP根目录。
+anon_mkdir_write_enable=[YES|NO]   是否允许匿名用户创建目录。
+anon_other_write_enable=[YES|NO]   是否开放匿名用户其他写入权限。
+anon_max_rate=0                    匿名用户最大传输速率(字节)，0为不限制。
+local_enable=[YES|NO]              是否允许本地用户登陆FTP。
+local_umask=022                    本地用户上传文件的umask值。
+local_root=/var/ftp                本地用户的FTP根目录。
+chroot_local_user=[YES|NO]         是否将用户权限禁锢在FTP目录，更加的安全。
+local_max_rate=0                   本地用户最大传输速率(字节)，0为不限制。
+
+= 11.3 Vsftpd的验证方式 =
+
+sftpd程序提供的FTP服务可选认证方式，分别为匿名访问、本地用户和虚拟用户：
+    匿名访问:任何人无需验证口令即可登入FTP服务端。
+    本地用户:使用FTP服务器中的用户、密码信息。
+    虚拟用户:创建独立的FTP帐号资料。
+
+本地用户与虚拟用户则需要帐号及口令才能登入FTP服务，虚拟用户则是最安全的。
+
+下面的实验环节将使用两台红帽RHEL7系统的主机，需要提前配置网卡的IP地址等信息：
+FTP服务端   红帽RHEL7操作系统   192.168.10.10
+FTP客户端   红帽RHEL7操作系统   192.168.10.20
+
+== 11.3.1 匿名访问模式 ==
+vsftpd程序默认已经允许匿名访问模式，我们要做的就是开启匿名用户的上传和写入权限
+    # vim /etc/vsftpd/vsftpd.conf
+
+anonymous_enable=YES          允许匿名访问模式。
+anon_umask=022                匿名用户上传文件的umask值。
+anon_upload_enable=YES        允许匿名用户上传文件
+anon_mkdir_write_enable=YES   允许匿名用户创建目录
+anon_other_write_enable=YES   允许匿名用户修改目录名或删除目录
+
+填写正确后保存并退出vsftpd.conf文件，重启vsftpd服务程序并设置为开机自启动。
+# systemctl restart vsftpd
+# systemctl enable vsftpd
+
+`ftp命令用于使用FTP服务，格式为：“ftp [参数] [FTP主机]”。`
+
+红帽RHEL7系统中ftp命令默认没有安装，请执行"yum install ftp -y"即可安装完毕。
+
+在客户端尝试登入FTP服务：
+# ftp 192.168.10.10
+ftp> cd pub
+ftp> mkdir files
+550 Permission denied.
+
+上面操作中已经将防火墙规则清空，在vsftpd.conf文件中也已经允许匿名用户创建目录与写入权限，那怎么会被拒绝了呢？
+
+回想前面的参数细节，匿名访问模式的FTP根目录为/var/ftp：
+
+# ls -ld /var/ftp/pub
+
+原来匿名用户的FTP根目录所有者/组都是root，所以匿名用户没有写入权限，将所有者修改为ftp试试
+# chown  ftp /var/ftp/pub
+
+此时再用ftp命令尝试登入FTP服务并创建文件：
+ftp> mkdir files
+550 Create directory operation failed
+
+又报错了!!报错代码还是550，但前面提示权限拒绝，这次是操作失败，是SELinux服务在捣鬼。
+查看所有与ftp相关的SELinux规则：
+# getsebool -a | grep ftp
+ftpd_full_access --> off
+
+设置SELinux服务对ftp服务的访问规则策略为允许
+# setsebool -P ftpd_full_access=on
+
+此时再来创建文件或目录就没有问题了：
+# ftp 192.168.10.10
+ftp> cd pub
+ftp> mkdir files
+ftp> rename files database
+ftp> rmdir database
+ftp> exit
+
+== 11.3.2 本地用户模式 ==
+既然要使用本地用户模式，而本地用户模式确实要比匿名访问模式更加的安全，所以关闭匿名访问模式。
+vsftpd服务程序默认已经允许本地用户模式，我们要做的是添加设置本地用户模式权限的参数：
+# vim /etc/vsftpd/vsftpd.conf
+
+anonymous_enable=NO   禁止匿名访问模式。
+local_enable=YES      允许本地用户模式。
+write_enable=YES      设置可写入权限。
+local_umask=022       本地用户模式创建文件的umask值。
+userlist_deny=YES     参数值为YES即禁止名单中的用户，参数值为NO则代表仅允许名单中的用户。
+userlist_enable=YES   允许“禁止登陆名单”，名单文件为ftpusers与user_list。
+
+填写正确后保存并退出vsftpd.conf文件，然后重启vsftpd服务程序并设置为开机自启动。
+# systemctl restart vsftpd
+# systemctl enable vsftpd
+
+我们先来看下ftpusers或user_list文件中禁止登录用户名单：
+    root bin daemon adm lp sync shutdown halt mail news uucp operator games nobody
+
+vsftpd服务为了让FTP服务更加的安全，默认禁止以root身份登入，那么创建个普通用户
+
+
+# useradd linuxprobe
+
+为linuxprobe用户设置密码：
+# passwd linuxprobe
+
+在客户端尝试登入FTP服务：
+# ftp 192.168.10.10
+ftp> mkdir files
+550 Create directory operation failed.
+
+遇到了“操作被拒绝”，马上想到SELinux了吧
+
+# getsebool -a | grep ftp
+ftpd_full_access --> off
+
+设置SELinux对FTP服务的规则为允许：
+# setsebool -P ftpd_full_access=on
+
+
+此时再来创建文件或目录就没有问题了：
+# ftp 192.168.10.10
+ftp> mkdir files
+ftp> rename files database
+ftp> rmdir database
+ftp> exit
+
+== 11.3.3 虚拟用户模式 ==
+因为虚拟用户模式的帐号口令都不是真实系统中存在的
+所以只要配置妥当虚拟用户模式会比本地用户模式更加安全，但是操作步骤相对复杂一些
+
+    第1步:建立虚拟FTP用户数据库文件。
+    第2步:创建FTP根目录及虚拟用户映射的系统用户。
+    第3步:建立支持虚拟用户的PAM认证文件。
+    第4步:在vsftpd.conf文件中添加支持配置。
+    第5步:为虚拟用户设置不同的权限。
+    第6步:重启vsftpd服务，验证实验效果。
+
+
+1. 第1步:建立虚拟FTP用户数据库文件。
+
+切换至vsftpd程序目录：
+# cd /etc/vsftpd/
+
+创建用于生成FTP用户数据库的原始帐号和密码文件：
+# vim vuser.list
+//单数行为帐号，双数行为密码。
+linuxprobe
+pa33w0rd
+blackshield
+pa22w1rd
+
+使用db_load命令用HASH算法生成FTP用户数据库文件vuser.db：
+# db_load -T -t hash -f vuser.list vuser.db
+
+查看数据库文件的类型：
+# file vuser.db
+vuser.db: Berkeley DB (Hash, version 9, native byte-order)
+
+FTP用户数据库内容很敏感，所以权限给小一些：
+# chmod 600 vuser.db
+
+删除原始的帐号和密码文件：
+# rm -f vuser.list
+
+
+2. 第2步:创建FTP根目录及虚拟用户映射的系统用户。
+
+创建用户virtual并设置为不允许登录系统并定义该用户的家目录：
+# useradd -d /var/ftproot -s /sbin/nologin virtual
+
+查看该用户的家目录权限：
+# ls -ld /var/ftproot/
+drwx------. 3 virtual virtual 74 Jul 14 17:50 /var/ftproot/
+
+为保证其他用户可以访问，给予rwxr-xr-x权限：
+# chmod -Rf 755 /var/ftproot/
+
+
+3. 第3步:建立支持虚拟用户的PAM认证文件：
+# vim /etc/pam.d/vsftpd.vu
+//参数db用于指向刚刚生成的vuser.db文件，但不要写后缀。
+auth       required     pam_userdb.so db=/etc/vsftpd/vuser
+account    required     pam_userdb.so db=/etc/vsftpd/vuser
+
+4. 第4步:在vsftpd.conf文件中添加支持配置。
+既然要使用虚拟用户模式，而虚拟用户模式确实要比匿名访问模式更加的安全，配置的同时也关闭匿名开放模式。
+# vim /etc/vsftpd/vsftpd.conf
+
+anonymous_enable=NO          禁止匿名开放模式。
+local_enable=YES             允许本地用户模式。
+guest_enable=YES             开启虚拟用户模式。
+guest_username=virtual       指定虚拟用户帐号。
+pam_service_name=vsftpd.vu   指定pam文件。
+allow_writeable_chroot=YES   允许禁锢的FTP根目录可写而不拒绝用户登入请求。
+
+
+5. 第5步:为虚拟用户设置不同的权限
+现在不论是linuxprobe还是blackshield帐户，权限都是相同的——默认不能上传、创建、修改文件
+如果希望用户blackshield能够完全的管理FTP内的资料，就需要让FTP程序支持独立的用户权限配置文件了：
+指定用户独立的权限配置文件存放的目录：
+
+# vim /etc/vsftpd/vsftpd.conf
+user_config_dir=/etc/vsftpd/vusers_dir
+
+创建用户独立的权限配置文件存放的目录：
+# mkdir /etc/vsftpd/vusers_dir/
+
+切换进入到该目录中：
+# cd /etc/vsftpd/vusers_dir/
+
+创建空白的linuxprobe的配置文件：
+# touch linuxprobe
+
+指定blackshield用户的具体权限：
+# vim blackshield
+anon_upload_enable      = YES
+anon_mkdir_write_enable = YES
+anon_other_write_enable = YES
+
+6. 第6步:重启vsftpd服务，验证实验效果。
+确认填写正确后保存并退出vsftpd.conf文件，重启vsftpd程序并设置为开机后自动启用：
+# systemctl restart vsftpd
+# systemctl enable vsftpd
+
+
+如果重启vsftpd并没有看到报错，此时可使用FTP客户机(192.168.10.20)尝试登入FTP服务了：
+# ftp 192.168.10.10
+ftp> mkdir files
+550 Create directory operation failed.
+
+再遇到了“操作被拒绝”，应该马上想到SELinux服务了吧。
+
+查看所有与ftp相关的SELinux规则：
+# getsebool -a | grep ftp
+ftpd_full_access –> off
+
+设置SELinux对FTP服务的规则为允许：
+
+[root@linuxprobe ~]# setsebool -P ftpd_full_access=on
+
+此时再来创建文件或目录就没有问题了：
+# ftp 192.168.10.10
+ftp> mkdir files
+ftp> rename files database
+ftp> rmdir database
+ftp> exit
+
+使用linuxprobe用户创建（肯定会报错）：
+# ftp 192.168.10.10
+ftp> mkdir files
+550 Permission denied.
+ftp> exit
+
+= 11.4 可插拔认证模块PAM =
+可插拔认证模块PAM(Pluggable Authentication Modules)是一种认证机制
+通过一些动态链接库和统一的API将系统提供的服务与认证方式分开，使得系统管理员可以根据需求灵活的调整服务程序的不同认证方式。
+通俗来讲PAM是一组安全机制的模块(插件)，让系统管理员可以轻易的调整服务程序的认证方式
+PAM采取了分层设计的思想——应用程序层、应用接口层、鉴别模块层。
+
+
+PAM API作为应用程序层与鉴别模块层的连接纽带，让应用程序可以根据需求灵活的在其中插入所需的鉴别功能模块
+当应用程序需要PAM认证时，一般在应用程序中定义负责其认证的PAM配置文件，
+    /lib/security : pam认证模块
+    /etc/pam.d    : 针对不同服务而定义好的pam配置文件
+
+例如vsftpd程序就会在其主配置文件("/etc/vsftpd/vsftpd.conf")中写入下面的参数：
+    pam_service_name=vsftpd
+表示登录FTP服务器时是根据/etc/pam.d/vsftpd的文件内容进行安全认证的。

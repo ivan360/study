@@ -1,0 +1,19 @@
+= u盘启动安装centos7 出现dracut:/# =
+cd /dev 查看u盘的位置
+我这里为/dev/sdd1
+至此我们重启一下，回到第一个图片所示的界面处，然后按下Tab键
+将
+    vmlinuz initrd=initrd.img inst.stage2=hd:LABEL=CentOS\x207\x20x86_64 rd.live.check quiet
+改为
+    vmlinuz initrd=initrd.img inst.stage2=hd:/dev/sdb4 quite
+然后按下enter 键进入安装界面。。。
+
+= centos7 最小化安装后 =
+vi /etc/sysconfig/network-scripts/ifcfg-enp2s0
+    ONBOOT=yes
+systemctl restart network
+
+yum install net-tools
+yum groupinstall 'Development Tools'
+yum groupinstall "GNOME Desktop"
+

@@ -1,0 +1,82 @@
+本地源创建
+
+1. 挂载raid5硬盘
+mkdir /backup /smbhome
+mount /dev/sdb2 /smbhome 
+mount /dev/sdb1 /backup 
+
+mkdir /usr/centos7
+# mount -t iso9660 /backup/centos7.1.iso /usr/centos7/ -- 挂载安装盘
+
+# vim /etc/fstab                                   -- 编辑开机启动挂载
+    /dev/sdb1       /myban/ban1     defaults        1 2
+    /dev/sdb2       /myban/ban2     defaults        1 2
+    /dev/sdb3       /myban/ban3     defaults        1 2
+    /home/centos7   /usr/centos7    defaults        0 2
+
+# mkdir ~/yum.repos.d                              -- 备份原yum仓库
+# cp -avf yum.repos.d/* ~/yum.repos.d/             -- 保留链接、文件属性、并递归地复制目录
+# rm CentOS-*                                      -- 删除原yum仓库文件
+
+# vim centos7-local.repo                           -- 编辑本地源yum仓库
+    [local]
+    name=centos7 local
+    baseurl=file:///usr/centos7
+    gpgcheck=1
+    gpgkey=file:///usr/centos7/RPM-GPG-KEY-CentOS-7
+    enabled=1
+
+# yum makecache                                    -- 更新缓存
+
+======================================================================
+
+Centos修改镜像为国内的阿里云源或者163源等国内源
+最近都在使用国内的VPS。系统统一使用的都是Linux系统。但是，有一些服务商的系统给默认设置的是国外的。这样就会导致下载速度缓慢。于是，找到了国内几家比较热门的镜像点。奉献给大家。下面的镜像全部支持Linux的任何一个发行版的系统。小编就拿Centos来进行做教程。
+
+阿里云Linux安装软件镜像源
+阿里云是最近新出的一个镜像源。得益与阿里云的高速发展，这么大的需求，肯定会推出自己的镜像源。
+阿里云Linux安装镜像源地址：http://mirrors.aliyun.com/
+
+CentOS系统更换软件安装源
+第一步：备份你的原镜像文件，以免出错后可以恢复。
+mv /etc/yum.repos.d/CentOS-Base.repo /etc/yum.repos.d/CentOS-Base.repo.backup
+
+第二步：下载新的CentOS-Base.repo 到/etc/yum.repos.d/
+wget -O /etc/yum.repos.d/CentOS-Base.repo http://mirrors.aliyun.com/repo/Centos-7.repo
+
+第三步：运行yum makecache生成缓存
+yum makecache
+
+
+163安装软件镜像源
+163开源镜像站是国内比较老的一个网站。很多人都在使用。从这里就可以看出来，网易，果然是业界良心啊。
+
+网易开源镜像站:http://mirrors.163.com/
+
+CentOS系统更换软件安装源
+第一步：备份你的原镜像文件，以免出错后可以恢复。
+
+mv /etc/yum.repos.d/CentOS-Base.repo /etc/yum.repos.d/CentOS-Base.repo.backup
+
+第二步：下载新的CentOS-Base.repo 到/etc/yum.repos.d/
+CentOS 5
+
+wget -O /etc/yum.repos.d/CentOS-Base.repo http://mirrors.163.com/.help/CentOS5-Base-163.repo
+
+CentOS 6
+
+wget -O /etc/yum.repos.d/CentOS-Base.repo http://mirrors.163.com/.help/CentOS6-Base-163.repo
+
+第三步：运行以下命令生成缓存 
+
+yum clean all
+
+
+yum makecache
+
+
+当然，除了网易之外，国内还有其他不错的yum源，比如中科大和搜狐的等，大家可以根据自己需求下载
+中科大的Linux安装镜像源：http://centos.ustc.edu.cn/
+搜狐的Linux安装镜像源：http://mirrors.sohu.com/
+北京首都在线科技：http://mirrors.yun-idc.com/
+

@@ -1,0 +1,104 @@
+一、重用命令
+1. !n， 重复执行第 n 条命令，n 为正整数。如果该命令很长，就能节省大量输入命令的时间；
+2. !-n， 重复执行倒数第 n 条命令，n 为正整数；
+3. !!， 重复执行上一条命令。该命令等价于 !-1；
+4. !str，重复执行最近一条以字符串 str 开头的命令；
+5. !?str，重复执行最近一条包含字符串 str 的命令；
+!?dist
+sudo apt-get dist-upgrade
+6. !#，引用当前的命令行
+cp filename filename.bak 可以写为 cp filename !#:1.bak
+
+关于命令重用，需要记住的是：
+!!
+![-]正整数
+![?]字符串
+!#
+
+二、重用命令的参数
+7. !$ 或 Alt + .，重用上一条命令的最后一个参数；
+mkdir src && cd !$
+8. !^，重用上一条命令的第一个参数；
+ls /usr/share/doc /usr/share/man;
+cd !^ # 即 cd /usr/share/doc
+9. !*，重用上一条命令的所有参数；
+touch a.txt b.txt c.txt;
+vim !*; # 即 vim a.txt b.txt c.txt
+10. !!:n，重用上一条命令中的第 n 个参数，n 为正整数。
+vim {a..c}.txt
+vim !!:2 # 即 vim b.txt
+11. !str:x-y，重用上一条以 str 开头的命令的第 x 到第 y 个参数；
+touch a.txt b.txt c.txt d.txt
+vim !touch:2-3 # 即 vim b.txt c.txt
+12. !?str:n*，重用上一条包含 str 的命令的从第 n 个到最后一个参数；
+vim foo.h http://foo.cc bar.h http://bar.cc
+wc !?vim:2* # 即 wc http://foo.cc bar.h http://bar.cc
+
+关于参数的选取，要记住的是：
+n
+^|$
+[n]*
+x-y
+
+三、提取前面运行过的命令的参数的 子字符串
+13. 利用 :h 截取路径开头，相当于 dirname
+ls /usr/share/fonts/truetype/dejavu
+cd !$:h # 即 cd /usr/share/fonts/truetype
+14. 利用 :t 截取路径结尾，相当于 basename
+wget http://nginx.org/download/nginx-1.4.7.tar.gz
+tar zxf !$:t # 相当于 tar zxf nginx-1.4.7.tar.gz
+15. 利用 :r 截取文件名
+gunzip filename.gzip
+cd !$:r # 即 cd filename
+16. 利用 :e 截取文件扩展名
+ls file.jpg
+echo !$:e # 即 echo jpg
+
+关于参数截取，要记住的是：
+h|t
+r|e
+
+四、对前面运行过的命令的参数 进行替换
+17. ^str1^str2^ ，将最近一条包含有字符串 str1 的命令中的 str1 用 str2 替换，并执行命令。注意 str1 只会替换一次，通常是第一次出现的 str1。
+18. !n:^str1^str2^ ，将第 n 条命令中的 str1 用 str2 替换一次，通常是替换第一次出现的str1，然后执行该命令；
+19. !-n:gs/str1/str2，将倒数第 n 条命令中的 str1 全部用 str2 替换，然后执行替换后的命令，注意该命令与前面 2 条命令的区别；
+
+五、光标的移动
+20. Ctrl + a，移动光标到命令行首；
+21. Ctrl + e，移动光标到命令行尾；
+22. Ctrl + f，向右移动一个字符；
+23. Ctrl + b，向左移动一个字符；
+24. Alt + f 或 Ctrl + →，"→"是向右的方向键，往右移动一个字；
+25. Alt + b 或 Ctrl + ←，往左移动一个字；
+26. Ctrl + l 或 clear，清屏并将光标移至屏幕左上角；
+
+六、命令的剪切和粘贴
+27. Ctrl + w，从光标位置开始，往左剪切一个单词，这里的单词是以空格为分隔符；
+28. Ctrl + u， 从光标位置开始，往左剪切至命令行首，即删除从命令行首到光标位置处的所有字符；
+29. Ctrl + k，从光标位置开始，往右剪切至命令行尾，即删除从光标位置到命令行尾的所有字符；
+30. Alt + d，从光标位置开始，往右剪切至当前词尾；
+31. Alt + BackSpace，从光标位置开始，往左剪切至当前词头。如果光标位置就是词头，则剪切前一个单词；
+32. Ctrl + y，把前面几个命令剪切到的文本粘贴至光标位置左侧；
+
+其它的高效命令
+33. mkdir -p a/very/deep/recursive/path，使用这条命令能够递归创建 a, a/very, a/very/deep, a/very/deep/recursive, a/very/deep/recursive/path，能节省大量的功夫；
+34. cd - ，进入到上一个工作目录；
+35. pushd 和 popd；
+36. autojump
+37. history ，查看执行过的命令，如果只想看最近执行的n条命令，那就输入 history | tail -n；另外，在 .bashrc 或 .zshrc 中加入 export HISTTIMEFORMAT="%m/%d/%y %T "，则可以显示命令的执行时间；
+38. grep -nr --color=auto str target_dir/*[hc]， 在 target_dir 目录下的所有 C 语言源文件中，匹配 str 出现的行。如果想严格匹配 str，那就那就用 egrep -nrw --color=auto str target_dir/*[hc]；
+39. 活用各种重定向符号，例如 <, >, 2>, >>, 2>>, 2>& 1；
+40. sed -i "s/\<str1\>/str2/g" *[hcpp] ，将所有 C++ 源文件中的 str1 字符都替换为str2，注意这里是严格匹配 str1， 只有当 str1 单独出现时，才会替换为 str2，例如 str1aa, astr1b 不会被替换。若不想进行严格匹配，就输入sed -i "s/str1/str2/g" *[hcpp]；
+41. less /proc/cpuinfo 或者 lscpu ，显示CPU信息；
+42. less /proc/meminfo ，显示内存信息；
+------------------------------------------------------------------------------------------------------------
+2015-02-03 星期二 更新
+43. 结合使用 find 和 ctags 和 cscope 对 C++ 源文件建立 tags 文件
+首先要找出所有的 C++ 源文件，然后再用 ctags 建立 tags
+find . \( -name "*.h" -o -name "*.cc" -o -name "*.cxx" -o -name "*.cpp" \) | xargs ctags;
+find . \( -name "*.h" -o -name "*.cc" -o -name "*.cxx" -o -name "*.cpp" \) | xargs cscope -Rbqk;
+注意，在 find 命令中，当你编写稍微复杂点的逻辑表达式时，必须要加上 ()，且 () 必须要加上 \ 转义。另外，\( 的右侧，\) 的左侧必须要加上一个空格。
+44. 使用 AWK 快速统计 csv 文件中某个字段的总和
+Excel文件可以另存为 csv 文件，熟悉 csv 文件的人都知道它是以 , 作为字段的分隔符，那么当用户要统计某个字段的总和时，例如第 2 个，输入命令：
+awk -F "," '{sum += $2} END {printf "%d\n", sum}' data.csv
+awk 会逐行处理 data.csv 中的每一行文本， -F "," 表示以 , 作为分隔符将文本行切分为多个字段，字段就相当于 Excel 中的列。

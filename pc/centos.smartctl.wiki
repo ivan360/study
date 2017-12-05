@@ -1,0 +1,80 @@
+Linux下用smartctl查看硬盘使用时间
+smartctl -A /dev/sda
+如果不行用df看看硬盘名称，把sda换了即可
+1、查看硬盘使用时间等信息
+硬盘使用时间很重要，硬盘理论寿命是3万小时以上 
+smartctl -A /dev/sda | grep -i power_on_hours
+9 Power_On_Hours          0x0032   097   097   000    Old_age   Always       -       2315
+
+== linux smartctl 磁盘健康监测 ==
+
+什么是S.M.A.R.T.
+SMART是一种磁盘自我分析检测技术，早在90年代末就基本得到了普及
+每一块硬盘（包括IDE、SCSI）在运行的时候，都会将自身的若干参数记录下来
+这些参数包括型号、容量、温度、密度、扇区、寻道时间、传输、误码率等
+硬盘运行了几千小时后，很多内在的物理参数都会发生变化
+某一参数超过报警阈值，则说明硬盘接近损坏
+此时硬盘依然在工作，如果用户不理睬这个报警继续使用
+那么硬盘将变得非常不可靠，随时可能故障
+
+启用SMART
+SMART是和主板BIOS上相应功能配合的
+要使用SMART，必须先进入到主板BIOS设置里边启动相关设置
+一般从Pentium2级别起的主板，都支持SMART
+BIOS启动以后，就是操作系统级别的事情了
+很遗憾，Windows没有内置SMART相关工具（需要安装第三方工具软件）
+好在Linux上很早就有了SMART支持了
+如果把Linux装在VMware等虚拟机上，在系统启动时候可以看到有个服务启动报错：smartd
+这个服务器就是smart的daemon进程（因为vmware虚拟机的硬盘不支持SMART，所以报错）
+
+首先通过dmesg工具，确认一下硬盘的设备符号
+例如一个IDE硬盘连接到Primary IDE 总线上的Slave位置，硬盘设备符号是/dev/hdb
+hdb中的h代表IDE，如果显示为sdb，则代表SATA和SCSI
+最后一个字幕b代表Primary总线，第二块硬盘即Slave位置
+
+== 确认硬盘是否打开了SMART支持 ==
+smartctl -i /dev/hdb
+
+我们可以看到SMART support is: Disabled表示SMART未启用
+
+执行如下命令，启动SMART：
+smartctl --smart=on --offlineauto=on --saveauto=on /dev/hdb
+
+例如看到如下返回结果
+SMART Enabled.
+SMART Attribute Autosave Enabled.
+SMART Automatic Offline Testing Enabled every four hours.
+现在硬盘的SMART功能已经被打开
+
+执行如下命令查看硬盘的健康状况：
+smartctl -H /dev/hda
+
+例如可以看到如下结果：
+SMART overall-health self-assessment test result: PASSED
+
+请注意result后边的结果：PASSED，这表示硬盘健康状态良好
+
+如果这里显示Failure，那么最好立刻给服务器更换硬盘
+SMART只能报告磁盘已经不再健康，但是报警后还能继续运行多久是不确定的
+通常，SMART报警参数是有预留的，磁盘报警后，不会当场坏掉，一般能坚持一段时间
+有的硬盘SMART报警后还继续跑了好几年，有的硬盘SMART报错后几天就坏了
+但是一旦出现报警，侥幸心里是万万不能的……
+
+执行如下命令可以看到详细的参数：
+smartctl -A /dev/hdb
+
+上边列出的参数表中可供进行技术分析和参考，使用下边的命令可以输出完整结果：
+smartctl -a /dev/hdb
+
+定期登录到服务器上运行smartctl是比较麻烦的，linux提供了系统进程smartd
+编辑配置文件：
+vi /etc/smartd.conf
+这个配置文件中大部分可能是注释掉的说明，只需要和当前硬盘相关的一行写入正确即可：
+/dev/hdb -H -m test@test123123.com
+
+上边的配置表示smartd以静默状态工作，当SMART中报告PASSED的时候不理睬
+一旦出现Failure，立刻用邮件通知用户指定的邮箱
+
+修改配置后重启服务：
+/etc/init.d/smartd
+即可完成对SMART的全部配置。

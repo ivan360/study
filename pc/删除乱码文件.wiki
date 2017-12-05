@@ -1,0 +1,6 @@
+查看乱码文件inod号
+ll -i 
+删除
+$ find . -inum 342137 -exec rm -i {} \;
+改名
+$ find . -inum 342137 -exec mv {} newname \;

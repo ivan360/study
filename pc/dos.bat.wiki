@@ -1,0 +1,24 @@
+[[dos.bat.study]]
+[[dos.bat.note]]
+[[dos.bat.good]]
+== 批处理bat根据星期启动程序 ==
+原来公司里的由于每次开机时启动的程序比较多，所以打算使用批处理程序，这里只列举了部分。在每周一到周五的时候，开机则启动指定的应用程序，如果是周末的两天则不启动任何程序，所以做了这个脚本。你如果需要，根据自己的情况自行修改程序
+
+@echo off
+set no=%date:~13,14%
+if %no%==一 goto :open
+if %no%==二 goto :open
+if %no%==三 goto :open
+if %no%==四 goto :open
+if %no%==五 goto :open
+goto :eof
+ 
+:open
+start "VPC" "E:\Program Files\Microsoft Virtual PC\Virtual PC.exe"
+start "MSN" "C:\Program Files\Windows Live\Messenger\msnmsgr.exe"
+::start "QQ" "D:\Start\腾讯QQ"
+::start "sms" "D:\Start\Fetion 2008.lnk"
+start /min "OUTLOOK" "Outlook"
+start /min "金山词霸" "D:\Start\金山词霸2007"
+goto :eof
+

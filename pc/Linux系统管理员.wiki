@@ -1,0 +1,127 @@
+
+18. 认识系统服务
+
+    服务 (daemon) 主要可以分为 stand alone (服务可单独启动) 及 super daemon (透过 xinetd 统一管理的服务) 两种。
+    super daemon 由于是经过一个统一的 xinetd 来管理，因此可以具有类似防火墙管理功能。此外，管理的联机机制又可以分为 multi-threaded 及 single-threaded。
+    启动 daemon 的程序通常最末会加上一个 d ，例如 sshd, vsftpd, httpd 等
+    stand alone daemon 启动的脚本放置到 /etc/init.d/ 这个目录中，super daemon 的配置文件在 /etc/xinetd.d/* 内， 而启动的方式则为 /etc/init.d/xinetd restart
+    立即启动 stand alone daemon 的方法亦可以使用 service 这个命令
+    Super daemon 的配置文件 /etc/xinetd.conf ，个别 daemon 配置文件则在 /etc/xinetd.d/* 内。在配置文件内还可以配置联机客户端的联机与否， 具有类似防火墙的功能喔。
+    若想要统一管理防火墙的功能，可以透过 /etc/hosts.{allow,deny} ，若有安装 TCP Wrappers 时，还能够使用额外的 spawn 功能等
+    若想要配置启动时启动某个服务时，可以透过 chkconfig, ntsysv 等命令。
+    一些不需要的服务可以关闭喔！
+
+19. 认识与分析登录文件
+
+    登录文件可以记录一个事件的何时、何地、何人、何事等四大资讯，故系统有问题时务必查询登录文件；
+    系统的登录文件默认都集中放置到 /var/log/ 目录内，其中又以 messages 记录的资讯最多！
+    登录文件记录的主要服务与程序为： syslogd, klogd, log
+    syslogd 的配置档在 /etc/syslog.conf ，内容语法为：『 服务.等级 记载装置或文件』
+    syslogd 本身有提供登录文件服务器的功能，透过修改 /etc/sysconfig/syslog 内容即可达成；
+    logrotate 程序利用 crontab 来进行登录文件的轮替功能；
+    logrotate 的配置档为 /etc/logrotate.conf ，而额外的配置则可写入 /etc/logrotate.d/* 内；
+    logwatch 为 CentOS 5 默认提供的一个登录文件分析软件。
+
+20. 启动流程、模块管理与loader
+
+    Linux 不可随意关机，否则容易造成文件系统错乱或者是其他无法启动的问题；
+    启动流程主要是：BIOS、MBR、Loader、kernel+initrd、/sbin/init 等流程
+    Loader 具有提供菜单、加载核心文件、转交控制权给其他 loader 等功能。
+    boot loader 可以安装在 MBR 或者是每个分割槽的 boot sector 区域中
+    initrd 可以提供核心在启动过程中所需要的最重要的模块，通常与磁碟及文件系统有关的模块；
+    init 的配置档为 /etc/inittab ，此文件内容可以配置默认 runlevel、系统初始化脚本、不同运行等级的服务启动等；
+    额外的装置与模块对应，可写入 /etc/modprobe.conf 中；
+    核心模块的管理可使用 lsmod, modinfo, rmmod, insmod, modprobe 等命令；
+    modprobe 主要参考 /lib/modules/$(uanem -r)/modules.dep 的配置来加载与卸载核心模块；
+    grub 的配置档与相关文件系统定义档大多放置於 /boot/grub 目录中，配置档名为 menu.lst
+    grub 对磁碟的代号配置与 Linux 不同，主要透过侦测的顺序来给予配置。如 (hd0) 及 (hd0,0) 等。
+    menu.lst 内每个菜单与 titile 有关，而直接指定核心启动时，至少需要 kernel 及 initrd 两个项目
+    menu.lst 内配置 loader 控制权移交时，最重要者为 chainloader +1 这个项目。
+    若想要重建 initrd ，可使用 mkinitrd 处理
+    重新安装 grub 到 MBR 或 boot sector 时，可以利用 grub shell 来处理。
+    若想要进入救援模式，可於启动菜单过程中，在 kernel 的项目后面加入『 single 』或『 init=/bin/bash 』等方式来进入救援模式。
+    我们可以对 grub 的个别菜单给予不同的口令。
+
+21. 系统配置工具（网络与打印机）与硬件侦测
+
+    CentOS 提供了好用的 setup 功能，可以帮忙配置 (1)认证方式 (2)防火墙配置 (3)键盘格式配置 (4)网络配置 (5)系统默认启动的服务配置 (6)时区配置 (7)X 解析度与硬件配置 等功能；
+    网际网络 (Internet) 就是 TCP/IP ，而 IP 的取得需与 ISP 要求。一般常见的取得 IP 的方法有：(1)手动直接配置 (2)自动取得 (dhcp) (3)拨接取得 (4)cable宽带 等方式。
+    主机的网络配置要成功，必须要有底下的数据：(1)IP (2)Netmask (3)gateway (4)DNS 服务器 等项目；
+    DNS 服务器 IP 的指定，需写入 /etc/resolv.conf 这个文件中；
+    默认 Linux 的列印服务使用 CUPS ，更早之前则是使用 lpd 这个服务；
+    Linux 支持的打印机网站查询： http://www.linuxfoundation.org/en/OpenPrinting
+    列印组件主要有：列印命令、列印工作、列印伫列、列印服务、打印机
+    网络打印机的格式主要有： ipp, smb 等类别；
+    CUPS 可使用 http://localhost:631 来连接，然后使用浏览器介面来管理！
+    PPD 指的是 postscript 列印定义档，可视为打印机的驱动程序；
+    命令列管理打印机的方式主要透过： lpadmin, lpstat, lpq, lprm 等命令。至於产生列印工作的命令则为 lpr, lp
+    本章新增硬件资讯的收集命令有： lspci, lsusb, iostat 等；
+    U盘 的驱动模块主要有 OHCI 与 UHCI，至於 U盘 2.0 则使用 EHCI。
+    lm_sensors 可用来侦测主板的温度、电压、风扇转速等功能；
+    动态管理硬件，透过使用者层级的管理方式，主要透过 udev 与 HAL 的管理！
+
+22. 软件安装：原始码与tarball
+
+    原始码其实大多是纯文字档，需要透过编译器的编译动作后，才能够制作出 Linux 系统能够认识的可运行的 binary file ；
+    开放原始码可以加速软件的升级速度，让软件效能更快、漏洞修补更即时；
+    在 Linux 系统当中，最标准的 C 语言编译器为 gcc ；
+    在编译的过程当中，可以藉由其他软件提供的函式库来使用该软件的相关机制与功能；
+    为了简化编译过程当中的复杂的命令输入，可以藉由 make 与 makefile 守则定义，来简化程序的升级、编译与连结等动作；
+    Tarball 为使用 tar 与 gzip/bzip2 压缩功能所打包与压缩的，具有原始码的文件；
+    一般而言，要使用 Tarball 管理 Linux 系统上的软件，最好需要 gcc, make, autoconfig, kernel source, kernel header 等前驱软件才行，所以在安装 Linux 之初，最好就能够选择 Software development 以及 kernel development 之类的群组；
+    函式库有动态函式库与静态函式库，动态函式库在升级上具有较佳的优势。动态函式库的扩展名为 *.so 而静态则是 *.a ；
+    patch 的主要功能在升级原始码，所以升级原始码之后，还需要进行重新编译的动作才行；
+    可以利用 ldconfig 与 /etc/ld.so.conf 来制作动态函式库的连结与缓存！
+    透过 MD5 的编码可以判断下载的文件是否为原本厂商所释出的文件。
+
+23. 软件安装RPM、SRPM与YUM功能
+
+    为了避免使用者自行编译的困扰，开发商自行在特定的硬件与操作系统平台上面预先编译好软件， 并将软件以特殊格式封包成文件，提供终端用户直接安装到固定的操作系统上，并提供简单的查询/安装/移除等流程。 此称为软件管理员。常见的软件管理员有 RPM 与 DPKG 两大主流。
+    RPM 的全名是 RedHat Package Manager，原本是由 Red Hat 公司所发展的，流传甚广；
+    RPM 类型的软件中，所含有的软件是经过编译后的 binary program ，所以可以直接安装在使用者端的系统上， 不过，也由於如此，所以 RPM 对於安装者的环境要求相当严格；
+    RPM 除了将软件安装至使用者的系统上之外，还会将该软件的版本、名称、文件与目录配置、系统需求等等均记录於数据库 (/var/lib/rpm) 当中，方便未来的查询与升级、移除；
+    RPM 可针对不同的硬件等级来加以编译，制作出来的文件可於扩展名 (i386, i586, i686, x86_64) 来分辨；
+    RPM 最大的问题为软件之间的相依性问题；
+    SRPM 为 Source RPM ，内含的文件为 Source code 而非为 binary file ，所以安装 SRPM 时还需要经过 compile ，不过，SRPM 最大的优点就是可以让使用者自行修改配置参数 (makefile/configure 的参数) ，以符合使用者自己的 Linux 环境；
+    RPM 软件的属性相依问题，已经可以藉由 yum 或者是 APT 等方式加以克服。 CentOS 使用的就是 yum 机制。
+    yum 服务器提供多个不同的容器放置个别的软件，以提供用户端分别管理软件类别。
+
+24. x window配置介绍
+
+    Unix Like 操作系统上面的 GUI 使用的是最初由 MIT 所开发的 X window system，在 1987 释出 X11 版，并於 1994 更改为 X11R6 ，故此 GUI 介面也被称为 X 或 X11
+    X window system 的 X server 最初由 XFree86 计画所开发，后来则由 Xorg 基金会所持续开发；
+    X window system 主要分为 X server 与 X client ，其中 X Server 在管理硬件，而 X Client 则是应用程序。
+    在运行上，X Client 应用程序会将所想要呈现的画面告知 X Server ，最终由 X server 来将结果透过他所管理的硬件绘制出来！
+    每一支 X client 都不知道对方的存在，必须要透过特殊的 X client ，称为 Window Manager 的， 来管理各窗口的重叠、移动、最小化等工作。
+    startx 可以侦测 X server / X client 的启动脚本，并呼叫 xinit 来分别运行；
+    X 可以启动多个，各个 X 显示的位置使用 -display 来处理，显示位置为 :0, :1...
+    Xorg 是一个 X server ，配置档位於 /etc/X11/xorg.conf ，里面含有 Module, Files, Monitor, Device 等配置阶段
+    字型管理为 X server 的重点，目前字型管理可由 xfs 及 fontconfig 来处理
+
+25. Linux备份策略
+
+    备份是系统损毁时等待救援的救星，但造成系统损毁的因素可能有硬件与软件等原因。
+    由於主机的任务不同，备份的数据与频率等考量参数也不相同。
+    常见的备份考虑因素有：关键文件、储存媒体、备份方式(完整/关键)、备份频率、使用的备份工具等。
+    常见的关键数据有：/etc, /home, /var/spool/mail, /boot, /root 等等
+    储存媒体的选择方式，需要考虑的地方有：备份速度、媒体的容量、经费与媒体的可靠性等。
+    与完整备份有关的备份策略主要有：累积备份与差异备份。
+    累积备份可具有较小的储存数据量、备份速度快速等。但是在还原方面则比差异备份的还原慢。
+    完整备份的策略中，常用的工具有 dd, cpio, tar, dump 等等。
+
+26. Linux核心编译与管理
+
+    其实核心就是系统上面的一个文件而已，这个文件包含了驱动主机各项硬件的侦测程序与驱动模块；
+    上述的核心模块放置於：/lib/modules/$(uname -r)/kernel/
+    『驱动程序开发』的工作上面来说，应该是属於硬件发展厂商的问题
+    一般的使用者，由於系统已经将核心编译的相当的适合一般使用者使用了，因此一般入门的使用者，基本上，不太需要编译核心
+    编译核心的一般目的：新功能的需求、原本的核心太过臃肿、与硬件搭配的稳定性、其他需求(如嵌入式系统)
+    编译核心前，最好先了解到您主机的硬件，以及主机的用途，才能选择好核心功能；
+    编译前若想要保持核心原始码的干净，可使用 make mrproper 来清除缓存档与配置档；
+    挑选核心功能与模块可用 make 配合：menuconfig, oldconfig, xconfig, gconfig 等等
+    核心功能挑选完毕后，一般常见的编译过程为：make bzImage, make modules
+    模块编译成功后的安装方式为： make modules_install
+    核心的安装过程中，需要移动 bzImage 文件、创建 initrd 文件、编辑 /boot/grub/menu.lst 等动作；
+    我们可以自行由硬件开发商之官网下载驱动程序来自行编译核心模块！
+    
+vim:ft=txt:

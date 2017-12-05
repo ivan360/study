@@ -1,0 +1,46 @@
+= 如何为CentOS 7配置静态IP地址 =
+使用下面的命令来验证网络管理器服务的状态：
+$ systemctl status NetworkManager.service
+
+运行以下命令来检查受网络管理器管理的网络接口：
+$ nmcli dev status 
+
+在CentOS 7上为网络接口配置静态IP地址的两种方式，在例子中我们将对名为enp0s3的网络接口进行配置。
+
+== 1. 不使用网络管理配置静态IP地址 ==
+
+进入/etc/sysconfig/network-scripts目录，找到该接口的配置文件（ifcfg-enp0s3）。如果没有，请创建一个。
+打开配置文件并编辑以下变量：
+----------
+TYPE=Ethernet
+NAME=enp7s0
+ONBOOT=yes
+BOOTPROTO=static
+IPADDR=10.200.55.25
+PREFIX=24
+NM_CONTROLLED=no
+HWADDR=F8:0F:41:FD:72:C0
+GATEWAY=10.200.55.254
+----------
+    在上图中，“NM_CONTROLLED=no”表示该接口将通过该配置文件进行设置，而不是通过网络管理器进行管理。“ONBOOT=yes”告诉我们，系统将在启动时开启该接口。
+    
+保存修改并使用以下命令来重启网络服务：
+# systemctl restart network.service
+
+现在验证接口是否配置正确：
+# ip add 
+
+== 使用网络管理器配置静态IP地址 ==
+    如果你想要使用网络管理器来管理该接口，你可以使用nmtui（网络管理器文本用户界面），它提供了在终端环境中配置配置网络管理器的方式。
+    在使用nmtui之前，首先要在/etc/sysconfig/network-scripts/ifcfg-enp0s3中设置“NM_CONTROLLED=yes”。
+    现在，请按以下方式安装nmtui。
+# yum install NetworkManager-tui
+
+然后继续去编辑enp0s3接口的网络管理器配置：
+# nmtui edit enp0s3 
+
+    在下面的屏幕中，我们可以手动输入与/etc/sysconfig/network-scripts/ifcfg-enp0s3中所包含的内容相同的信息。
+    使用箭头键在屏幕中导航，按回车选择值列表中的内容（或填入想要的内容），最后点击屏幕底部右侧的确定按钮。
+
+最后，重启网络服务。
+# systemctl restart network.service

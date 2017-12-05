@@ -1,0 +1,329 @@
+批处理(bat)命令学习的一些总结
+投稿：mdxy-dxy 字体：[增加 减小] 类型：转载
+这篇笔记是我对批处理学习的一些总结，能在系统帮助里找到的内容我就不写了，太偏门的也不写，只写些个人感觉很好用的技巧，大部分属于整理
+
+一、set 篇：
+
+1、set（无开关）
+
+set .=test
+set.
+::若一个变量以:\.这三个与路径相关的符号开头，用set查看以该字符打头的变量时可以省去一个空格。
+echo %tmp:*\=%
+::显示tmp变量第一个\之后的部分，其余变量替换与变量偏移太简单不解释
+
+2、set /p 变量名=注释<设备名
+当设备名为文件时，因为文件中换行符与回车符伴生，所以只取文件第一行作为var变量的内容，但是不超过1024字节；而当设备名为nul或者com3时，只显示不换行的注释，这种情况下可以省略变量名（如：set /p=Hello World
+
+3、set /a，最具技巧的命令之一
+
+set /a n=1,m=2
+::同时把不同数值分别赋予两个变量
+set /a a=b=c=d=e=f=1
+::用一条算式为多个变量同时赋值
+set /a "1/n" 2>nul||echo 变量n非纯数字或为零
+::利用分母不能为0的特征，用set判断一个变量是否为非零纯数字
+set n=1
+set /a "n=!!123|!!234&!!0"
+::位运算，!、^、|和&常用于布尔运算，而逻辑位移常用于二进制运算（>>还可判断数值是否为负，见下例）
+set /a n=-100,"1/(-100>>31)"||echo 变量n为负数
+::顺应cmd中的正负数存储特点，可以用逻辑位移实现判断正负数的“布尔运算”，可以衍生出繁多的算法，比如稍加改动就可以比较两数甚至多个数的大小
+set /a n=~-100
+::利用~将所有二进制的1、0逆转，负号在后或在前配合可以实现简单加1或减1，这个技巧主要用来减少括号的使用，因为~号与负号的优先级都是高于算数运算符的
+set /a test=%test:~5,1%-0
+::可以避免%test:~5,1%为空时出错的情况
+set /a 十进制=0x十六进制,十进制=0八进制
+::快速将十六进制与八进制数转为十进制，可惜没有二进制...
+:loop
+set /a n+=1001
+echo %n:~-3%
+goto loop
+::这比常规的补位方法更优越
+for %%a in (test 123 ABC test @#$ 123) do set /a ".%%a+=1"
+set .|findstr /v /e "=1"
+::经典的获取字符串的重复次数的方案
+
+二、for 篇：
+
+这是批处理中最强的内部命令，没有之一！
+
+1、for（无开关）
+
+复制代码 代码如下:
+
+for %%a in (c:\*.*) do echo %%a
+::显示C盘根目录下所有非隐藏、非系统属性文件
+for %%a in (.\..) do echo %%~nxa
+::显示上一级目录的文件夹名
+set str=123,234,345
+set str=%str:,=\%
+for %%a in (%str%\..) do echo %%~nxa
+::用前一个技巧，巧取倒数第二段字符串，与for /f "delims=\"相映成趣
+for %%a in (*.txt) do (
+for /f "useback delims=" %%b in ("%%a") do (
+set str=%%b
+for %%c in ("!str:分隔符=" "!") do (
+for /f "tokens=1*" %%d in (%%c) do echo %%~d
+)
+)
+)
+
+::不带参数的for与for /f配合，威力极大，仅举此一例
+for %%a in (123) do for %%a in (234) do for %%a in (345) do echo %%a
+::其实如果只读取最后一层for的参数，即使多层for嵌套也可以使用同样的参数，比如%%a
+for %%z in (!tmp!) do echo !%%z!
+::目前已知的摆脱call实现多层变量嵌套的最好方法，不少人用
+
+2、for /l
+
+for /l %%a in () do echo 
+::无限循环，步数为0也是一样的效果，但是没这个简洁
+for /l %%a in (-4 1) do echo %%a
+::for /l中的三项参数从左至右的三位分别是初始值、步数、终止点，当用户给定的数量不足时，将按从右至左的顺序把不足的一项赋为0
+
+3、for /d /r
+
+for /r /d %%a in (*) do echo %%a
+::可以遍历所有子文件夹，之所以可以联用r开关和d开关是因为它们的参数有交集，l开关和f开关就不行了。
+
+4、for /f
+
+for /f本身的技巧并不是特别多，它的优势是能够将其他命令的输出作为输入来分析，所以for /f可以说是当之无愧的内部命令之王
+for /f "tokens=* delims=0123" %%a in ("0000123456") do echo %%a
+::去除前缀的n个字符
+for /f "skip=99" %%a in (1.txt) do echo 1.txt至少100行
+::以前看到某版主写的，印象颇深。
+for /l %%a in (1 1 10) do (
+for /f "tokens=1,2* delims=\" %%a in ("!tmp!") do (
+for %%c in (%%a %%b) do echo %%c
+set tmp=%%c
+)
+)
+::将tokens的取值范围无限拓展
+set tmp=123=234=345=456
+for /l %%a in (1 1 40) do (
+for /f "tokens=1,2* delims==" %%a in ("!tmp!") do (
+set str=!str!,%%a,%%b
+set tmp=%%c
+)
+)
+echo %str:~1%
+::有时候set变量替换是无法替换一些特殊字符的，此时可以用for /f处理
+set test=d:\test\
+for %%a in (test.*) do (
+if "%%~za" neq "%%~z$test:a" replace /p /u "%%a" "%%~dp$test:a"
+)
+::判断当前目录下以test为名的文件是否在d:\test\文件夹下存在同名文件，如果存在且大小不同、修改日期更早，则替换之，否则不做处理。for帮助信息中的“%%~dp$path:a”参数似乎没见人用过，虽然它的适用范围很狭隘，但是特定的情况下不妨一试。
+setlocal enabledelayedexpansion
+set t=tmp
+set @=t
+for /f %%a in ('echo !%@%!') do echo !%%a!
+::另一种三层嵌套方法，其实不实用。
+
+三、findstr 篇
+
+我最钟爱的命令，可惜外部命令的启动速度太慢，所以实际运用时较少露面。
+findstr /s /m .* *.*
+::其实findstr也是一个dir，虽然比dir慢些，却多了查找文件内容的功能
+findstr /n .* 1.txt|findstr "^5000:"
+::非常实用的取指定行的方法，配合正则可以取指定范围之内的行
+set /p n=请输入数字或大小写字母
+(echo !n!)|findstr /i "[0-9a-Z]"&&echo 输入有误！
+::这个够实用吧？不解释
+dir|findstr ['-Z]
+::利用findstr和if命令中字符的实际大小顺序实现查找含有宽字符的行
+findstr /x ".........." 1.txt
+::查找1.txt中10字节的行
+(type 1.txt&echo;)|findstr /o .*|more +1
+::加上for，很容易获取1.txt每行的字节数
+findstr>1.txt /m /p .* *.*
+dir /b /a-d|findstr>2.txt /v /i /m /g:1.txt
+::获取含有不可打印字符的文件名，关键是findstr取集
+findstr "^Rar!" /g:1.txt
+::此处1.txt是上个技巧的1.txt，内容是所有含不可打印字符的文件列表，此技巧可搜索rar文件，虽然简单，但是至今也未出错过，原创。
+more>tmp +2 1.txt
+findstr>前两行.txt /x /v /g:1.txt 2.txt
+::有时候可用此办法获取前几行，当然，绝大部分情况下没有for /f合适，而且存在特殊字符bug
+@echo off
+findstr /n .* 1.txt>tmp1
+find /n /v "" 2.txt|more>tmp2 +2
+for /f "tokens=2*delims=]:" %%a in ('fc /n /lb10000 tmp1 tmp2^|sort') do (
+echo;%%b
+)
+del tmp?
+pause
+::qzwqzw首创用fc /n同时输出双文本的思路，但是存在排序有可能被打乱的缺陷，所以加了个find弥补一下
+
+四、start、call、cmd 篇
+
+之所以放在一起，是因为这三个命令的功能有所交集
+1、start
+@echo off
+%1 cd.>tmp
+set /p=%1
+%1 start /b "" %0 :（五秒后退出） tm
+if not "%1"=="" goto %1
+set /p n=输入任意字符
+if defined n (
+del tmp
+echo 您输入的是%n%，五秒后退出。
+) else echo 输入为空！五秒后退出。
+:（五秒后退出）
+ping /n 5 localhost>nul
+if exist %2p exit
+pause
+::妙用start /b让set /p实现choice的延时功能，不知道哪位前辈首创的，再次赞一个。此处%1、%2的技巧仅作点缀，我只是觉得这样“搭积木”很好玩才强加上去的。
+2、call
+set a=b
+set b=c
+call echo %%%a%%%
+::不使用变量延迟仍然可以借助call实现变量的延迟读取与嵌套，但是效率上有缺陷
+3、cmd
+set a=b
+set b=c
+cmd /c echo %%%a%%%
+::这证明call一个命令时的效果近似于cmd /c，二者的区别体现在"for"和"if"这两个命令不能用call运行，因为for和if其实可能只是关键字，而非真实存在的命令
+set a=b
+set b=c
+cmd /v:on /c echo !%a%!
+::不需要setlocal，照样可以使用变量延迟
+%1 %0 :: echo;成功调用自身
+%2
+::个人很常用，这里用%1和%2的技巧为我所偏爱，那个::可以视情况换为rem。虽然此处并未出现cmd命令，但其实运行自身时执行的就是cmd /c %0。
+@echo off
+%1 cmd /v:on /c %0 ::
+set n=123
+echo !n!
+pause
+::综合前两个技巧实现不使用setlocal，开启变量延迟
+@echo off
+set str=test测试1234
+setlocal enabledelayedexpansion
+for /f "delims=:; " %%a in ('((cmd /u /c echo !str!^)^&echo^;^;^)^|findstr /o ^;') do set /a n=%%a-5
+for /f "delims=:" %%a in ('((echo !str!^)^&echo^;^;^)^|findstr /o ^;') do set /a d=n-%%a+3
+set /a m=n/2,s=m-d
+echo 共!m!个字符，!d!个单字节字符、!s!个双字节字符
+pause
+::三步判断单字符、双字符个数的另类办法。优势在于支持对超长字符串进行计算（此时用常规算法步骤多且难通用），缺点在于效率低。
+ren 1.exe 1.bat
+echo 请双击1.bat
+::为什么这样也可以运行呢？因为exe的打开方式是"%1" %*，bat是cmd /c "%1" %*，所以把exe当做bat运行时，相当于cmd /c 1.exe...不过这只适合双击打开，在cmd内部调用此文件的时候是当成真正的bat运行的，所以会出错。
+
+五、其他命令篇
+
+1、xcopy比copy强大得多，最大的遗憾在于它是外部命令
+xcopy /a 源文件夹 目标文件夹
+::xcopy用在筛选上也很实用
+xcopy /l /y /n %cd% ..
+::巧取当前目录下文件的短名，并不会真的复制
+xcopy /d:1-31-2011 /l "%cd%" tmp\
+::获取修改日期在2011年1月31日以后的文件清单
+xcopy /t *.txt C:\test\
+::复制含有txt文件的目录结构到C:\test
+@echo 1.txt>list
+xcopy /exclude:list ?.txt test\
+::复制所有以单个字符为名的文件到test文件夹
+xcopy /s *.txt ..\txt\
+::复制所有以txt为名的子文件到上一级目录中的txt文件夹
+for /f "delims=" %%a in ('dir /s /b /ad^|sort -r') do rd "%%a" 2>nul
+::删除空文件夹的经典思路，利用rd默认不删除非空文件夹的特性进序删除空文件夹
+for /d %%a in (*) do (
+xcopy /q /h /r /s /k "%%a" "tmp\"
+rd /s /q "%%a"
+ren "tmp" "%%a"
+)
+::删除空文件夹的另类方案
+2、相比于前面几个大佬级的命令，这些命令算是比较不起眼的了，所以归在一类
+copy nul+Unicode.bat 解密.bat
+::用Unicode文件头来进行编码混淆加密的bat，可以用这条命令解密
+echo>tmp 12323412 2323242134122434 345
+more /t20 tmp>对齐.txt
+type 对齐.txt
+pause
+::more命令的t开关也有大用途，潜规则不解释。
+cmd /u /c echo 0123456789|more
+::more命令会将cmd /u输出的nul字符转换为空格，从而实现逐字打印一行单字节字符。
+@echo off&setlocal enabledelayedexpansion
+set n=32768
+(for %%a in (16384 8192 4096 2048 1024 512 256 128 64 32 16 8 4 2 1) do sort /rec !n! %0&&set /a n-=%%a||set /a n+=%%a)>nul 2>nul
+echo 最长行有%n%个字符
+pause
+::当最长的行字符数大于128时可能可以用这个来判断最长行的字符数（短于128时rec开关会失效，代码中那一大堆2的N次方就是凑字数的，实战中可以省掉一些），支持超长字符串，计算大文件时效率明显优于传统算法，新折半法来自plp626的转帖，sort的/rec开关比较鸡肋，想来想去也只想到这个用途，未见先例
+ren 1.exe 1.bat
+echo 请双击1.bat
+::为什么可以把exe改为bat后缀名运行呢？因为exe的打开方式是"%1" %*，bat是cmd /c "%1" %*，所以把exe当做bat运行时，相当于cmd /c 1.exe...不过这只适合双击打开，在cmd内部调用此文件的时候是当成真正的bat运行的，所以会出错。而且基于同样的原因，它还可以改成com或者cmd后缀名来执行。
+3、再介绍一些在cmd窗口中的技巧，当然它们仅仅是“欺骗”cmd窗口，一旦输出到文件就原形毕露：
+@echo off
+echo 1
+echo 2
+echo 3
+echo 退行了
+pause>nul
+::这个太牛了，不知道哪位发现的
+set "dq= "
+(echo 2、计划生育的重要性%dq%啊
+echo 1、贯彻落实科学发展观%dq%哇)|sort
+::借助tab键与退格符实现多行捆绑排序并错行显示，tab与退格之间的那个空格是关键，否则变为退行
+set /p=同一行显示不同颜色：
+set /p=红底蓝字
+echo  黄底绿字
+findstr /a:41 .* 红底蓝字?
+findstr /a:62 .* 黄底绿字?
+del>nul 红底蓝字 黄底绿字
+pause
+::经常见到的在同一行显示不同颜色的办法，不过很多人总是用    （四个退格四个空格），说明没理解退格键的意义
+@prompt $_
+dir fuck.tmp
+pause
+::利用这个prompt，打开回显后可以同时输出命令与命令结果，而不会有多余内容，适合制作bat运行日志
+echo 
+::这个黑色的圆点在前面的介绍中作为配角出现过，是ansi码中的0x07，也等同于在cmd中输入的ctrl+G，它每次被显示在屏幕上时都会发出“滴”的一声，所以以后findstr *.*时一定要留神了（除非不得已，否则需要把结果显示到窗口时建议加上/p开关），万一不小心打印出几万个，你的电脑会像发电报一样响个不停，我中招N次了...
+
+六、cmd运行机制篇
+
+1、预处理机制：特殊字符优先级、语句和语块的划分
+setlocal enabledelayedexpansion
+(set n=3
+set /a n=2,n=%n%+!n!+n)
+::利用预处理机制，将一个变量解释为多个值
+setlocal enabledelayedexpansion
+echo ^^!
+::当语句中存在变量延迟符号时，将被预处理两次，这是一定要注意的
+set str=.
+set "str name=str"
+for %%a in (%tmp%) do if defined %%a echo %%a 存在变量str
+::利用for的参数变量在if参数划分之后才被解释的特点，弥补if defined对于空格变量名的兼容性缺陷，本质原因是for和if都是特殊的函数，他们的参数设置在语块的预处理中就已经被cmd“记住”了，之后无法对其进行改变。
+(del %0
+echo 能找到我，就给你发糖
+pause>nul)
+::括号里的内容被理解成一个语块，运行其中的命令时不需从文件读取，所以就算删除自身仍可运行。
+echo "test&pause|sort
+::当一行命令中存在奇数个双引号时，将会转义其后所有本行字符
+for /f tokens^=2delims^=^" %%a in ("123"test"456") do echo %%a
+::通过对特殊字符的转义，在for中用双引号当分隔符
+for /f tokens^=2delims^=^" %%a in (^"123"456") do echo %%a
+set /p=^"""
+::当一组字符串中含有奇数个双引号时经常会出错，解决方法是转义其中的一个，保持有效的双引号成对，可是引号对之内无法用转义符对其转义，所以转义符要放在引号对之外使用
+set /a "1/(%random%%%2)"&&set com=||set com=/f "tokens=2"
+for %com% %%a in ("123 234 345") do echo %%a
+::假如随机值为偶数，则显示指定字符串第二段，否则显示整段。这里用变量来定制命令，会比常规办法（一条if和一条命令对应）更灵活和省事，但是要注意的是，变量延迟是在解释语块之后进行，所以这里的%com%不能使用变量延迟。
+set /a \test1=123,test2=234
+(@echo off
+for /f "tokens=1* delims==" %%a in ('set\') do echo %%b
+)|sort
+::sort对for命令的输出进行排序，那个@echo off并非多余，因为通道之前的若是语块（for、if或者被成对括号包起来的语句），该语块中的内容将会以cmd /c的形式运行，此时的回显是打开的，而变量延迟则是默认关闭的。
+dir /ad 123\&&md234||rd 345&tree /f|more
+::当存在123文件夹时，创建234文件夹，否则删除345文件夹，无论结果如何，接下来都会逐屏显示当前目录树。重点是管道命令、逻辑连接符的灵活运用
+2、句柄的妙用
+@echo off 2>nul 3>nul
+这个命令不存在...
+echo 错误回显呢？
+pause
+::句柄备份，可用于屏蔽所有正确或错误回显
+cd.>1.txt 2>2.txt 3>3.txt 4>4.txt 5>5.txt 6>6.txt 7>7.txt 8>8.txt 9>9.txt
+::用一个命令创建9个文件，效率自然提高了
+@echo off
+(for /r %%a in (*.*) do del /f /s "%%~nxa" 3>>"%%a") 2>nul 4>>%0
+pause
+::利用写入句柄会占用文件的特性实现高效删除重复文件
+待续...

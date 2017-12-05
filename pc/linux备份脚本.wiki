@@ -1,0 +1,193 @@
+首先我在/root/backup 目录下建立一个文件夹,
+
+　　#mkdir /root/backup/mysqlbackup
+
+　　以后在每天五点钟,就会有一个文件保存在这里.
+
+　　接着新建文件
+
+　　#vim /root/mysqlautobak
+
+　　输入:
+
+　　filename=` date +%Y%m%d `
+
+　　mysqldump --all-databases -uroot -p(mysql密码)> /root/backup/mysqlbackup/mysql$file.sql
+
+　　
+
+　　保存退出!
+
+　　让它可以执行
+
+　　#chomd +X /root/mysqlautobak
+
+　　接着开始完crontab了
+
+　　#vi /etc/crontab
+
+　　
+
+　　添加一行
+
+　　
+
+　　01 5 * * * root /root/mysqlautobak
+
+　　保存退出.
+
+　　重新启动你的crond服务进程
+
+　　# /etc/rc.d/init.d/crond restart
+
+
+===============================================================================
+
+hp unix 自动全备份脚本(shell)
+                                      
+
+说明：每天夜里10点自动备份并且压缩，保留2天备份，在备份完当天后删除前天的备份。在一切执行之后，发邮件通知,邮件内容有删除文件和备份文件名称及备份开始时间，结束时间。
+使用方法：nohup backup.sh &
+
+filename：backup.sh
+reportlist=""
+while [ 1 ]
+do
+hou=`date +%H`
+backdate=`date +%Y%m%d`
+if [ $hou -eq 22 ]
+then
+begintime=`date +%Y-%m-%d:%H-%M`
+cd /data_log2/for_test
+log_txt=`ls -al -crt log.txt | awk '{print $9}' | wc -l`
+if [ $log_txt -gt 0 ]
+then
+        mv log.txt log.txt.bak
+fi
+
+exp owner=user file=/data_log2/for_test/tmp_now.dmp
+compress /data_log2/for_test/tmp_now.dmp
+mv tmp_now.dmp.Z report_$backdate.dmp.Z
+echo "---------report database backuped----------- ">> log.txt
+echo "filename="report_$backdate.dmp.Z >>log.txt
+
+delfile=`ls -al -crt *.Z | awk '{print $9}' | head -1`
+count=`ls -al -crt *.Z | awk '{print $9}' | wc -l`
+
+if [ $count -gt 2 ]
+then
+        rm `ls -al -crt *.Z | awk '{print $9}' | head -1`
+        echo "----------- old backup deleted ---------" >> log.txt
+        echo "the deleted backup filename="$delfile >> log.txt
+fi
+
+echo "-----------------beigin time----------------" >> log.txt
+echo $begintime >> log.txt
+echo "-----------------end    time----------------" >> log.txt
+echo `date +%Y-%m-%d:%H-%M` >> log.txt
+
+rm log.txt.bak
+
+mailx -s "10.203.116.23 daily database backup" -r ")" $reportlist < log.txt
+fi
+
+sleep 3600
+done
+
+======================================================================================
+1 给我自己的服务器写的一段自动备份的shell
+#!/bin/bash
+
+#指定要备份的系统目录
+SYSTEM_DIR=/home
+
+#指定要备份的目录MAIL_DIR=mailbox       #邮件目录
+WEBSITE_DIR=www/html                    #WEB目录
+DATABASE_DIR=databases                  #数据库目录
+
+#指定备份文件的前缀
+MAIL_PREFIX=mail
+WEBSITE_PREFIX=web
+DATABASE_PREFIX=database
+
+#有朋友的一台WIN2K服务器，我在上面开了ftp，把备份文件传到他的服务器上，相当于我实现了个双机备份
+
+#ftp服务器的IP
+FTP_SERV=211.144.155.111
+#ftp用户名
+FTP_USER=username
+#ftp密码
+FTP_PASS=12345678
+
+#备份文件存放目录
+BACKUP_DIR=/home/backup
+
+#格式化一下日期，备份文件时用日期来做文件名的
+DATE=`date +%Y%m%d`
+
+#开始备份邮件
+if [ -f ${BACKUP_DIR}/${MAIL_PREFIX}${DATE}.tar.gz ]; then #如果当天的邮件已经备份，那没跳过
+    echo `date +%Y-%m-%d`'s mail backup file is existing
+else #如果没有备份，那么用tar命令来打包邮件目录
+    tar -czvf ${BACKUP_DIR}/${MAIL_PREFIX}${DATE}.tar.gz ${SYSTEM_DIR}/${MAIL_DIR}
+fi
+
+#开始备份网站目录，备份过程同上
+if [ -f ${BACKUP_DIR}/${WEBSITE_PREFIX}${DATE}.tar.gz ]; then
+    echo `date +%Y-%m-%d`'s webebsite backup file is existing
+else
+    tar -czvf ${BACKUP_DIR}/${WEBSITE_PREFIX}${DATE}.tar.gz ${SYSTEM_DIR}/${WEBSITE_DIR}
+fi
+
+#开始备份数据库目录，备份过程同上
+if [ -f ${BACKUP_DIR}/${DATABASE_PREFIX}${DATE}.tar.gz ]; then
+    echo `date +%Y-%m-%d`'s database backup file is existing
+else
+    tar -czvf ${BACKUP_DIR}/${DATABASE_PREFIX}${DATE}.tar.gz ${SYSTEM_DIR}/${DATABASE_DIR}
+fi
+
+#开始把备份文件传输到另一台服务器上
+ftp -i -n $FTP_SERV <<AUTO_FTP
+user $FTP_USER $FTP_PASS
+passive
+binary
+put ${BACKUP_DIR}/${MAIL_PREFIX}${DATE}.tar.gz ${MAIL_PREFIX}${DATE}.tar.gz
+put ${BACKUP_DIR}/${WEBSITE_PREFIX}${DATE}.tar.gz ${WEBSITE_PREFIX}${DATE}.tar.gz
+put ${BACKUP_DIR}/${DATABASE_PREFIX}${DATE}.tar.gz ${DATABASE_PREFIX}${DATE}.tar.gz
+AUTO_FTP
+
+别忘了，还有最后一步，就是在crontab里加上个任务，这样你就不用每次备份都一步步地敲那些琐碎的命令了。
+
+
+我的网站,希望大家多多交流
+
+===================================
+linux下：
+
+MySQL :: Linux 下自动备份数据库的 shell 脚本
+Linux 服务器上的程序每天都在更新 MySQL 数据库，于是就想起写一个 shell 脚本，结合 crontab，定时备份数据库。其实非常简单，主要就是使用 MySQL 自带的 mysqldump 命令。
+
+脚本内容如下：
+#!/bin/sh
+# File: /home/mysql/backup.sh
+# Database info
+DB_NAME="test"
+DB_USER="username"
+DB_PASS="password"
+
+# Others vars
+BIN_DIR="/usr/local/mysql/bin"
+BCK_DIR="/home/mysql/backup"
+DATE=`date +%F`
+
+# TODO
+$BIN_DIR/mysqldump --opt -u$DB_USER -p$DB_PASS $DB_NAME | gzip > $BCK_DIR/db_$DATE.gz
+
+
+然后使用将此脚本加到 /etc/crontab 定时任务中：
+
+01 5 * * 0 mysql /home/mysql/backup.sh
+
+好了，每周日凌晨 5:01 系统就会自动运行 backup.sh 文件备份 MySQL 数据库了。
+
+/home/www/inc/back

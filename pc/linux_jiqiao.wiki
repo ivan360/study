@@ -1,0 +1,458 @@
+ linux技巧
+
+1.实现RedHat非正常关机的自动磁盘修复
+先登录到服务器，然后在/etc/sysconfig里增加一个文件autofsck,内容如下：
+AUTOFSCK_DEF_CHECK=yes
+PROMPT=yes
+
+2.改变文件或目录之最后修改时间(变为当前时间)
+执行格式：touch name ( name 可为文件或目录名称。)
+
+3.如何设置login后欢迎信息
+修改/etc/motd，往里面写入文本即可。
+
+4.如何设置login前欢迎界面
+修改/etc/issue或者issue.net，往里面写入文本。
+issue的内容是出现在本机登录的用户界面上，而issue.net则是在用户通过网络telnet的时候出现。
+
+5.如何修改网卡MAC地址
+首先必须关闭网卡设备，否则会报告系统忙，无法更改。
+命令是： /sbin/ifconfig eth0 down
+修改 MAC 地址，这一步较 Windows 中的修改要简单。
+命令是：/sbin/ifconfig eth0 hw ether 00:AA:BB:CC:DD:EE
+重新启用网卡 /sbin/ifconfig eht0 up
+网卡的 MAC 地址更改就完成了
+
+6.建立别名/删除别名
+alias cp='cp -i'
+unalias cp
+
+7.如何知道某个命令使用了什么库文件
+例如要知道ls使用了什么库文件，可以使用：
+$ ldd /bin/ls
+
+8.如何使一个用户进程在用户退出系统后仍然运行
+使用nohup command &，比如：nohup wget -c ftp://test.com/test.iso
+#这样即使用户退出系统，wget进程仍然继续运行直到test.iso下载完成为止
+
+9.如何限制用户的最小密码长度
+修改/etc/login.defs里面的PASS_MIN_LEN的值。比如限制用户最小密码长度是8：
+PASS_MIN_LEN 8
+
+10.如何取消root命令历史记录以增加安全性
+为了设置系统不记录每个人执行过的命令，就在/etc/profile里设置：
+HISTFILESIZE=0
+HISTSIZE=0
+或者：
+ln -s /dev/null ~/.bash_history
+
+++如何测试硬盘性能
+使用hdparm -t -T /dev/hdX就可以测试硬盘的buffer-cache reads和buffered disk reads两个数据，可以用来当作硬盘性能的参考。
+同时使用hdparm -c3 /dev/hdaX还能设置硬盘以32bit传输，以加快数据传输的速度。
+
+++如何列出一个目录占用的空间
+du或du -s或du -k
+du -S | sort -n 可以迅速发现那个目录是最大的。
+用df可以看到已安装的文件系统的空间大小及剩余空间大小。
+quota -v查看用户的磁盘空间信息,如果你用quota限制了用户空间大小的话。
+
+++如何使新用户首次登陆后强制修改密码
+#useradd -p ‘’ testuser; chage -d 0 testuser
+
+++在Linux中有时开机不自动检查新硬件，新安装的网卡找不到。请问怎么解决？
+答：自动检查新硬件的服务是Kudzu，用户可以用“ntsysv”命令启动该服务。下次重启就会找到用户的新网卡。
+
+++从台湾省的一个 网站找到的,如何让系统密码和samba密码一致,并可以让用户自行修改他们的密码.
+使用web界面來同步更改system passwd 及 samba password
+下载 http://changepassword.sourceforge.net/
+安装就可以了.先看README哈.
+附加:
+将系统用户批量倒成samba用户.
+less /etc/passwd | mksmbpasswd.sh >; /etc/samba/smbpasswd
+
+++更改Linux启动时用图形界面还是字符界面
+cd /etc
+vi inittab
+将id:5:initdefault: 其中5表示默认图形界面
+改id:3: initdefault: 3表示字符界面
+
+++配置smb可以被哪些IP所用.
+cd /etc/samba
+Vi smb.conf
+找到hosts allow = 192.168.1. 192.168.2. 127.
+修改其为哪些机器所用,注意IP之间用逗号分开
+举例:
+hosts allow =192.168.1.110,192.168.1.120
+
+++禁止在后台使用CTRL-ALT-DELETE重起机器
+cd /etc/inittab
+vi inittab 在文件找到下面一行
+# Trap CTRL-ALT-DELETE
+ca::ctrlaltdel:/sbin/shutdown -t3 -r now （注释掉这一行）
+如： # Trap CTRL-ALT-DELETE
+#ca::ctrlaltdel:/sbin/shutdown -t3 -r now
+
+++修改主机名
+vi /etc/sysconfig/network
+修改HOSTNAME一行为HOSTNAME=主机名
+
+++查看开机检测的硬件
+dmesg | more
+
+++查看硬盘使用情况
+df –m
+
+++查看目录的大小
+du –sh dirname
+
+++解压小全
+tar xvfj lichuanhua.tar.bz2
+tar xvfz lichuanhua.tar.gz
+tar xvfz lichuanhua.tgz
+tar xvf lichuanhua.tar
+unzip lichuanhua.zip
+注:压缩 tar cvfz FileName.tar.gz DirName
+
+++显示内存使用情况
+free –m
+
+++显示系统运行了多长时间
+uptime
+
+++显示开机自检的内容命令
+dmesg
+
+++端口的详细列表
+/etc/services
+
+++查看物理信息
+lspci
+
+++文本截面的中文支持
+RH 9.0自带安装包 zhcon_0.2.3_1.rh9.i386.rpm
+安装完成后，执行: zhcon 就可以支持中文了
+
+++linux 控制 windows
+(1)用RH9.0自己带rdesktop,版本是1.2.0
+命令：rdesktop –u user –f 192.168.1.70 色默认的是8位
+(2)要达到16色，就要下载新版本1.3.0
+rdesktop –a 16 –u lichuanhua –g 800*600 192.168.1.70
+
+++不让显示器休眠
+setterm –blank 0
+
+++显示最后一个登录到系统的用户
+last
+
+++查看所有帐号的最后登录时间
+lastlog /var/log/lastlog
+
+++查看系统自开通以来所有用户的登录时间和地点
+cat /var/log/secure
+
+++显示当前用户所属信息
+id
+
+++如何知道Apache的连接数目
+ps -ef|grep httpd|wc -l #其它服务可以类推
+netstat -nat|grep -i “80″|wc -l # 以上结果再减1吧
+
+++删除用户帐号的同时,把用户的主目录也一起删除
+userdel -r 用户名
+
+++修改已有用户的信息
+usermod [参数] 用户名
+参数: -c, -d, -m, -g, -G, -s, -u以及-o与adduser参数意义相同
+新参数: -l 新用户名(指定一个新的账号,即将原来的用户名改为新的用户名)
+
+++改变redhat的系统语言/字符集
+改 /etc/sysconfig/i18n 文件，如
+LANG=”en_US”，xwindow会显示英文界面，
+LANG=”zh_CN.GB18030″，xwindow会显示中文界面。
+还有一种方法
+cp /etc/sysconfig/i18n $HOME/.i18n
+修改 $HOME/.i18n 文件，如
+LANG=”en_US”，xwindow会显示英文界面，
+LANG=”zh_CN.GB18030″，xwindow会显示中文界面。
+这样就可以改变个人的界面语言，而不影响别的用户
+vi .bashrc
+export LANG=zh_CN.GB2312
+export LC_ALL=zh_CN.GB2312
+
+++cd光盘做成iso文件
+cp /dev/cdrom xxxx.iso
+
+++快速观看开机的硬件检测
+dmesg | more
+
+++查看硬盘的使用情况
+df -k 以K为单位显示
+df -h 以人性化单位显示，可以是b,k,m,g,t..
+
+++查看目录的大小
+du -sh dirname
+-s 仅显示总计
+-h 以K、M、G为单位，提高信息的可读性。KB、MB、GB是以1024为换算单 位， -H以1000为换算单位。
+
+++查找或删除正在使用某文件的进程
+fuser filename
+fuser -k filename
+
+++linux中让用户的密码必须有一定的长度,并且符合复杂度
+vi /etc/login.defs，改PASS_MIN_LEN
+
+++以不同的用户身份运行程序
+su - username -c “/path/to/command”
+有时候需要运行特殊身份的程序, 就可以让su来做
+
+++ adduser m -g cvsroot -s /bin/false
+添加用户m，参数-s /bin/false表示不允许用户直接登录服务器
+id m
+显示m用户的uid和gid号。
+
+++ 强制卸载rpm包
+rpm -e –nodeps 包名称
+#个别不正常情况下:
+rm -f /var/lib/rpm/__*
+rpm –rebuilddb
+
+++拒绝除root用户的其它用户登陆
+touch /etc/nologin
+也可以在/etc/passwd中加!对指定用户限制登陆
+
+++检查自己所属之群组名称
+执行格式：groups
+
+++修改文件/文件夹所属用户组(支持-R)
+chown .组名 文件名(注:组名名勿忘”.”，“:”也可)
+也可chgrp 组名 文件名
+chown 用户名.组名 文件名(同时修改所属用户及用户组) 
+
+++用fuser命令查看一下是哪些进程使用这个分区上的文件：
+fuser –v –m /usr
+如果没有什么重要的进程，用以下命令停掉它们：
+fuser -k –v –m /usr
+然后就可以重新挂载这些文件系统了。
+
+++网络唤醒主机
+ether-wake 目标网卡MAC
+
+++如何查找大小为500K到1000K之间的文件
+find / -type f -size +500k -and -size -1000k
+
+++让主机不响应ping
+echo 1 > /proc/sys/net/ipv4/icmp_echo_ignore_all
+若想恢复就用
+echo 0 > /proc/sys/net/ipv4/icmp_echo_ignore_all
+#必须是用命令改，不能是vi修改
+
+++自动注销ROOT
+编辑你的配置文件”vi /etc/profile”,在"HISTSIZE="后面加入下面这行：
+　　TMOUT=300
+　　#300，表示300秒
+
+++ls只列出目录
+ls -lF | grep ^d
+ls -lF | grep /$
+ls -F | grep /$
+
+++让cron任务不回馈信息
+* * * * * cmd > /dev/null 2>&1
+
+++lsof(list open files)用法
+lsof -i :xx
+lsof abc.txt 显示开启文件abc.txt的进程
+lsof -i :22 知道22端口现在运行什么程序
+lsof -c nsd 显示nsd进程现在打开的文件
+lsof -g gid 显示归属gid的进程情况
+
+++改变sshd 的端口
+在/etc/ssh/sshd_config 中加入一行：Port 2222，/etc/init.d/sshd restart 重启守护进程
+
+++防止任何人使用su 命令成为root
+     vi /etc/pam.d/su，在开头添加下面两行：
+　　auth sufficient /lib/security/pam_rootok.so
+　　auth required /lib/security/Pam_wheel.so group=wheel
+     然后把用户添加到“wheel”组：chmod -G10 username
+
+++如何让ssh 只允许指定的用户登录
+方法1：在/etc/pam.d/sshd 文件中加入
+auth required pam_listfile.so item=user sense=allow file=/etc/sshusers onerr=fail
+然后在/etc 下建立sshusers 文件,加入允许使用ssh 服务的用户名(每一个用户名都要单独一行),重新起动sshd
+
+++利用ssh 复制文件
+1、从A 复制B（推过去）   #scp -rp /path/filename username@remoteIP:/path
+2、从B 复制到A（拉过来）#scp -rp username@remoteIP:/path/filename /path
+
+++linux机器挂载windows上的共享文件 
+windows IP:192.168.1.1 
+mount -t smbfs -o username=massky,password=massky //192.168.1.1/dbf /mnt/share 
+如想机器重启自动挂载，vi /etc/fstab最后加入： 
+//192.168.1.1/dbf /mnt/share smbfs defaults,auto,username=massky,password=massky 0 0
+
+++定制linux 提示符
+在bash 中提示符是通过一个环境变量$PS1 指定的。用export $PS1 查看现在的值，比较直
+观常用的提示符可以设定为export PS1=“[\u@\h \W]\$”。其中\u 代表用户名，\h 代表主机
+名，\W 代表当前工作目录的最后一层，如果是普通用户\$则显示$，root 用户显示#。
+
+++清空文件
+[echo] > 文件名
+
+++DNS相关
+host -a domain.com #显示相关资讯都列出来
+host domain.com 202.106.0.20 #用202.106.0.20这台DNS服务器查询domain.com
+
+++前后台任务相关
+jobs 列出属于当前用户的进程
+bg 将进程搬到后台运行（Background）
+fg 将进程搬到前台运行（Foreground）
+万一你运行程序时忘记使用“&”了，又不想重新执行。可以先使用ctrl+z挂起程序，然后敲入bg命令，这样程序就在后台继续运行了。
+
+++查找当前目录下七天前的文件,并删除
+find ./ -mtime +7 -type f -exec rm {} \;
+
+++产生指定大小的文件(bs*count)
+dd if=/dev/zero of=filename bs=1000000 count=10
+
+++查找当前目录下文件并更改扩展名
+更改所有.ss文件为.aa
+# find ./ -name "*.ss" -exec rename .ss .aa '{}' \;
+
+++修改系统时间
+date -s "2005-6-4 17:26"
+
+++让服务器自动同步时间
+0 1 * * * /usr/sbin/ntpdate 210.72.145.44
+或 0 1 * * * rdate -s time.nist.gov
+
+++解决打开文件过多的问题
+在etc/security/limits.conf 配置文件中设置进程文件描述符极限：
+  * soft nofile 2048
+  * hard nofile 4096
+系统级文件描述符极限及timeout时间修改，添加如下两行到 /etc/rc.d/rc.local 启动脚本中：
+  # Increase system-wide file descriptor limit.
+  echo 65536 > /proc/sys/fs/file-max
+  echo 30 > /proc/sys/net/ipv4/tcp_fin_timeout
+#一般情况下，最大打开文件数比较合理的设置为每4M物理内存256，比如1G内存可以设为65536，
+#而最大的使用的i节点的数目应该是最大打开文件数目的3倍到4倍
+
+++如何用tar打包一个目录时,去掉其中的某些子目录或指定文件
+加参数 –exclude 即可, 可加文件名或目录名, 可多写
+tar cvf –exclude {dirname,filename} #dirname不要加/
+
+++终端下修改服务器时区
+/usr/sbin/timeconfig 
+或直接#/etc/sysconfig/clock 
+
+++关闭启动时的内存不足256M提示
+#vi /etc/rc.sysinit #把最后六行注释掉
+或#vi /var/lib/supportinfo
+把其中的 MinRAM: 256M  这个值调低点.
+
+++在多层目录中查找到某一指定"字符串"
+grep string -R /etc/sysconfig/
+find ./pathname/ -name '*' | xargs grep 'string'
+
+++占用CPU的一个命令
+#yes string  #有时候测试用得上。狂占CPU
+
+++Kill相关
+      kill -STOP [pid]
+   　发送SIGSTOP (17,19,23)停止一个进程，而并不消灭这个进程。
+　　kill -CONT [pid]
+　　发送SIGCONT (19,18,25)重新开始一个停止的进程。
+　　kill -KILL [pid]
+　　发送SIGKILL (9)强迫进程立即停止，并且不实施清理操作。
+　　kill -9 -1
+　　终止你拥有的全部进程。
+
+++在当前目录下建个bak目录,然后 cp * bak,会提示略过bak,有其它办法可以排除指定文件(夹)?
+ls -F|grep -v \/|xargs -i cp {} bak #推荐
+或 find ! -name "./bak"
+
+++ 根据进程名显示进程号
+# pidof httpd
+1846 1845 1844 1843 1842 1841 1840 1839 1820
+
+++e2fsck
+检查使用 Linux ext2 档案系统的 partition 是否正常工作,  检查 /dev/hda5 是否正常，如果有异常便自动修复，并且设定若有问答，均回答[是] :
+e2fsck -a -y /dev/hda5
+
+++反向输出
+rev 反向输出(以行为单位)
+tac 反向输出(全文)
+
+++显示终端号
+tty
+
+++文件行数/字数统计
+wc –l file   计算文件行数
+wc -w file  计算文件中的单词数
+wc -c file   计算文件中的字符数
+
+++出每行第5个到第9个字符
+cut -b5-9 file.txt
+
+++删除文本文件中出现的行列
+uniq
+
+++返回文件所在路径
+dirname /bin/tux #将返回 /bin
+
+++fcitx在英文环境下正常使用
+#vi ~/.bashrc
+xport LC_CTYPE="zh_CN.UTF-8"
+export XMODIFIERS="@im=fcitx"
+export XIM=fcitx
+export XIM_PROGRAM=fcitx
+#gnome-session-properties可以把fctix加入登入后自启动
+
+++split分割合并文件
+split -b1440k a_whopping_big_file chunk #拆
+cat chunk* > a_whopping_big_file  #合
+
+++利用现存两个文件，生成一个新的文件
+#取出两个文件的并集(重复的行只保留一份)
+ cat file1 file2 | sort | uniq
+#取出两个文件的交集(只留下同时存在于两个文件中的文件)
+ cat file1 file2 | sort | uniq -d
+#删除交集，留下其他的行
+ cat file1 file2 | sort | uniq -u
+
+++生成kill -9 httpd进程的命令
+ps aux|grep httpd|awk '{print "kill -9 " $2}'  
+
+ 
+
+++查看即时网络流量
+数据包 “netstat 1″一秒钟累计一次，”netstat 2″两秒钟累计一次。依此类推
+查看网卡流量：”systat -if 1″每秒钟刷新一次，”systat -if 2″两秒钟刷新一次，依此类推.  #freebsd
+
+++硬盘对拷
+dd if=/dev/src of=/dev/dst bs=131072
+
+++用wget下载FTP整个目录
+wget -mcnH ftp://hostname/dirname –ftp-user=user –ftp-password=password –no-passive-ftp -o /tmp/down/down.log
+
+++统计某列数值的平均值
+例: grep Total: squid.log |awk '{print $2}' |awk '{sum+=$0}END{print sum/NR}'  
+
+++如何释放出.tar.gz中指定文件/文件夹?
+tar zxvf *.tar.gz  [$path/filename] [$path/dirname]
+如果不加path的话，会直接释放到当前目录,加path会保留原有目录结构
+
+++指定发件人来发送邮件
+cat local-host-names  sendmail -v -Cetcmailsendmail.cf -f Sender@domain.com -oi To i@zhangjianfeng.com
+
+++单独取出apache日志中2007.1.24的18:00~23:00的日志
+sed -n '/\[24\/Jan\/2007\:18/,/\[24\/Jan\/2007\:23/p' access_log > tmp.log
+++在LINUX下修改MACK地址
+Linux下网卡的MAC地址修改
+关闭网卡：(否则会报告说设备忙)/sbin/ifconfig eth0 down
+然后改地址：/sbin/ifconfig eth0 hw ether 00:AA:BB:CCD:EE
+然后启动网卡:/sbin/ifconfig eth0 up
+可能还需要重新设置路由。视情况而定。
+或者：
+只要在/etc/sysconfig/network-scripts/ifcfg-eth?中指定MAC地址即可，比如：
+MACADDR=0123456789ab
+

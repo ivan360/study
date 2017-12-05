@@ -1,0 +1,11 @@
+vim /etc/nail.rc
+--------------------
+set from=2008fudao@163.com
+set smtp=smtp.163.com
+set smtp-auth-user=2008fudao
+set smtp-auth-password=yj@debbie
+set smtp-auth=login
+--------------------
+
+测试：
+echo 'hello!' | mail -s "hello test" ymwugui@qq.com

@@ -1,0 +1,73 @@
+[global]
+	workgroup = WORKGROUP
+	server string = Samba Server Version %v
+	netbios name = centos7
+
+	security = user
+	pam password change = no
+	passwd chat = **NEW*UNIX*password* %n\n *Retype*new*UNIX*password* %n\n *successfully*
+	passwd program = /usr/bin/passwd %u
+	unix password sync = yes
+
+	log file = /var/log/samba/log.%m
+	max log size = 50
+
+[homes]
+	comment = Home Directories
+	browseable = no
+	writable = yes
+	valid users = %S
+
+[managers]
+	comment =Directory of managers
+	path = /myhome/managers
+	writeable = yes
+	valid users = @managers
+	create mask = 0644
+	directory mask = 0755
+[backs]
+	comment =Directory of backs
+	path = /myhome/backs
+	writeable = yes
+	valid users = @backs
+	create mask = 0644
+	directory mask = 0755
+[offices]
+	comment =Directory of offices
+	path = /myhome/offices
+	writeable = yes
+	valid users = @offices
+	create mask = 0644
+	directory mask = 0755
+[sales_hf]
+	comment =Directory of sales_hf
+	path = /myhome/sales_hf
+	writeable = yes
+	valid users = @sales_hf
+	create mask = 0644
+	directory mask = 0755
+[sales_hg]
+	comment =Directory of sales_hg
+	path = /myhome/sales_hg
+	writeable = yes
+	valid users = @sales_hg
+	create mask = 0644
+	directory mask = 0755
+[services]
+	comment =Directory of services
+	path = /myhome/services
+	writeable = yes
+	valid users = @services
+	create mask = 0644
+	directory mask = 0755
+
+[shares]
+	comment = Directory of shares
+	path = /myhome/shares
+	writeable = yes
+	valid admin = shares
+	valid users = @managers, @backs, @offices, @sales_hf, @sales_hg, @services
+	create mask = 0644
+	directory mask = 0755
+	
+vim:set ft=nginx:

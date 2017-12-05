@@ -1,0 +1,10 @@
+1. 在启动界面选择  centos linux, with linux***.x86_64
+2. 按 e 键进入编辑模式
+3. 将光标移动到 linux 16 开头的行，找到 ro 改为 rw init=sysroot/bin/sh 
+4. 修改完成后按  ctrl+x 开始执行
+5. 进入后输入  chroot /sysroot  回车
+6. 输入  passwd  回车
+7. 根据提示输入两次你所需的密码
+8. 完成后输入   touch /.autorelabel 回车
+9. 输入 exit 回车
+10.  reboot 重启 过程慢，要耐心等等

@@ -1,0 +1,5 @@
+Failed to start LSB: Bring up/down networking
+RHEL7/CentOS7安装完成并配置好所有网络相关配置后重启机器，使用systemctl --failed检查是否有失败的服务，发现在network服务启动失败，使用systemctl status network查看服务状态，得到如下错误信息：
+
+通过查找相关文档，使用如下方法解决了问题：设定开机启动一个名为NetworkManager-wait-online服务，命令为：
+systemctl enable NetworkManager-wait-online.service

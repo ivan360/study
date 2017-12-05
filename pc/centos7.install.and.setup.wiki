@@ -1,0 +1,74 @@
+======================================================================
+= centos7 安装及设置 =
+======================================================================
+
+[[centos7密码重置]]
+1. 通过网络下载制作U盘系统安装盘
+2. 设置电脑U盘启动安装系统
+
+3. 中英文切换与PS1设置
+    1. 修改系统当前语言环境为英文
+export LANG=en_US
+    为中文
+    export LANG=zh_CN.UTF-8
+
+    或者
+localectl set-locale LANG=要修改的语言
+[[centos7.中文乱码]]
+
+    2. 更新家目录的文件命名为英文
+xdg-user-dirs-gtk-update
+    当前用户的家目录配置文件位置
+    vim ~/.config/user-dirs.dirs
+
+    3. 设置PS1，当前用户:vi ~/.bashrc,所有用户:vi /etc/bashrc
+PS1='\[\033[01;32m\]\u@\h\[\033[01;34m\]:\w\[\e[01;31m\] \$\[\033[00m\] '
+source ~/.bashrc
+
+4. 修改网卡启动时联网和网络代理设置
+    1. 开机后自动联网
+vim /etc/sysconfig/network-scripts/ifcfg-enp7s0
+    ONBOOT=yes
+
+    2. 全局代理设置
+vim /etc/profile
+    或者，用户代理设置 vim ~/.bash_profile
+export http_proxy=http://lizhx:QQ%40debbie@10.242.8.12:8080
+export https_proxy=http://lizhx:QQ%40debbie@10.242.8.12:8080
+
+[[上网代理密码中含有特殊字符]]
+    
+    3. hostname修改
+hostnamectl set-hostname 你要修改到的hostname
+
+    4. 重新启动网络
+systemctl restart network.service
+
+5. 修改启动时为文本介面
+ln -sf /lib/systemd/system/multi-user.target /etc/systemd/system/default.target
+
+6. 下载安装Xshell和Xftp
+    用于win电脑连接centos系统和上传下载文件
+    需要知道centos的IP地址和用户名密码
+ifconfig
+
+7. 设置变更软件更新源
+    阿里云Linux安装镜像源地址：http://mirrors.aliyun.com/
+    rhel 更换 centos 源 [[rhel2centos]]
+
+    1. 备份原镜像文件，以免出错后可以恢复
+mv /etc/yum.repos.d/CentOS-Base.repo /etc/yum.repos.d/CentOS-Base.repo.backup
+
+    2. 下载新的CentOS-Base.repo 到/etc/yum.repos.d/
+wget -O /etc/yum.repos.d/CentOS-Base.repo http://mirrors.aliyun.com/repo/Centos-7.repo
+
+    3. 运行yum makecache生成缓存
+yum clean all
+yum makecache
+
+    4. 软件安装
+yum install *
+
+8. 安装系统驱动程序
+yum groupinstall 'Development Tools'
+

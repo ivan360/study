@@ -1,0 +1,27 @@
+ == 在centos中禁止root帐号直接登录 ==
+
+centos的默认管理员名即是root，只需要知道ROOT密码即可直接登录SSH。禁止Root从SSH直接登录可以提高服务器安全性。经过以下操作后即可实现。
+useradd aries            -- 新建帐户
+passwd aries             -- 置帐户密码
+vim /etc/ssh/sshd_config -- 修改sshd_config文件
+--------------------
+查找“#PermitRootLogin yes”，将前面的“#”去掉，短尾“Yes”改为“No”，并保存文件。
+--------------------
+/etc/init.d/sshd restart -- 重启sshd服务
+
+下次登陆
+1、先使用新建账号“aries”以普通用户登陆。
+2、若要获得ROOT权限，在SSH中执行以下命令
+su root
+
+== 给一般账号root权限 ==
+  默认情况下，一般账号是没有root权限的。为什么不直接用root账号，而是要给一般账号root权限呢？
+日常工作中使用root账号，是非常糟糕且危险的习惯！无论是服务器还是个人电脑都是如此。
+安装软件时需要root权限，只能su切换到root账户再安装。对于习惯使用sudo的人来说，还是有些麻烦。
+
+假设账户名为ivan，要授予他root权限，则要修改配置文件/etc/sudoers
+# echo 'ivan ALL=(ALL) ALL' >> /etc/sudoers # 向配置文件中加入语句
+# tail -1 /etc/sudoers  # 检查一下是否正确
+ivan ALL=(ALL) ALL
+其中ivan为当前用户名。
+修改完毕，现在可以用ivan帐号登录，然后用命令 su ，即可获得root权限进行操作。

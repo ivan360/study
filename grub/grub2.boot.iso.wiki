@@ -1,0 +1,51 @@
+在Linux(Ubuntu)下用GRUB2自动引导ISO和分区
+第一步：增加代码到GRUB2
+
+sudo gedit /etc/grub.d/30_os-prober
+
+在最前面的2行之下增加一段代码：（添加至/etc/grub.d/30_os-prober）
+
+#!/bin/sh
+set -e ##这两行不变，下面开始加
+
+IMAGES=/boot/images
+. /usr/lib/grub/grub-mkconfig_lib
+if test -e /boot/memdisk ; then
+MEMDISKPATH=$( make_system_path_relative_to_its_root "/boot/memdisk" )
+echo "Found memdisk: $MEMDISKPATH" >&2
+find $IMAGES -name "*.iso" -o -name '*.img' | sort | 
+while read image ; do
+IMAGEPATH=$( make_system_path_relative_to_its_root "$image" )
+case "$image" in
+*.iso)
+echo "Found iso image: $IMAGEPATH" >&2
+cat << EOF
+menuentry "可启动 ISO 光驱镜像: $(basename $IMAGEPATH | sed s/.img//)" {
+EOF
+prepare_grub_to_access_device ${GRUB_DEVICE_BOOT} | sed -e "s/^/\t/"
+cat << EOF linux16 $MEMDISKPATH iso initrd16 $IMAGEPATH } EOF ;; *.img) echo "Found floppy image: $IMAGEPATH" >&2
+cat << EOF
+menuentry "可启动 IMG软驱 镜像: $(basename $IMAGEPATH | sed s/.img//)" {
+EOF
+prepare_grub_to_access_device ${GRUB_DEVICE_BOOT} | sed -e "s/^/\t/"
+cat << EOF
+linux16 $MEMDISKPATH raw
+initrd16 $IMAGEPATH
+}
+EOF
+;;
+esac
+done
+fi
+
+第2步：在/boot/下面建立一个images文件夹，即sudo mkdir /boot/images
+将你想启动的pe.iso或者dos.ima或者ghost.img丢进去，
+下载一个syslinux的memdisk文件放进/boot/下。
+第3步：运行自动生成
+
+sudo update-grub2
+
+搞定！重启后，你会发现pe、dos、ghost等工具的启动菜单自动加上去了。
+以后，你想替换或者增加工具，只要往那个文件夹里面丢，然后sudo update-grub2就行了。
+
+至于分区的系统，grub2在linux下可以自动搜索的，只要安装了，指令update-grub2会完成自动启动菜单。

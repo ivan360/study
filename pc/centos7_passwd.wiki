@@ -1,0 +1,15 @@
+= 如何重置CentOS 7的Root密码 =
+
+1 - 在启动grub菜单，选择编辑选项启动
+2 - 按键盘e键，来进入编辑界面
+3 - 找到Linux 16的那一行
+将ro改为rw init=/sysroot/bin/sh
+4 - 现在按下 Control+x ，使用单用户模式启动
+
+chroot /sysroot     -- 访问系统
+passwd root         -- 重置密码
+touch /.autorelabel -- 更新系统信息
+exit                -- 退出chroot
+reboot              -- 重启你的系统
+
+

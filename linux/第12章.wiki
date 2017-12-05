@@ -1,0 +1,279 @@
+= 12.1 了解文件共享服务 =
+NFS(NetworkFile System)是一个能够将多台Linux的远程主机数据挂载到本地目录的服务，属于轻量级的文件共享服务，不支持Linux与 Windows系统间的文件共享
+
+SMB（Server Message Block）通信协议是微软（Microsoft）和英特尔(Intel)在1987年制定的协议
+1991年时大学生Tridgwell开发出了Samba服务程序
+    SMB(Server Messages Block)协议:实现局域网内文件或打印机等资源共享服务
+    Samba服务程序是一款基于SMB协议并由服务端和客户端组成的开源文件共享软件
+    
+= 12.2 Samba服务 =
+== 12.2.1 安装服务程序 ==
+
+安装Samba服务软件包：
+# yum install samba
+
+浏览Samba配置文件：
+# cat /etc/samba/smb.conf
+
+备份原始的配置文件：
+# mv /etc/samba/smb.conf /etc/samba/smb.conf.bak
+
+过滤掉无用的内容：
+# cat /etc/samba/smb.conf.bak | grep -v "#" | grep -v ";" | grep -v "^$" > /etc/samba/smb.conf
+分别删选掉包含#号的行("#")，包含;号的行(";")以及所有的空白行("^$")
+
+让我们来看看过滤后的配置文件吧：
+[global]                                  # 全局参数。
+	workgroup = MYGROUP                     # 工作组名称。
+	server string = Samba Server Version %v # 服务器介绍信息,参数%v为显示SMB版本号。
+	log file = /var/log/samba/log.%m        # 定义日志文件存放位置与名称，参数%m为来访的主机名。
+	max log size = 50                       # 定义日志文件最大容量为50Kb。
+	security = user                         # 安全验证的方式,总共有4种。
+	                                        # share:来访主机无需验证口令，更加方便，但安全性很差。
+	                                        # user:需由SMB服务验证来访主机提供的口令后才可建立访问,更加的安全。
+	                                        # server:使用独立的远程主机验证来访主机提供的口令（集中管理帐号）。
+	                                        # domain:使用PDC来完成验证
+	passdb backend = tdbsam                 # 定义用户后台的类型，共有3种。
+	                                        # smbpasswd:使用SMB服务的smbpasswd命令给系统用户设置SMB密码。
+	                                        # tdbsam:创建数据库文件并使用pdbedit建立SMB独立的用户。
+	                                        # ldapsam:基于LDAP服务进行帐户验证。
+	load printers = yes                     # 设置是否当Samba服务启动时共享打印机设备。
+	cups options = raw                      # 打印机的选项
+[homes]                                   # 共享参数
+	comment = Home Directories              # 描述信息
+	browseable = no                         # 指定共享是否在“网上邻居”中可见。
+	writable = yes                          # 定义是否可写入操作，与"read only"相反。
+[printers]                                # 打印机共享参数
+	comment = All Printers
+	path = /var/spool/samba                 # 共享文件的实际路径(重要)。
+	browseable = no
+	guest ok = no                           # 是否所有人可见，等同于"public"参数。
+	writable = no
+	printable = yes
+
+标准的Samba共享参数是这样的：
+[linuxprobe]                                          # 共享名称为linuxprobe
+comment = Do not arbitrarily modify the database file # 警告用户不要随意修改数据库
+path = /home/database                                 # 共享文件夹在/home/database
+public = no                                           # 关闭所有人可见
+writable = yes                                        # 允许写入操作
+
+将上面的配置参数追加到SMB服务配置文件(/etc/samba/smb.conf)并重启SMB服务
+但此时SMB服务默认的验证模式为user，需要先创建用户数据库后才可以正常使用
+
+== 12.2.2 安全共享文件 ==
+1. 第1步:检查当前是否为user验证模式。
+# cat /etc/samba/smb.conf
+    security = user
+    passdb backend = tdbsam
+
+2. 第2步:创建共享文件夹：
+# mkdir /database
+
+3. 第3步:描述共享文件夹信息。
+
+    [database]
+    comment = Do not arbitrarily modify the database file
+    path = /database
+    public = no
+    writable = yes
+
+保存smb.conf文件后重启启动SMB服务：
+# systemctl restart smb
+
+添加到开机启动项：
+# systemctl enable smb
+
+4. 第4步：使用Windows主机尝试访问
+ \\192.168.10.10
+此时访问Samba服务是报错的
+
+5. 第5步:清空防火墙规则链：
+# iptables -F
+# service iptables save #iptables-save
+
+因为Windows系统的缓存关系，需要先重启下Windows主机再尝试访问Samba共享。
+
+6. 第6步:创建SMB服务独立的帐号。
+
+SMB服务配置文件中密码数据库后台类型为"tdbsam"
+帐户和口令是Samba服务的独立帐号信息，需要pdbedit命令来创建SMB服务的用户数据库。
+
+`pdbedit命令用于管理SMB服务的帐户信息数据库，格式为：“pdbedit [选项] 帐户”`
+
+-a 用户名 # 建立Samba用户
+-x 用户名 # 删除Samba用户
+-L        # 列出用户列表
+-Lv       # 列出用户详细信息的列表
+
+*创建系统用户：*
+# useradd smbuser
+
+*将此系统用户提升为SMB用户：*
+# pdbedit -a -u smbuser
+new password:设置SMB服务独立的密码
+
+7. 第7步:使用Windows主机验证共享结果：
+
+8. 第8步：允许SELinux规则
+
+对于共享文件这么重要的事情，SELinux一定会强制管理，果然又报错了。
+
+*将共享目录的所有者和所有组设置为smbuser用户：*
+# chown -Rf smbuser:smbuser /database
+
+*允许SELinux对于SMB用户共享家目录的布尔值：*
+# setsebool -P samba_enable_home_dirs on
+
+*将共享目录的SELinux安全上下文设置妥当：*
+# semanage fcontext -a -t samba_share_t /database
+
+*使新的安全上下文立即生效：*
+# restorecon -Rv /database/
+
+9. 第9步：使用Windows主机验证共享结果
+
+10. 第10步：使用Linux主机验证共享结果
+Samba服务程序还可以实现Linux系统之间的文件共享，先动手配置下客户端主机的IP地址吧：
+主机名称          操作系统               IP地址
+Samba共享服务器   红帽RHEL7操作系统      192.168.10.10
+客户端            红帽RHEL7操作系统      192.168.10.20
+客户端            微软Windows7操作系统   192.168.10.30
+
+在客户端安装cifs-utils软件包：
+# yum install -y cifs-utils
+
+创建挂载目录：
+# mkdir /database
+
+在root家目录创建认证文件(依次为SMB用户名、SMB用户密码、SMB共享域)：
+# vim auth.smb
+username=smbuser
+password=redhat
+domain=MYGROUP
+
+此文件太重要了，权限应该给小一些：
+# chmod -Rf 600 auth.smb
+
+配置其挂载信息（内容依次为远程共享信息、本地挂载目录、文件系统类型、认证文件以及开机自检选项）：
+# vim /etc/fstab
+//192.168.10.10/database /database cifs credentials=/root/auth.smb 0 0
+
+使用mount命令的-a参数挂载所有在fstab文件中定义的文件信息：
+# mount -a
+
+= 12.3 NFS网络文件系统 =
+NFS(Network Files System)即网络文件系统
+NFS文件系统协议允许网络中的主机通过TCP/IP协议进行资源共享，NFS客户端可以像使用本地资源一样读写远端NFS服务端的资料
+需要注意NFS服务依赖于RPC服务与外部通信，所以必需保证RPC服务能够正常注册服务的端口信息才能正常使用NFS服务。
+
+红帽RHEL7系统已经默认安装NFS服务：
+
+# yum install nfs-utils
+
+本次的实验需要两台Linux主机，网络配置情况：
+主机名称    操作系统            IP地址
+NFS服务端   红帽RHEL7操作系统   192.168.10.10
+NFS客户端   红帽RHEL7操作系统   192.168.10.20
+
+1. 第1步:创建NFS服务端的共享目录。
+
+清空iptables默认的规则链：
+# iptables -F
+
+保存清空后的iptables规则：
+# service iptables save
+
+创建nfsfile共享目录：
+# mkdir /nfsfile
+
+为共享目录设置权限（让其他人可以有写入权限）：
+# chmod -Rf 777 /nfsfile
+
+写入一个文件，用于NFS客户端读取：
+# echo "welcome to linuxprobe.com" > /nfsfile/readme
+
+NFS服务端配置文件是"/etc/exports"，用于定义要共享的目录以及相应权限。
+# vim /etc/exports
+//格式为:共享目录的绝对路径 允许访问NFS资源的客户端(权限参数)
+/nfsfile 192.168.10.*(rw,sync,root_squash)
+
+NFS配置共享的参数有：
+ro               只读默认
+rw               读写模式
+root_squash      当NFS客户端使用root用户访问时，映射为NFS服务端的匿名用户。
+no_root_squash   当NFS客户端使用root用户访问时，映射为NFS服务端的root用户。
+all_squash       不论NFS客户端使用任何帐户，均映射为NFS服务端的匿名用户。
+sync             同时将数据写入到内存与硬盘中，保证不丢失数据。
+async            优先将数据保存到内存，然后再写入硬盘，效率更高，但可能造成数据丢失。
+
+看完后来分析下/etc/exports文件中参数作用吧“/nfsfile 192.168.10.* (rw,sync,no_root_squash)”（答案模式）。
+答案:将/nfsfile目录共享给192.168.10.0/24网段，运行NFS客户端读写数据、同步数据并映射为NFS服务器的root用户。
+
+
+2. 第2步:启动NFS服务端
+NFS服务依赖于RPC服务的，在红帽RHEL7系统中RPC服务已经默认运行(active)了，所以无需再配置RPC服务
+# systemctl status rpcbind
+
+启动nfs-server程序：
+# systemctl start nfs-server
+
+设置NFS服务端为开机启动：
+# systemctl enable nfs-server
+
+3. 第3步：配置NFS客户端
+如果NFS客户端也是红帽RHEL7系统，那么软件包nfs-utils一定也是已经默认安装，直接挂载共享就可以了。
+`showmount命令用于查询NFS服务端共享信息，格式为：“showmount [参数] [远程主机]”`
+-e   显示NFS服务端的共享列表
+-a   显示本机挂载NFS资源的情况
+-v   显示版本号
+
+查询远程NFS服务端中可用的共享资源：
+# showmount -e 192.168.10.10
+Export list for 192.168.10.10:
+/nfsfile (everyone)
+
+创建本地挂载目录：
+# mkdir /nfsfile
+# mount -t nfs 192.168.10.10:/nfsfile /nfsfile
+
+顺利查看到刚刚写入文件内容：
+# cat /nfsfile/readme
+
+如果希望开机后自动将NFS资源挂载到本地，那么就可以通过修改fstab文件来实现：
+# vim /etc/fstab
+192.168.10.10:/nfsfile /nfsfile nfs defaults 0 0
+
+= 12.4 AutoFs自动挂载服务 =
+AutoFs服务与Mount/Umount命令不同之处在于它是一种守护进程
+只有检测到用户试图访问一个尚未挂载的文件系统时才自动的检测并挂载该文件系统
+AutoFs是当用户需要使用该文件系统了才会动态的挂载，节约网络与系统资源。
+
+主机名称    操作系统            IP地址
+NFS服务端   红帽RHEL7操作系统   192.168.10.10
+NFS客户端   红帽RHEL7操作系统   192.168.10.20
+
+安装autofs服务：
+# yum install autofs
+
+=== 模拟训练:每次进入/media/iso目录时都会自动挂载镜像。 ===
+
+启动autofs服务并加入到开机启动项中：
+# systemctl start autofs
+# systemctl enable autofs
+
+
+修改autofs主配置文件（格式为：挂载目录 映射配置文件）：
+# vim /etc/auto.master
+/media /etc/iso.misc
+
+编辑挂载配置参数文件（映射文件）：
+# vim /etc/iso.misc
+iso   -fstype=iso9660,ro,nosuid,nodev :/dev/cdrom
+
+重新加载启动autofs服务：
+# systemctl restart autofs
+
+进入自动挂载目录中：
+# cd /media/iso
+

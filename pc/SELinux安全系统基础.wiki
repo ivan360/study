@@ -1,0 +1,255 @@
+ Linux学习之CentOS(三十)--SELinux安全系统基础
+
+一、SELinux简介
+
+SELinux(Secure Enhanced Linux)安全增强的Linux是由美国国家安全局NSA针对计算机基础结构安全开发的一个全新的Linux安全策略机制。SELinux可以允许系统管理员更加灵活的来定义安全策略。
+
+SELinux是一个内核级别的安全机制，从Linux2.6内核之后就将SELinux集成在了内核当中，因为SELinux是内核级别的，所以我们对于其配置文件的修改都是需要重新启动操作系统才能生效的。
+
+现在主流发现的Linux版本里面都集成了SELinux机制，CentOS/RHEL都会默认开启SELinux机制。
+
+二、SELinux基本概念
+
+我们知道，操作系统的安全机制其实就是对两样东西做出限制：进程和系统资源(文件、网络套接字、系统调用等)。
+
+在之前学过的知识当中，Linux操作系统是通过用户和组的概念来对我们的系统资源进行限制，我们知道每个进程都需要一个用户才能执行。
+
+在SELinux当中针对这两样东西定义了两个基本概念：域(domin)和上下文(context)。
+
+域就是用来对进行进行限制，而上下文就是对系统资源进行限制。
+
+我们可以通过 ps -Z 这命令来查看当前进程的域的信息，也就是进程的SELinux信息：
+
+[root@xiaoluo ~]# ps -Z
+LABEL                             PID TTY          TIME CMD
+unconfined_u:unconfined_r:unconfined_t:s0-s0:c0.c1023 2503 pts/0 00:00:00 su
+unconfined_u:unconfined_r:unconfined_t:s0-s0:c0.c1023 2511 pts/0 00:00:00 bash
+unconfined_u:unconfined_r:unconfined_t:s0-s0:c0.c1023 3503 pts/0 00:00:00 ps
+
+通过 ls -Z 命令我们可以查看文件上下文信息，也就是文件的SELinux信息：
+
+[root@xiaoluo ~]# ls -Z
+-rw-------. root root system_u:object_r:admin_home_t:s0 anaconda-ks.cfg
+drwxr-xr-x. root root unconfined_u:object_r:admin_home_t:s0 Desktop
+-rw-r--r--+ root root system_u:object_r:admin_home_t:s0 install.log
+-rw-r--r--. root root system_u:object_r:admin_home_t:s0 install.log.syslog
+
+在稍后我们来探讨一下这些字段所代表的含义。
+
+三、策略
+
+在SELinux中，我们是通过定义策略来控制哪些域可以访问哪些上下文。
+
+在SELinux中，预置了多种的策略模式，我们通常都不需要自己去定义策略，除非是我们自己需要对一些服务或者程序进行保护
+
+在CentOS/RHEL中，其默认使用的是目标(target)策略，那么何为目标策略呢？
+
+目标策略定义了只有目标进程受到SELinux限制，非目标进程就不会受到SELinux限制，通常我们的网络应用程序都是目标进程，比如httpd、mysqld，dhcpd等等这些网络应用程序。
+
+我们的CentOS的SELinux配置文件是存放在 /etc/sysconfig/ 目录下的 selinux 文件，我们可以查看一下里面的内容：
+复制代码
+
+[root@xiaoluo ~]# cat /etc/sysconfig/selinux 
+
+# This file controls the state of SELinux on the system.
+# SELINUX= can take one of these three values:
+#     enforcing - SELinux security policy is enforced.
+#     permissive - SELinux prints warnings instead of enforcing.
+#     disabled - No SELinux policy is loaded.
+SELINUX=enforcing
+# SELINUXTYPE= can take one of these two values:
+#     targeted - Targeted processes are protected,
+#     mls - Multi Level Security protection.
+SELINUXTYPE=targeted 　　// 我们的CentOS使用的策略就是目标策略
+
+复制代码
+
+四、SELinux模式
+
+SELinux的工作模式一共有三种 enforcing、permissive和disabled 
+
+①enforcing　　强制模式：只要是违反策略的行动都会被禁止，并作为内核信息记录
+
+②permissive　　允许模式：违反策略的行动不会被禁止，但是会提示警告信息
+
+③disabled　　禁用模式：禁用SELinux，与不带SELinux系统是一样的，通常情况下我们在不怎么了解SELinux时，将模式设置成disabled，这样在访问一些网络应用时就不会出问题了。
+
+上面也说了SELinux的主配置文件是 /etc/sysconfig/selinux 
+复制代码
+
+[root@xiaoluo ~]# cat /etc/sysconfig/selinux 
+
+# This file controls the state of SELinux on the system.
+# SELINUX= can take one of these three values:
+#     enforcing - SELinux security policy is enforced.
+#     permissive - SELinux prints warnings instead of enforcing.
+#     disabled - No SELinux policy is loaded.
+SELINUX=enforcing　　//　　我们看到SELinux默认的工作模式是enforcing
+# SELINUXTYPE= can take one of these two values:
+#     targeted - Targeted processes are protected,
+#     mls - Multi Level Security protection.
+SELINUXTYPE=targeted 
+
+复制代码
+
+我们SELinux默认的工作模式是enforcing，我们可以将其修改为 permissive或者是disabled
+
+我们如果要查看当前SELinux的工作状态，可以使用 getenforce 命令来查看：
+
+[root@xiaoluo ~]# getenforce 
+Enforcing
+
+当前的工作模式是 enforcing，我们如果要设置当前的SELinux工作状态，可以使用 setenforce [0|1] 命令来修改，setenforce 0表示设置成 permissive，1表示enforcing
+
+【注意：】通过 setenforce 来设置SELinux只是临时修改，当系统重启后就会失效了，所以如果要永久修改，就通过修改SELinux主配置文件
+复制代码
+
+[root@xiaoluo ~]# setenforce 0
+[root@xiaoluo ~]# getenforce
+Permissive
+
+[root@xiaoluo ~]# setenforce 1
+[root@xiaoluo ~]# getenforce 
+Enforcing
+
+复制代码
+
+ 
+
+ 
+
+[root@xiaoluo ~]# ls -Z
+
+-rw-------. root root system_u:object_r:admin_home_t:s0 anaconda-ks.cfg
+drwxr-xr-x. root root unconfined_u:object_r:admin_home_t:s0 Desktop
+-rw-r--r--+ root root system_u:object_r:admin_home_t:s0 install.log
+-rw-r--r--. root root system_u:object_r:admin_home_t:s0 install.log.syslog
+
+ 
+
+我们可以通过 ls -Z 这个命令来查看我们文件的上下文信息，也就是SELinux信息，我们发现其比传统的 ls 命令多出来了 system_u:object_r:admin_home_t:s0 这个东西，我们现在就来分析一下这段语句所代表的含义
+
+system_u:object_r:admin_home_t:s0
+
+这条语句通过：划分成了四段，第一段 system_u 代表的是用户，第二段 object_r 表示的是角色，第三段是SELinux中最重要的信息，admin_home 表示的是类型，最后一段 s0 是跟MLS、MCS相关的东西，暂时不需要管
+
+①system_u　　指的是SElinux用户，root表示root账户身份，user_u表示普通用户无特权用户，system_u表示系统进程，通过用户可以确认身份类型，一般搭配角色使用。身份和不同的角色搭配时有权限不同，虽然可以使用su命令切换用户但对于SElinux的用户并没有发生改变，账户之间切换时此用户身份不变，在targeted策略环境下用户标识没有实质性作用。
+
+②object_r　　object_r一般为文件目录的角色、system_r一般为进程的角色，在targeted策略环境中用户的角色一般为system_r。用户的角色类似用户组的概念，不同的角色具有不同的身份权限，一个用户可以具备多个角色，但是同一时间只能使用一个角色。在targeted策略环境下角色没有实质作用，在targeted策略环境中所有的进程文件的角色都是system_r角色。
+
+③admin_home　　文件和进程都有一个类型，SElinux依据类型的相关组合来限制存取权限。
+
+五、实例
+
+下面我们通过一个实例来看一下上下文 context 的值和SELinux的访问控制
+
+比如说我搭建好了一个Web服务器，我们知道www服务器其默认网页存放位置是在 /var/www/html 这个目录下，我们如果在这里新建一个 index.html 测试页面，启动我们的www服务器，刷新就能见到其内容了，这时我们如果是在我们的 /home 目录下建立一个 index.html 页面，然后将其移动到 /var/www/html 这个目录下，再刷新页面，其还会不会正常显示呢？
+
+首先我们启动我们的 httpd 服务：
+
+ 
+
+[root@xiaoluo ~]# service httpd restart
+
+Stopping httpd:                                            [  OK  ]
+Starting httpd: httpd: apr_sockaddr_info_get() failed for xiaoluo
+httpd: Could not reliably determine the server's fully qualified domain name, using 127.0.0.1 for ServerName
+                                                           [  OK  ]
+
+ 
+
+然后打开浏览器，输入我们的 127.0.0.1 来访问，此时看到的界面是Apache的测试界面：
+
+ 
+
+因为我们此时的 /var/www/html 下还不存在任何页面：
+
+[root@xiaoluo home]# ll /var/www/html/
+total 0
+
+接下来我们在 /home 目录下建立一个 index.html 的页面，然后将其移动到我们的 /var/www/html 目录下
+复制代码
+
+[root@xiaoluo home]# vi index.html
+
+This is a test about SELinux
+
+[root@xiaoluo home]# mv index.html /var/www/html/
+
+[root@xiaoluo html]# cd /var/www/html/
+[root@xiaoluo html]# ls
+index.html
+
+复制代码
+
+此时，按照正常情况，因为html目录下存在了一个index.html的页面，我们此时如果刷新浏览器页面，应该会跳转到index.html页面的
+
+ 
+
+但是事实我们发现，页面还是在这个测试页面，到底是为什么呢？这个就跟我们的SELinux的安全策略有关系了，我们可以去 /var/log/audit 这个目录下查看 audit.log 这个文件，从中找出错误信息
+复制代码
+
+[root@xiaoluo html]# tail /var/log/audit/audit.log 
+
+type=CRED_DISP msg=audit(1369575601.957:289): user pid=3637 uid=0 auid=0 ses=44 subj=system_u:system_r:crond_t:s0-s0:c0.c1023 msg='op=PAM:setcred acct="root" exe="/usr/sbin/crond" hostname=? addr=? terminal=cron res=success'
+type=USER_END msg=audit(1369575601.957:290): user pid=3637 uid=0 auid=0 ses=44 subj=system_u:system_r:crond_t:s0-s0:c0.c1023 msg='op=PAM:session_close acct="root" exe="/usr/sbin/crond" hostname=? addr=? terminal=cron res=success'
+type=AVC msg=audit(1369575729.534:291): avc:  denied  { getattr } for  pid=3619 comm="httpd" path="/var/www/html/index.html" dev=sda2 ino=538738 scontext=unconfined_u:system_r:httpd_t:s0 tcontext=unconfined_u:object_r:home_root_t:s0 tclass=file
+type=SYSCALL msg=audit(1369575729.534:291): arch=c000003e syscall=4 success=no exit=-13 a0=7f34198634f8 a1=7fffbc87bee0 a2=7fffbc87bee0 a3=7f341985ff60 items=0 ppid=3612 pid=3619 auid=500 uid=48 gid=48 euid=48 suid=48 fsuid=48 egid=48 sgid=48 fsgid=48 tty=(none) ses=1 comm="httpd" exe="/usr/sbin/httpd" subj=unconfined_u:system_r:httpd_t:s0 key=(null)
+type=AVC msg=audit(1369575729.535:292): avc:  denied  { getattr } for  pid=3619 comm="httpd" path="/var/www/html/index.html" dev=sda2 ino=538738 scontext=unconfined_u:system_r:httpd_t:s0 tcontext=unconfined_u:object_r:home_root_t:s0 tclass=file
+type=SYSCALL msg=audit(1369575729.535:292): arch=c000003e syscall=6 success=no exit=-13 a0=7f34198635c8 a1=7fffbc87bee0 a2=7fffbc87bee0 a3=1 items=0 ppid=3612 pid=3619 auid=500 uid=48 gid=48 euid=48 suid=48 fsuid=48 egid=48 sgid=48 fsgid=48 tty=(none) ses=1 comm="httpd" exe="/usr/sbin/httpd" subj=unconfined_u:system_r:httpd_t:s0 key=(null)
+type=AVC msg=audit(1369575736.549:293): avc:  denied  { getattr } for  pid=3618 comm="httpd" path="/var/www/html/index.html" dev=sda2 ino=538738 scontext=unconfined_u:system_r:httpd_t:s0 tcontext=unconfined_u:object_r:home_root_t:s0 tclass=file
+type=SYSCALL msg=audit(1369575736.549:293): arch=c000003e syscall=4 success=no exit=-13 a0=7f34198634f8 a1=7fffbc87bee0 a2=7fffbc87bee0 a3=7f341985ff60 items=0 ppid=3612 pid=3618 auid=500 uid=48 gid=48 euid=48 suid=48 fsuid=48 egid=48 sgid=48 fsgid=48 tty=(none) ses=1 comm="httpd" exe="/usr/sbin/httpd" subj=unconfined_u:system_r:httpd_t:s0 key=(null)
+type=AVC msg=audit(1369575736.549:294): avc:  denied  { getattr } for  pid=3618 comm="httpd" path="/var/www/html/index.html" dev=sda2 ino=538738 scontext=unconfined_u:system_r:httpd_t:s0 tcontext=unconfined_u:object_r:home_root_t:s0 tclass=file
+type=SYSCALL msg=audit(1369575736.549:294): arch=c000003e syscall=6 success=no exit=-13 a0=7f34198635c8 a1=7fffbc87bee0 a2=7fffbc87bee0 a3=1 items=0 ppid=3612 pid=3618 auid=500 uid=48 gid=48 euid=48 suid=48 fsuid=48 egid=48 sgid=48 fsgid=48 tty=(none) ses=1 comm="httpd" exe="/usr/sbin/httpd" subj=unconfined_u:system_r:httpd_t:s0 key=(null)
+
+复制代码
+
+从这个日志文件中，我们就可以看到刷新页面不出来index.html的原因就是因为我们的SELinux安全策略所导致的
+
+我们通过 ls -Z 命令先来看看刚移动过来的 index.html 的上下文信息
+
+[root@xiaoluo html]# ls -Z
+-rw-r--r--. root root unconfined_u:object_r:home_root_t:s0 index.html
+
+我们发现其第三个字段的类型是 home_root_t,这是为什么呢？因为我们刚才是在 /home 目录下创建的这index.html文件，所以其默认会继承上一层目录的SELinux的类型信息，我们可以查看一下 /home 这个目录的上下文信息：
+
+[root@xiaoluo html]# ls -Z -d /home/
+drwxr-xr-x. root root system_u:object_r:home_root_t:s0 /home/
+
+我们看到，其第三个字段和我们刚才的index.html相同，由此可以看出文件的context值是受上一级目录影响的，一般情况下它们会继承上一级目录的context值，但是，一些安装服务产生的文件context值会例外，不继承上级目录的context值，服务会自动创建它们的context值，比如没有装http服务的时候/var/目录下时没有www目录的，安装httpd服务后该服务会自动创建出所需的目录，并定义与服务相关的目录及文件才context值，它们并不会继承上级目录的context值。
+
+[root@xiaoluo html]# ls -Z -d /var
+drwxr-xr-x. root root system_u:object_r:var_t:s0       /var
+
+[root@xiaoluo html]# ls -Z -d /var/www/html/
+drwxr-xr-x. root root system_u:object_r:httpd_sys_content_t:s0 /var/www/html/
+
+此时我们发现我们的 /var/www/html 这个目录的上下文类型是 httpd_sys_content_t， 而我们刚才移动过来的 index.html 的类型却是 home_root_t,因为我们此时的SELinux的工作模式是 enforcing，所以对于违反策略的行动是被禁止的，所以我们刷新页面并不会出现我们的index.html里面的信息，那么我们这个时候应该解决这个问题呢？
+
+通常解决办法由两种：
+
+①直接将SELinux的工作模式设置成 disabled，这样就不会出现策略拦截问题了，但是这样的话我们的系统就没有SELinux安全防护了
+
+②通过 restorecon 或者 chcon 命令来修复我们的文件上下文信息
+
+命令 restorecon 可以用来恢复文件默认的上下文：
+
+restorecon -R -v /var/www/html/index.html　　//-R 表示递归，如果是目录，则该目录下的所有子目录、文件都会得到修复　　
+
+命令 chcon 可以改变文件的上下文信息，通常我们使用一个参照文件来进行修改：
+
+chcon --reference=/var/www/html/index.html /var/www/html/test.html
+
+这里我们通过使用 restorecon 命令来恢复我们文件默认的上下文：
+
+[root@xiaoluo html]# restorecon -v index.html 
+restorecon reset /var/www/html/index.html context unconfined_u:object_r:home_root_t:s0->unconfined_u:object_r:httpd_sys_content_t:s0
+
+[root@xiaoluo html]# ls -Z
+-rw-r--r--. root root unconfined_u:object_r:httpd_sys_content_t:s0 index.html
+
+我们看到，使用 restorecon 命令以后，index.html的上下文信息就继承了上一级目录 html 这个目录的上下文信息了，这个时候我们再刷新页面就可以看到我们index.html里面的内容了
+
+ 
+
+通过这个实例我们就明白了文件的上下文信息与SELinux之间的关系了，并知道了通过查看 /var/log/audit/audit.log 这个日志文件的信息找出错误所在，以及通过 restorecon 命令来修复我们的文件的上下文信息

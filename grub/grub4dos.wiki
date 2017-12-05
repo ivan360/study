@@ -1,0 +1,2033 @@
+http://www.cnblogs.com/liuzhaoyzz/archive/2013/01/04/2843592.html
+===================================================================
+bean对grub4dos做出的巨大贡献总结：
+1、2005-12-3给grub4dos打上了WinME补丁，这个补丁修正了chainloader 不能启动WinME的IO.SYS的问题。
+   http://bbs.znpc.net/forum.php?mod=viewthread&tid=359&extra=page%3D10
+   2005-12-10新版的WinME补丁
+   http://bbs.znpc.net/forum.php?mod=viewthread&tid=359&page=1&fromuid=12697#pid2138
+2、2007-2-6 grubinst更新：增加对NTFS文件系统的本地支持
+   http://bbs.znpc.net/forum.php?mod=viewthread&tid=2249&highlight=%2Bbean
+   2007-2-23grubinst更新：支持grub2和NTFS压缩文件
+   http://bbs.znpc.net/forum.php?mod=viewthread&tid=2311&highlight=%2Bbean
+   2007-8-8grubinst更新：可以跳过严格的mbr测试
+   http://bbs.znpc.net/forum.php?mod=viewthread&tid=3885&highlight=%2Bbean
+3、2007-2-15编写了通用引导程序grldr.mbr，支持安装到mbr，支持通过vista和win7中加载。
+   http://bbs.znpc.net/forum.php?mod=viewthread&tid=2300&extra=page%3D10
+   2007-3-18提出把GRLDR.MBR作为通用的引导程序的一些想法
+   http://bbs.znpc.net/forum.php?mod=viewthread&tid=2461&extra=page%3D10
+4、2007-3-4建立了GRUB4DOS项目空间@gna.org，https://gna.org/projects/grub4dos/
+5、2007-3-9编写了GRUB4DOS中文文档@SF.net，增加grub4dos高级功能和grub4dos命令索引说明
+   http://bbs.znpc.net/forum.php?mod=viewthread&tid=2369&extra=page%3D10
+6、2007-4-7编写了修改内置菜单的命令行工具grubmenu
+   http://bbs.znpc.net/forum.php?mod=viewthread&tid=2664&highlight=%2Bbean
+7、2007-4-18日为GRUB4DOS增加了PXE网络启动功能
+   http://bbs.znpc.net/forum.php?mod=viewthread&tid=2931&highlight=%2Bbean
+8、2007-4-23提出了在GRUB4DOS中实现内存管理和动态模块的想法
+   http://bbs.znpc.net/forum.php?mod=viewthread&tid=3117&extra=page%3D10
+9、2007-7-8关于grub4dos中启动代码分离的想法
+http://bbs.znpc.net/forum.php?mod=viewthread&tid=3736&highlight=%2Bbean
+   2007-10-10提出GRUB4DOS中启动代码分离的具体构思，包括采用模块化的设计，建议把grub4dos分为启动模块、分区模块、文件系统模块、格式处理模块、扩展功能模块、通用函数模块、脚本解析模块
+   http://bbs.znpc.net/forum.php?mod=viewthread&tid=3736&highlight=%2Bbean
+10、2007-10-15 提出了新一代GRUB4DOS的想法，包括启动管理器分离、使用Unicode，不区分中英文版本、利用gettext实现多语言支持、内存管理器和动态模块、图形界面的改进
+   http://bbs.znpc.net/forum.php?mod=viewthread&tid=4156&highlight=%2Bbean
+11、2007-12-6日编写了loadbin在不同的启动管理器中启动grub，grub2，grub4dos 和 ntldr
+   http://bbs.znpc.net/forum.php?mod=viewthread&tid=4273&extra=page%3D6
+12、2007-12-20日提出了关于迷你grub4dos的想法
+   http://bbs.znpc.net/forum.php?mod=viewthread&tid=4311&highlight=%2Bbean
+   并与2007-12-25日发布了迷你版grub4dos测试版
+   http://bbs.znpc.net/forum.php?mod=viewthread&tid=4335&highlight=%2Bbean
+13、2007-12-21日使用makerom制作grub，grub4dos，grub2和grldr.mbr的启动bootrom
+   http://bbs.znpc.net/forum.php?mod=viewthread&tid=4315&highlight=%2Bbean
+14、2008-3-28grub4dos新功能测试：在不同时间段执行不同的命令checktime。使用它，你可以使得某些命令只有在某一时间段内才执行。
+   http://bbs.znpc.net/forum.php?mod=viewthread&tid=4591&highlight=%2Bbean
+15、2009-1-1为grub4dos增加gfxmenu支持
+   http://bbs.znpc.net/forum.php?mod=viewthread&tid=5496&extra=page%3D7
+16、2009-5-4日提出关于万能启动U盘的想法
+   http://bbs.znpc.net/forum.php?mod=viewthread&tid=5629&extra=page%3D1
+   2009-5-6日万能启动u盘制作工具fbinst （最新稳定版本1.2）
+   http://bbs.znpc.net/forum.php?mod=viewthread&tid=5631&extra=page%3D8
+   2009-5-29日fbinst v1.4：增加文件管理功能
+   http://bbs.znpc.net/forum.php?mod=viewthread&tid=5664&extra=page%3D8
+   2009-6-7日fbinst v1.5：分离菜单文件，支持syslinux
+   http://bbs.znpc.net/forum.php?mod=viewthread&tid=5669&extra=page%3D1&page=1
+   fbinst启动问题专用贴
+   http://bbs.znpc.net/forum.php?mod=viewthread&tid=5663&extra=page%3D1
+   最新 fbinst 1.6 正式版,2010年8月10日更新,1楼有 FbinstTool 10601正式版
+   http://bbs.wuyou.com/viewthread.php?tid=169595
+==============================================================================================
+bean对grub4dos所做的贡献
+http://bbs.znpc.net/forum.php?mod=viewthread&tid=359&extra=page%3D10
+bean发表于 2005-12-3 16:43
+grub_for_dos 0.4.1 的 WinME 补丁
+
+这个补丁修正了chainloader 不能启动WinME的IO.SYS的问题。
+
+基本原理：
+不同于Win98以及以前的IO.SYS，WinME的IO.SYS是经过压缩的，因此在把IO.SYS复制到内存后，要经过解压后才能使用，其基本过程如下：
+
+1、把IO.SYS从0x800开始的数据读入70:0。(此步同Win98)
+2、把70:0的数据移到常规内存的最高处。
+3、以块的形式把数据解压回70:0
+4、把di设为解压后数据的长度
+5、设置dx的值，然后转入70:0执行。(此步同Win98)
+
+WinME 的IO.SYS的结构：
+
+0-0x7FF: 4个扇区的BOOT程序
+0x800: word 0x4D43 ( 'CM' ) 压缩IO.SYS的标志。
+从0x802开始是压缩块，每块以3个字节的属性字段开始。
+字节0:
+0 - 块是非压缩块
+1 - 块是压缩块
+对于压缩块，从块开始+5处是一个0x5344的字。
+字节1-2：长度字段len
+对于压缩块，下一个块的开始位置是本块位置+1+len
+对于非压缩块，下一个块的开始位置是本块位置+1+2+len
+
+若某一块的长度为0，则它标志着数据块的结束。
+
+在数据块后紧接着的第一个段，是程序块，它的结构为：
+字节0-1：标志字节 0x4D43 ( 'CM' )
+字节2-3: 解压程序相对于本块开始的位移
+字节4-结束：解压程序的代码和数据
+
+我在附件中包含了此补丁的源程序grub-winme-1129，此补丁对应于grub_for_dos-2005-11-29.zip，并且应该在grub-0.97-patch4-emulation后使用。
+
+附件中的grub.exe和grldr是编译后的版本，它应用了补丁patch1 - patch5, 以及grub-winme-1129。
+
+我所使用的IO.SYS也包含在附件中，它来自于英文版WinME, WinVer是 4.90.3000，大家可以测试一下其它的版本。
+附件
+ grub_winme_patch.tar.gz (265.54 KB)
+2005-12-3 16:43, 下载次数: 237
+使用源文件编译的朋友请注意一下，以上的补丁文件因为忘了使用条件编译，因此在编译Grub Shell时会出现变量chain_is_winme没有找到的错误，修正后的补丁文件如下。
+附件
+ grub-winme-1129 (5.18 KB)
+
+http://bbs.znpc.net/forum.php?mod=viewthread&tid=359&page=1&fromuid=12697#pid2138
+bean发表于 2005-12-10 08:09
+新版的WinME补丁
+
+附件里包含了新版的WinME补丁，这个版本完全用C语言编写，而且增加了解压的部分（原来版本是使
+
+用IO.SYS里面的函数来解压）。
+
+IO.SYS里面使用了滑动窗口的压缩(LZ77)，而位移和长度字段均使用了变长字节编码：
+
+位移：
+00：后接6位数据，位移范围 0 - 0x3F
+110: 后接8位数据，位移范围 0x40 - 0x13F
+111: 后接12位数据，位移范围 0x140 - 0x113F
+01/10: 后面7位是直接的数据，数据的最高位取0/1
+
+当出现位移0x113F是，表明一个段的结束。解压后，除了最后一个段外，其他各个段的长度都应该是
+
+512。
+
+长度：
+1：没有后接位，长度是2
+01：后接1位数据，长度范围 3-1
+001：后接2位数据，长度范围 5-8
+0001：后接3位数据，长度范围 9-0x10
+00001: 后接4位数据，长度范围 0x11-0x20
+000001：后接5位数据，长度范围 0x21-0x40
+0000001: 后接6位数据，长度范围 0x41-0x80
+00000001: 后接7位数据，长度范围 0x81-0x100
+000000001: 后接8位数据，长度范围 0x101-0x200
+000000000: 作出错处理
+
+附件里还包含一个独立的应用程序expios，它把关于IO.SYS的处理分离出来，可以用作测试。其使用
+
+如下：
+
+1、expios io.sys
+
+如果没有输出信息，则基本的解压检测通过
+
+2、expios io.sys io_out.sys
+
+把解压后的io.sys写入io_out.sys中，如果用二进制编辑器打开io_out.sys，应该可以看到英文的字
+
+符串。解压后的io_out.sys不能直接作为IO.SYS，不过可以使用grub来启动。
+
+expios.exe是编译后的Win32命令行程序，其他系统的用户可以用gcc来编译：
+
+gcc -D__unix -o expios expios.c
+
+grub-winme-c-1129是补丁的源程序，它与前一版本的grub-winme-1129不兼容，请不要同时使用。
+附件
+ grub_winme_c.tar.gz (392.94 KB)
+2005-12-10 08:09, 下载次数: 168
+
+http://bbs.znpc.net/forum.php?mod=viewthread&tid=2249&highlight=%2Bbean
+bean发表于 2007-2-6
+grubinst更新：增加对NTFS文件系统的本地支持
+
+下载地址：
+
+http://grub4dos.sourceforge.net/grubinst-1.1-beta5-bin-w32.tar.gz
+http://grub4dos.sourceforge.net/grubinst-1.1-beta5-src.tar.gz
+
+从grubinst 1.1 beta5 起，增加了对NTFS文件系统本地支持的代码，也就是说，现在在
+NTFS上引导GRLDR的时候，不再要求在分区上有微软的启动代码。把GRLDR.MBR安装到MBR
+后，其启动代码能自动搜索和引导硬盘上所有FAT16/FAT32/NTFS/EXT2分区（包括主分区
+和扩展分区）上根目录的GRLDR文件。
+
+GRLDR的NTFS引导代码也可以安装到分区上，不过要注意不要安装到系统分区上，否则它
+将会覆盖微软的启动代码。
+
+另外，grubinst增加新参数--boot-file，利用它可以指定在NTFS分区上启动文件的名字，
+缺省值是GRLDR。例如，利用
+
+        grubinst --boot=file=grldr.new DEVICE_OR_FILE
+
+安装后，在启动时将会在NTFS上引导grldr.new而不是grldr，当前该功能只有在NTFS分区
+上实现，在其他FAT16/FAT32/EXT2分区上，依然只能引导GRLDR。要注意的是，启动文件
+的名字长度最多只能是11个字符（包括 "." ），并且必须是英文。
+
+利用该功能，你甚至可以让GRLDR.MBR在NTFS分区上引导微软的启动管理器：
+
+        grubinst --boot-file=ntldr DEVICE_OR_FILE
+
+当前NTFS访问代码的限制：
+1、不支持压缩或加密的GRLDR文件，分区的根目录也不能是压缩的。
+2、不支持$ATTRIBUTE_LIST属性，也就是说，当根目录的文件非常多或在硬盘上的分配非
+常散的时候，有可能找不到其中的GRLDR。
+
+关于源代码：
+
+NTFS的启动代码是在ntfsbs.S里，它可以独立编译，编译后会生成NTFS的启动扇区代码
+ntfsbs.bin。
+
+grldrstart.S是由不点的Grub4Dos 0.4.2的代码中修改而来，编译后会生成GRLDR.MBR。
+修改的地方有：
+
+1、用#include "ntfsbs.S" 把NTFS的代码加入到grldr.mbr中，编译后，NTFS的启动
+代码的位置是0xA00，长度为3个扇区。最终的grldr.mbr为16个扇区。
+
+2、当搜索到NTFS分区时，直接使用grldr.mbr内的代码引导，而不再装载硬盘上可能
+存在的微软启动代码。
+
+3、出错返回的代码从0x7e00转到0x8200，这是由于现在NTFS启动扇区为3个扇区，装载
+到内存后将占用0x7c00 - 0x8200的空间。
+
+[ 本帖最后由 bean 于 2007-2-6 13:06 编辑 ]
+http://bbs.znpc.net/forum.php?mod=viewthread&tid=2249&page=3&fromuid=12697#pid49513
+不点发表于 2011-12-26
+您使用的 grubinst，属于比较旧的版本了。bean 已经不再开发 grubinst 了。所以，不建议采用 grubinst。如果您实在想用 grubinst，建议使用英国人 steve 改造后的版本，或者使用 chenall 改造的版本。
+
+发现您是在 windows 下使用 grubinst，因此，建议用 BOOTICE 这个软件来代替。
+
+请在搜索引擎里面找相关的资料和软件。
+
+关键点：老版本的 grubinst 中的引导代码很旧，很多 bug 未修复。因此建议采用较晚开发的软件（或者版本）。
+
+用 grub4dos 自带的 bootlace.com 也是可以安装的，您可以读一读 readme。
+
+
+http://bbs.znpc.net/forum.php?mod=viewthread&tid=2311&highlight=%2Bbean
+发表于 2007-2-23 17:32
+grubinst更新：支持grub2和NTFS压缩文件
+
+beta7:
+* 增加对NTFS压缩文件的支持
+
+beta6:
+* 支持设置启动文件的名字和装载的段地址
+* 支持导出grldr.mbr文件
+* 支持引导grub2内核
+* 修正了部分NTFS分区访问的bug
+
+使用简介：
+
+1、支持设置启动文件的名字和装载的段地址：
+
+grubinst增加了参数--boot-file和--load-seg，可以用来设置启动文件的名字和装载的段地址，例如:
+
+grubinst --boot-file=grldr_1 --load-seg=3000 DEVICE_OR_FILE
+
+引导启动文件grldr1，装载的地址是 3000:0000
+
+使用该参数，GRLDR.MBR的启动代码可用于装载ntldr：
+
+grubinst --boot-file=ntldr DEVICE_OR_FILE
+
+注意1：启动文件名字的最大长度是7，而且不能违反8.3的命名规则
+
+注意2：--load-seg参数对于EXT2分区上的启动文件无效
+
+
+2、导出grldr.mbr文件
+
+可用--output参数导出grldr.mbr文件：
+
+grubinst --output C:\grldr.mbr
+
+你可以使用其它的参数，比如--boot-file等，参数的效果将会保留在导出的GRLDR.MBR文件中，例如：
+
+grubinst --boot-file=grldr_1 --output C:\grldr.mbr
+
+用该GRLDR.MBR启动时，将会搜索启动文件grldr_1而不是grldr
+
+注意：某些参数将无效，例如--boot-prevmbr-first
+
+
+3、支持引导grub2内核
+
+可用参数--grub2指定引导grub2内核：
+
+grubinst --grub2 DEVICE_OR_FILE
+
+grub2内核的缺省名字是g2ldr，你也可以用--boot-file来改为其他的名字
+
+要生成grub2内核，首先用mkimage(该程序在grub2源代码中)来生成core.img,然后加上头g2hdr.bin：
+
+cat g2hdr.bin core.img > g2ldr
+
+4、修正了部分NTFS分区访问的bug
+
+修正了某些造成Large Structure的bug
+
+从beta7开始，支持NTFS压缩文件和稀疏文件
+
+http://bbs.znpc.net/forum.php?mod=viewthread&tid=2300&extra=page%3D10
+bean发表于 2007-2-15 10:22
+利用NT的启动管理器引导GRLDR.MBR
+
+经过适当的修改，GRLDR.MBR可以直接由NT的启动管理器来引导，
+
+在2000/XP/2003下，在boot.ini的最后加上一行：
+C:\GRLDR.MBR="Boot GRLDR.MBR"
+
+在Vista下，可以使用bcdedit，方法在fujianabc的贴子里有介绍，摘录如下:
+
+md a:\boot 创建a:\boot文件夹
+bcdedit /createstore a:\boot\bcd  新建一个bcd文件
+bcdedit /store a:\boot\bcd -create {bootmgr} /d "Boot Manager"  新建一个用bootmgr加载的启动项
+bcdedit /store a:\boot\bcd /create /d "bootsect" /application bootsector 此项目用bootmgr加载一个bootsector项
+执行上面命令后返回一个{ID}，然后执行
+bcdedit /store a:\boot\bcd /set {ID} device boot  设置启动设备
+bcdedit /store a:\boot\bcd /set {ID} path \grldr.mbr  设置启动扇区路径和文件名
+bcdedit /store a:\boot\bcd /displayorder {ID} /addlast  加入以上设置项目
+
+当然，你还需要把附件中的grldr.mbr文件拷贝到C:\下。
+
+如果引导正常，GRLDR.MBR运行，它会在硬盘上所有的FAT16/FAT32/NTFS/EXT2分区的根目录寻找并
+装载GRLDR，其效果就和把GRLDR.MBR安装到MBR里一样。
+
+原理：
+
+我发现NTLDR引导启动文件的方式非常奇特：
+
+如果文件大小<16扇区(8K)，那么整个文件被装载到D00:0，不过只有第一个扇区的内容被拷贝
+到0:7C00中，而且开始运行的地址是0:7C00。
+
+如果文件大小=16扇区(8K), 那么整个文件被装载到D00:0，而且，开始运行的地址是D00:200
+
+文件大小>16扇区(8K)的情况没有测试，不过应该和=的情况是类似的。
+
+请大家在不同的系统上测试一下。
+
+更新：根据不点的提示改动了一下grldr.mbr，现在该版本应该可以适用于XP系统下
+
+更新：修改了NTFS的代码，现在应该能够解决Large structure的问题
+
+[ 本帖最后由 bean 于 2007-2-22 15:29 编辑 ]
+附件
+ grldr.mbr (8 KB)
+2007-2-22 15:29, 下载次数: 1999
+
+http://bbs.znpc.net/forum.php?mod=viewthread&tid=2335&extra=page%3D10
+bean发表于 2007-3-4 13:51
+GRUB4DOS项目空间@gna.org
+
+在gna.org上的GRUB4DOS页面：
+
+https://gna.org/projects/grub4dos/
+
+用户使用的简单介绍:
+
+1、用web界面浏览代码
+
+直接使用以下的网址：
+
+http://svn.gna.org/viewcvs/grub4dos/trunk/
+
+下载空间：
+
+http://download.gna.org/grub4dos/
+
+以后GRUB4DOS编译版本可能会上传到这里。
+
+2、匿名下载最新代码
+
+svn co svn://svn.gna.org/svn/grub4dos/trunk grub4dos
+或
+svn co http://svn.gna.org/svn/grub4dos/trunk grub4dos
+
+下载旧版本：
+
+svn co svn://svn.gna.org/svn/grub4dos/tags/grub-0.97 grub4dos
+这是原始版本grub-0.97
+
+svn co svn://svn.gna.org/svn/grub4dos/tags/grub4dos-0.4.2 grub4dos
+这是grub4dos 0.4.2正式版
+
+3. 邮件列表
+
+相应于svn有一个邮件列表，可以在以下网址订阅:
+
+https://mail.gna.org/listinfo/grub4dos-commits/
+
+填好你的邮箱地址，和任选一个密码后，便可按subscribe订阅
+
+订阅了该邮件列表后，每当svn有新的版本commit时,都会以邮件的形式通知你。
+
+开发者使用简单介绍：
+
+gna.org上关于项目管理的文档在这里:
+
+https://gna.org/cookbook/?group=grub4dos
+
+1、开发者访问代码
+
+1) 运行ssh-keygen -t rsa，生成私匙和公匙
+该命令生成 ~/.ssh/id_rsa和~/.ssh/id_rsa.pub文件，前者私匙，后者是公匙
+该命令还提示你输入密码pass phrase,在以下的svn中，在提示输入pass phrase时使用
+假如你觉得每次输入密码麻烦，可以不设密码，也可以使用ssh-agent：
+
+ssh-agent $SHELL
+ssh-add ~/.ssh/id_rsa
+
+ssh-agent命令调用一个新的shell，在其中运行ssh的私匙由ssh agent控制。
+ssh-add把私匙加入ssh agent,命令中要求输入pass phrase，正确输入后，以后的svn就不再需要输入了
+
+2) 登陆到gna.org,在左边工具栏点"My Account Conf"，然后点"Edit the 1 SSH Public Key
+registered", 然后用编辑器打开~/.ssh/id_rsa.pub，把里面的内容（是很长的一行）拷贝到
+Key #1里，然后点"Update"。注意：在修改了公匙后，需要一定的时间才能生效，在最坏的情况下，
+等待时间是3个小时。
+
+3) 用以下的命令获得代码：
+
+svn checkout svn+ssh://<membername>@svn.gna.org/svn/grub4dos/trunk grub4dos
+
+<membername>是你在gna.org的用户名
+
+2. 上传文件到下载空间
+
+rsync --delete  -avr --rsh="ssh" . <membername>@download.gna.org:/upload/grub4dos
+
+或者
+
+scp filename <membername>@download.gna.org:/upload/grub4dos/
+
+ssh的配置和1中是一样的
+
+3、svn使用简单介绍
+
+详细使用手册在这里：
+英文版：http://svnbook.red-bean.com/en/1.2/
+中文版：http://svnbook.subversion.org.cn/1.2/index.html
+
+你也可使用
+
+svn help commnd
+
+来获得command命令的帮助信息
+
+常用的命令简单介绍如下：
+
+1) 导出/提交代码
+
+导出代码用：
+
+svn co svn+ssh://<membername>@svn.gna.org/svn/grub4dos/trunk grub4dos
+
+该命令下载最新的GRUB4DOS代码到grub4dos目录下，grub4dos便是当前的工作目录。
+
+修改代码后，用
+
+svn commit
+
+命令便可提交。
+
+提交时需要为当前提交的代码写简单的介绍，有三种方法：
+
+a)用--message 或 -m, 在命令行里直接指定，如：
+
+svn commit -m "This is a new version"
+
+b)用--file 或 -F, 介绍在外部文件中：
+
+svn commit -F commit_text
+
+c)如果不使用以上的参数，在提交前会调用编辑器，在里面可临时添加信息
+
+2) 使本地文件和服务器上的同步
+
+svn update
+
+3) 察看工作目录的修改状态
+
+svn status
+
+该命令会显示当前的工作目录文件的状态。
+
+? 该文件不在代码控制范围内
+A 该文件是新加文件
+M 该文件以修改
+
+? 开始的文件是不在代码控制范围内的文件，它有可能是程序运行中生成的中间文件（如*.o等），
+也可能是在本版本中新加的文件。对于第一种情况，不需要理会，因为它们在commit时不会被处理。
+对于第二种情况,需要用svn add命令把它加入代码控制系统中。这时如果再运行svn status，会发现
+该文件的状态从? 改为 A, 在下一次commit，该文件将会被添加到服务器上。
+
+4) 察看修改纪录
+
+svn log
+
+该命令可以加一个参数--revision或-r，用来指定显示的版本：
+
+svn log -r 5:8
+
+显示版本5和版本8之间的修改纪录。
+
+-r的参数除了使用数字外，还可以使用关键字：
+
+HEAD: 系统最新的版本号
+BASE: 目录/文件建立时的版本号
+COMMITTED：目录/文件最新修改的版本号
+PREV：目录/文件对上一次修改的版本号，即COMMITTED-1
+
+也可以使用日期或时间作为版本号的参数，如
+
+{2007-03-03} {15:30} {"2007-03-03 15:30"} {20070303T1530} 等等
+
+例子:
+
+svn log -r PREV:COMMITTED
+显示最近一次修改的纪录
+
+svn log -r "{2007-03-03}":"{2007-03-04}"
+
+显示从 2007-03-03 到 2007-03-04 的修改纪录
+
+5) 生成补丁
+
+svn diff > patch.diff
+
+生成当前工作目录代码自checkout以来所作的修改的补丁
+
+svn diff -r 5 > patch.diff
+
+生成当前工作目录代码相对于版本5的补丁，版本5其实就是grub-0.97
+
+svn diff --old=svn://svn.gna.org/svn/grub4dos/tags/grub-0.97 --new=svn://svn.gna.org/svn/grub4dos/trunk > patch.diff
+
+生成服务器上最新版本相对于grub-0.97的补丁
+
+
+http://bbs.znpc.net/forum.php?mod=viewthread&tid=2369&extra=page%3D10
+bean发表于 2007-3-9 18:04
+GRUB4DOS中文文档@SF.net
+在SF.net上建立的wiki空间中增加了中文文档：
+http://grub4dos.sourceforge.net/wiki/index.php/Main_Page
+目前仅写了"相关资源"和"如何启动grub4dos" 这两章，近期会增加grub4dos和grubinst的使用介绍。
+新增"grub4dos高级功能"，里面介绍了利用map命令作磁盘映射，cdrom功能和脚本支持。
+新增"grub4dos命令索引"，里面列出了GRUB4DOS中所有命令的使用语法。
+
+http://bbs.znpc.net/forum.php?mod=viewthread&tid=2461&extra=page%3D10
+bean发表于 2007-3-18 20:56
+GRLDR.MBR作为通用的引导程序的一些想法
+
+不少的启动管理器或系统的启动部分，主要的功能是在一个启动文件里实现，而MBR或启动扇区的功能是把该文件读入内存并运行。这和GRLDR.MBR引导GRLDR的方式非常相似。不同启动文件使用时的差别在于：
+
+1、启动文件名字不同
+2、启动文件在内存里存放的地址不同
+3、启动文件运行的入口参数的差异
+
+我们可以用一个中间层的启动程序来处理这些差别，从而使GRLDR.MBR成为通用的引导程序。其启动的流程如下：
+
+1、装载GRLDR.MBR
+2、从GRLDR.MBR引导中间启动层启动程序
+3、中间层启动程序选择最终的启动文件。其选择可以通过一个简单的选择菜单，或使用嵌入中间层启动程序中的值。
+4、中间层启动程序把自己移动到较低的内存处，并且，把最终的启动文件的名字填入启动扇区适当的位置中。
+5、中间层启动程序跳回7C00:0000，该地址是原来启动扇区的内容。
+6、启动扇区第二次运行，它从分区中里装载新的启动文件(文件名字在中间层启动程序里填入的)。
+7、装载成功后，启动扇区返回较低的内存处的中间层启动程序。
+8、中间层启动程序把最终启动文件的内容复制到恰当的位置，然后设置入口参数，并且运行最终启动文件中的代码。
+
+现在的GRLDR.MBR已经可以直接使用，只需要写一个处理不同启动文件的中间层的启动程序就行了。
+
+如果要更好地配合这一方案，GRLDR.MBR的代码可以作以下修改：
+
+1、存取分区的代码分为初始化，搜索文件和装载文件三部分。在第二次运行时可以跳过初始化的代码。
+2、中间层启动程序可以调用启动扇区里的搜索文件函数。这样中间层启动程序可以对于每种支持的启动文件都测试一下，并且显示可以启动系统的列表。
+
+使用该方案的好处是能够在不同的分区动态搜索启动文件。而且，GRLDR.MBR也能在Windows NT系列系统的启动管理器中引导。
+
+该方案适用于GRLDR, GRUB2，NTLDR，io.sys, syslinux.bin, kernel.sys(FreeDOS)等启动文件。
+
+大家可以说说，这一方案是否具有实用价值。
+
+
+http://bbs.znpc.net/forum.php?mod=viewthread&tid=2300&page=7&fromuid=12697#pid16199
+不点发表于 2007-4-13 15:44
+感谢你成为我们中的一分子。应该说，你现在比前两年的许多人都幸运了，因为你来的时机，是在 2007 年。这一年的一开始，bean 就开始大手笔行动了，包括对 VISTA 的支持；对项目空间的建立；对中英文文档的编写，等等。今年还出现了另外几篇好的文章，可以阅读，这些都在不断完善。我能理解你的要求，因为我也是这样要求其他优秀软件的。感谢你的支持。
+
+http://bbs.znpc.net/forum.php?mod=viewthread&tid=2931&highlight=%2Bbean
+bean发表于 2007-4-18 03:34
+GRUB4DOS PXE网络启动版 (v3.2)
+
+2该版本可用于PXE无盘启动。进入grub后，可以用设备(pd)来访问服务器上的文件。
+
+v3.2更新：
+* 在启动系统前卸载PXE的运行环境。
+
+v3.1更新：
+* 增加内置命令pxe，可用于设置pxe的参数。
+
+v3更新：
+* 优化PXE代码，文件下载速度大大增加
+* 显示进度条。每下载1M的内容，在屏幕上显示一个"."。
+* 修正使用map函数映射网络上的虚拟影像时出现的问题（主要对应于etherboot的PXE ROM，网卡上内置的ROM一般没有问题）
+
+v2更新：
+* 完全重写pxe部分的代码。
+* pxe和网络部分代码相互独立，pxe成为一个文件系统模块。
+* 不再需要pxegrub，grldr可以直接用于无盘启动。
+* 采用类似于pxelinux结构的配置文件。
+
+注意1：v2中，使用设备(pd)来访问pxe服务器上文件，它不同于netboot生成的网络设备(nd)。netboot支持需要使用特殊的编译指令，而pxe支持是缺省的。
+
+注意2：v2中，启动文件所在的目录成为文件访问的根目录。例如，启动文件是 tftp/grldr，那么所有的文件名都是相对于tftp目录的，比如说，(pd)/aa.img在服务器上相应的文件是 tftp/aa.img。
+
+注意3：v2中，配置文件采用类似于pxelinux的结构，也就是，程序在开始前将会顺序搜索以下的文件：
+        [/mybootdir]/menu.lst/01-88-99-AA-BB-CC-DD
+        [/mybootdir]/menu.lst/C000025B
+        [/mybootdir]/menu.lst/C000025
+        [/mybootdir]/menu.lst/C00002
+        [/mybootdir]/menu.lst/C0000
+        [/mybootdir]/menu.lst/C000
+        [/mybootdir]/menu.lst/C00
+        [/mybootdir]/menu.lst/C0
+        [/mybootdir]/menu.lst/C
+        [/mybootdir]/menu.lst/default
+
+（88:99:AA:BB:CCD是网卡MAC，C000025B是IP地址192.0.2.91）
+
+如果以上的文件都不存在，那么grub会使用内置菜单。
+
+注意4：从v3.1开始，增加内置命令pxe，用于在menu.lst中设置pxe的参数。
+
+pxe
+没有任何参数时，显示当前的blksize和basedir设置
+
+pxe blksize N
+设置包的大小。N最大值是1432，最小值是512，缺省值是1432。某些很旧的tftp服务器可能不支持大于512的包，这时需要手动把包的大小设置为512。
+
+pxe basedir path
+设置tftp的基础目录。比如说，使用命令
+
+pxe basedir /tftp
+
+后，(pd)设备中的文件名都是相对于/tftp目录的：(pd)/aa.img相对于服务器上的 /tftp/aa.img文件。
+
+基础目录的初始值是启动文件所在的目录。比如说，启动的文件是/tftp/grldr，那么basedir的初始值就是/tftp/
+
+注意5：从v3.2开始，增加两个pxe命令，用于管理PXE的运行环境
+
+pxe keep
+不卸载PXE的运行环境
+
+pxe unload
+立刻卸载PXE的运行环境
+
+程序缺省的处理方式是在boot的时候卸载PXE的运行环境。如果你需要保留PXE（例如需要通过startrom引导PE），可以使用pxe keep。如果需要在boot命令之前卸载PXE，则使用pxe unload。
+
+使用介绍：
+1、把grldr文件拷贝到服务器。
+2、建立目录 /menu.lst/，在里面存放菜单文件。
+3、设置dhcp和tftp服务器，把grldr作为启动文件。
+4、启动客户端，PXE ROM会自动从服务器上下载grub并启动。
+
+在Windows平台下，可以使用tftpd32，它同时提供了dhcp和tftp两种服务。网址：
+
+http://tftpd32.jounin.net/
+
+示范的menu.lst:
+
+title Create ramdisk using map
+map --mem (pd)/floppy.img (fd0)
+map --hook
+rootnoverify (fd0)
+chainloader (fd0)+1
+
+title Create ramdisk using memdisk
+kernel (pd)/memdisk
+initrd (pd)/floppy.img
+
+[ 本帖最后由 bean 于 2007-5-26 17:33 编辑 ]
+
+http://bbs.znpc.net/forum.php?mod=viewthread&tid=2664&highlight=%2Bbean
+发表于 2007-4-7 03:02
+修改内置菜单的命令行工具grubmenu
+
+grubmenu是grubutil工程中的新增工具，利用它可以修改grldr/grub.exe/stage2中的内置菜单。
+
+用法:
+
+grubmenu info grldr
+显示grldr的内置菜单相关的信息
+
+grubmenu print grldr
+打印grldr中的内置菜单
+
+grubmenu export grldr menu.lst
+把grldr中的内置菜单保存到外部文件 menu.lst
+
+grubmenu import grldr menu.lst
+以外部文件menu.lst的内容设置grldr的内置菜单。
+
+grldr可分为两类，4-3前的版本是旧版本，之后的是新版本。旧版本的内置菜单的大小是固定的，新设置菜单的长度不能大于原来的菜单长度(可以少于，这时程序自动用空格来填充)。新版本的内置菜单的长度可以增加，但最大长度不能超过4K。
+
+grubmenu可以在Windows，Linux和其他Unix平台下运行。(Linux和Unix版本需要利用源代码来编译)
+
+更新：
+
+* r10版本的grubmenu可以自动转换菜单文件。在导出时会把菜单转为本地系统格式的文本文件（Windows是\r\n，UNIX是\n），而在导入时会把文本文件转换为UNIX格式。在导入时还会去掉注释和空行，以及去掉每行结尾处多余的空格。这些转换不影响使用，但可以节省存储的空间，这对于旧版的grldr来说比较重要。
+
+[ 本帖最后由 bean 于 2007-4-22 16:05 编辑 ]
+
+http://bbs.znpc.net/forum.php?mod=viewthread&tid=3117&extra=page%3D10
+bean发表于 2007-4-23 21:29
+在GRUB4DOS中实现内存管理和动态模块的想法
+
+尽管GRUB4DOS使用的是GRUB Legacy的架构，但并不代表GRUB4DOS中不能实现内存管理和动态模块的功能。
+
+对于内核来说，由于受原来的结构的限制，要实现模块化比较困难，这里就暂且不管了。
+
+内核使用最高内存到常规内存顶部，以及扩展内存，则统一使用内存管理器来进行管理。要使用内存时，必须向内存管理器申请，而不是随意使用。在使用完毕后要及时释放。
+
+有了内存管理后，动态模块也可以实现。模块装载时需要向内存管理器申请一块常规内存的空间，然后把模块读入内存，在模块卸载后则可以释放所占的内存。
+
+模块的结构可以有很多，以下是比较简单的一种，可供参考。
+
+模块开始是某一标示，接着是函数表。以下是一些示范的函数
+
+int init(struct *grub_api);
+
+这是入口函数，模块在这里进行初始化的工作，如果因为某些原因不能继续运行，函数返回出错代码，那么模块就自动被卸掉。
+
+grub_api是grub主程序传递给模块的一个结构，里面包含一些重要的API的入口地址，以供模块使用。
+
+grub_api中也可以包含扩展命令表，当模块需要添加新的内置命令或者取代原有的内置命令时，可以把相应的项目增加到该表里。
+
+int unload(struct *grub_api);
+
+模块在这里实现卸载前清理功能，如果因为某些原因无法卸载，函数返回出错代码，该模块就不会被卸掉。
+
+实现了内存管理和动态模块后，有以下的好处：
+
+1、把一些比较大的数据结构放到扩展内存中
+背景图片，字体等都可以利用内存管理器的功能在扩展内存中分配
+
+2、网络驱动
+这部分可以转为动态模块，在启动时只需装入适合自己网卡的驱动就可以了
+
+3、其他的扩展
+一些不太常用的功能可以做成模块的形式，在有需要时才调入内存。而且，把结构定下来以后，其他的用户也可以根据规范为grub4dos编写扩展。
+
+http://bbs.znpc.net/forum.php?mod=viewthread&tid=3949&page=1&fromuid=12697#pid23381
+不点发表于 2007-8-26 16:43
+已经实现了，上载为 2007-08-26，是按照上述“照顾 Ago” 的方案来做的。
+
+我身体不行，准备退出开发 grub4dos。
+
+以后 bean 就全权代劳了。
+
+真抱歉我曾经答应做的几个工作，未能“说话算数”。1. ISO 仿真。2. 嵌入 MBR 上的 GRUB。3. bootlace 的 --install-partition 参数实现。4. 把 grub4dos 同 linux kernel 进行密切配合（二次开发），使得 linux kernel 成为一个引导管理器。请多多包涵！
+
+我对我在这段时间的工作也表示满意。只是，在未来的一段时间要把工作负担都压在 bean 一人身上，我感到遗憾。希望尽快有新人和 bean 一起工作。
+
+http://bbs.znpc.net/forum.php?mod=viewthread&tid=3751&extra=&page=1
+bean发表于 2007-7-10 23:41
+关于GRUB4DOS文档，不点请进
+
+Jyothsna 终于有回复了，他说不在Wipro的办公室里，因此很久没有检查邮件了。看来他还是有意思参与grub4dos的文档开发的。
+
+但文档的编写究竟如何进行，大家讨论一下。
+其实官方的grub文档对于grub legacy的命令介绍已经很详细了，只是缺乏中文文档。而对于我们的grub4dos，只需要按照官方的文档格式书写grub4dos有关的新功能即可。另外，我建议增加一个使用技巧部分，通过实例来演示如何使用grub4dos的新功能。
+我觉得文档这个工作量确实也不小。不知道 Jyothsna 有何打算？
+
+我先来猜测一下。他可能是要用 man page 的形式来做这个文档了。
+
+不管他是什么打算，我都支持。因为我对此没有任何经验、见解。
+
+我就擅长于，在别人建立好的基础之上，修修补补。
+
+所以，这基础的工作，得你们两个商量着做才行。这时候，先不要考虑我的意见，因为我本来就没有主意。
+
+等你们做好了，我有时间的话，会补充资料进去的。
+
+我觉得，我可能补充的地方，包括 map 的命令选项，新增的 root 命令语法，default 语法，以及 parttype 用法等细节部分。
+
+另外，他似乎应该在 gna 注册一个用户，以便管理 grub4dos，因为我们的源代码已经在 GNA 了，而不是在 sarovar 了。在中国，我们访问 sarovar 比较成问题，常常很不顺利。这一点，你也可以告诉他。如果他已经在 sarovar 有了账户，或者他打算在 sarovar 注册账户，那么我可以直接把他添加为 sarovar 上的管理者。
+正式文档，最好使用texinfo格式。texinfo可以转换为多种格式，如info，txt, 单页html，多页html，PDF等，grub legacy的官方在线文档：
+
+http://www.gnu.org/software/grub/manual/
+
+就是使用grub.texi自动生成的。
+
+另外，关于交流平台的问题，英文论坛还可以，不过现在论坛的状态的确令人担忧。我想或者可以使用邮件列表，大家认为如何。
+邮件列表是一个群发地址，所有发向该地址的邮件会自动转发给订阅了该邮件列表的用户。新的邮件是一个thread，回复的邮件被添加到同一个thread里。邮件列表系统会保留所有邮件，可供查阅和搜索。
+
+就拿GRUB Legacy的邮件列表作为例子。
+
+订阅界面是
+
+http://lists.gnu.org/mailman/listinfo/bug-grub
+
+订阅了以后，可以向 bug-grub@gnu.org发邮件，该邮件会转发给所有订阅的用户。
+
+即使没有订阅，也可以到
+http://lists.gnu.org/archive/html/bug-grub/
+里查看保存的邮件，例如点2007-06，按照Thread浏览：
+
+    * Where can I get the files stage1 and stage2?, Dallas Clement, 2007/06/30
+          o Re: Where can I get the files stage1 and stage2?, Gregg Levine, 2007/06/30
+                + Re: Where can I get the files stage1 and stage2?, Dallas Clement, 2007/06/30
+                      # RE: Where can I get the files stage1 and stage2?, Gregg C Levine, 2007/06/30
+                      # RE: Where can I get the files stage1 and stage2?, Dallas Clement, 2007/06/30
+    * compile_error grub-1.95, harri brunk, 2007/06/25
+    * Which device did I boot from?, Dallas Clement, 2007/06/22
+          o RE: Which device did I boot from?, Gregg C Levine, 2007/06/22
+                + RE: Which device did I boot from?, Dallas Clement, 2007/06/22
+          o Re: Which device did I boot from?, Felix Miata, 2007/06/22
+                + Re: Which device did I boot from?, Benoit Donnette, 2007/06/22
+                      # Re: Which device did I boot from?, Dallas Clement, 2007/06/22
+          o Message not available
+                + Re: Which device did I boot from?, Dallas Clement, 2007/06/22
+          o Re: Which device did I boot from?, Dallas Clement, 2007/06/23
+                + Re: Which device did I boot from?, Gregg Levine, 2007/06/23
+          o RE: Which device did I boot from?, Brown, Beverly, 2007/06/22
+                + RE: Which device did I boot from?, Dallas Clement, 2007/06/22
+                      # Re: Which device did I boot from?, adrian15, 2007/06/25
+    * [bug #18619] default not saved with trailing white-space on "default saved" line in menu.lst, Ryan Stutsman, 2007/06/21
+    * Grub and disk images, Eric S. Johansson, 2007/06/06
+          o Re: Grub and disk images, adrian15, 2007/06/07
+                + Re: Grub and disk images, Eric S. Johansson, 2007/06/07
+    * Re: triple boot sys, adrian15, 2007/06/01
+    * Re: Problems with Grub and booting to WinXP, adrian15, 2007/06/01
+
+用起来和论坛差不多，邮件就相当于帖子，只是不能编辑。
+
+现在很多GNU软件的支持都是通过邮件列表的。而且，邮件列表系统是gna/sf提供的，我们不需要进行维护。
+邮件列表已经开通，订阅页面：
+
+https://mail.gna.org/listinfo/grub4dos-devel/
+我在google groups也为grub4dos申请了一个邮件列表：
+
+http://groups.google.com/group/grub4dos
+
+邮件地址：grub4dos@googlegroups.com
+
+而且，这个邮件列表可以自动接收gna.org上的邮件列表的内容。挺爽吧！
+邮件系统使用的筛选规则：
+
+1、附件中不能包含后序名为exe，bat，cmd，com，pif，scr，vbs，cpl的文件
+2、邮件内容不能为空
+3、邮件中MIME type中必须包含multipart/mixed，multipart/alternative，text/plain中的一个。纯文本邮件一般都符合这个要求。
+
+不符合规则的邮件会被系统拒绝。
+不点也试试发封邮件到grub4dos-devel@gna.org，看能否收到。
+
+http://bbs.znpc.net/forum.php?mod=viewthread&tid=3736&highlight=%2Bbean
+bean发表于 2007-7-8 13:39
+关于grub4dos中启动代码分离的想法
+
+grub4dos可以看成由两部分组成，一部分是grub4dos的运行代码，grub4dos的功能在这里实现。另一部分
+是启动代码，它的任务是把以上所说的运行代码从启动介质上装载到内存里。这两部分其实是相对独立的，
+启动代码可以从grub4dos的主体中分离开来。
+
+grub4dos的启动代码可以作为通用的引导程序，它不只可以引导grub4dos，还可以引导其他的一些启动文
+件，例如grub2, io.sys, ntldr 等。这些文件的共同点是只需要把它们装载到内存的某一个地方，然后
+转到入口地址运行就可以了。其实，很多启动文件也采用类似的方法，不同的只是装载地址，入口地址和
+入口参数而已。把启动代码分离后，可以成为一个类似于syslinux的通用引导程序。
+
+grub4dos的启动代码可以使用多种方法启动：
+
+1、从MBR中启动
+大部分的引导程序都支持从MBR中启动。
+
+2、从NT启动管理中启动
+目前似乎没有引导程序支持从启动管理中启动。
+
+3、从DOS里直接启动
+在DOS里启动目前好像只有ldlin，但它只能引导linux内核格式的文件。
+
+4、作为linux内核启动
+这可以用于在其他的启动管理器中引导。
+
+5、从光盘中启动
+目前grub4dos的启动代码已经实现了这一功能。
+
+6、从PXE中启动
+目前grub4dos的启动代码还不支持这个功能，但需要增加的话也不是很复杂。
+
+目前大部分的启动管理器只实现了1，就算是启动方式比较多的syslinux，也只是实现了1, 5 和6。而
+grub4dos目前已经实现了1-5，在我看来，这就是grub4dos的精粹，它是其他软件所没有的。而grub4dos
+的主体部分，尽管作了很多的改进，但它们不是独有的。这些改进基本上都可以在grub2中实现。
+
+启动代码的分离也不是很复杂：
+
+1、MBR和从NT启动管理中启动的代码，其实现在已经分离了，就在grldr.mbr中。
+
+2、从DOS里启动的grub.exe，可以把grub.exe后面紧贴的stage2代码去掉。启动文件可以利用INT 21从
+硬盘中读取。
+
+3、作为linux内核格式的grub.exe，可以利用initrd来传递启动文件，而不需要把它绑定在grub.exe中。
+
+4、从光盘和PXE启动时，可以从启动介质中读取文件，就像syslinux一样。
+
+另外，如果要作为通用的引导程序，需要使用配置文件来进行设置。命令行参数可以放到一个固定的内存
+地址，启动文件可以自行到相应的地址中读取。
+
+http://bbs.znpc.net/forum.php?mod=viewthread&tid=4146&highlight=%2Bbean
+bean发表于 2007-10-10 13:00
+GRUB4DOS中启动代码分离的构思
+
+这个想法我以前也曾经提过，现在把它总结一下：
+
+1、启动代码和GRUB4DOS分离
+
+启动代码的主要功能是把pre_stage2的代码装载到内存的某一位置，然后进行调用。除此之外，启动代码和GRUB4DOS的交互是很少的。而把文件装载到内存这一功能，可以用于启动其他一些文件，如io.sys, ntldr, kernel.sys, grub2等等。因此，启动代码可以独立于GRUB4DOS而存在，作为一个通用的启动管理器。
+
+2、采用模块化的设计
+
+目前启动代码比较混乱，不适合于将来的扩展。主要体现在：
+
+a、多功能集合导致代码复杂度提高
+
+现在grub.exe和grldr都是集合了多个功能于一身。这看上去好像很方便，但其实使得代码的复杂度大大提高，增加了修改和调试的难度。我想应该对于每种不同的启动环境使用不同的启动文件，而代码的共用通过子模块来实现。
+
+b、存在过度优化的现象
+
+我看过一篇名为 Optimization: Your Worst Enemy 的文章：
+
+http://www.codeproject.com/tips/optimizationenemy.asp?msg=2259746
+
+我觉得启动代码里也存在过度优化的现象。优化的确是需要的，但是它应该局限于子模块内，不同模块间的交互应该是简单和明确的。
+
+我想启动代码应该尽可能细分为模块，每个模块只实现单一的功能，最终把不同的模块连接起来而成为最终的启动文件。模块可以粗略分为以下几类：
+
+1、启动模块
+
+这相当于启动文件的头部，不同的启动方式对应于不同的头部。启动模块还可以根据具体的启动方式，导出启动设备。例如，如果从光驱里启动，则可导出光驱设备(cd)，从pxe启动，则可导出设备(nd)。而通用的设备(hdN)和(fdN)在独立的模块里实现，它们用于读取硬盘和软盘。
+
+2、分区模块
+
+这部分模块处理不同的分区格式。它们通过读取底层的设备(hdN)，分析里面存在的分区，从而生成新的设备(hdN,M)
+
+3、文件系统模块
+
+这部分模块处理不同的文件系统。它们使用(hdN,M)来访问底层的设备，并导出文件读取的函数。特殊设备(cd)和(nd)跳过这一步骤，直接导出文件读取的函数。
+
+4、格式处理模块
+
+不同的启动文件，其启动的方式略有不同，这些差异在这些模块里进行处理。
+
+5、扩展功能模块
+
+这部分模块提供扩展的功能。它们类似于GRUB4DOS里的命令。每个命令对应于一个模块。
+
+6、通用函数模块
+
+这部分模块提供公用的函数。比如说，开启/关闭A20的代码，访问扩展内存的代码，等等。
+
+7、脚本解析模块
+
+启动管理器可以使用配置文件的形式来设置启动选项，于是在启动时就需要解析执行。还有一个比较简单的方式，就是
+利用外部程序把配置文件转化为容易使用的二进制形式，然后把它添加到启动文件中。
+
+如果使用配置文件，其格式可以参照GRUB4DOS，例如：
+
+timeout 10
+
+title Windows XP
+root (hd0,0)
+ntldr /ntldr
+
+title DOS
+root (hd0,1)
+msdos /io.sys
+
+title Grub
+root (hd0,0)
+grub /boot/grub/stage2
+
+title Grub 2
+root (hd0,0)
+grub2 /boot/grub2/core.img
+
+在这里，不同的启动文件使用不同的格式处理模块进行处理。
+
+至于这个启动管理器的名字，我本来想使用miniboot，但这名字好像已经有人使用了。我想是不是可以使用tinyboot，这和miniboot的意思差不多，而且和不点的名字有点像，呵呵。
+
+
+http://bbs.znpc.net/forum.php?mod=viewthread&tid=3885&highlight=%2Bbean
+bean发表于 2007-8-8 12:47  
+grubinst更新：可以跳过严格的mbr测试
+
+ 
+
+在缺省情况下，程序进行严格的测试，如果发现问题，会把mbr表的内容和分区列表显示出来。如果用户觉得没有问题，可以使用--skip-mbr-test来跳过严格的测试，从而顺利
+的进行安装。
+
+另外，新版本在缺省情况下不会把第一个分区的bpb拷贝到mbr。如果想拷贝的话，需要使用--copy-bpb选项。
+
+新版本调整了ntfs中启动文件的空间，现在可以支持所有符合8.3规则的文件名。
+--copy-bpb 应该是默认选项。如果不想这样做，可以加入 --no-copy-bpb 选项。
+
+--copy-bpb 不会带来副作用。
+拷贝bpb不是只对某些有问题的U盘才使用的吗？正常的硬盘应该不需要的吧。
+
+其实我只是怕它会有副作用。比如说，如果有多个分区的话，会不会只能认出第一个分区。而且还有一个隐藏的问题。如果用户的mbr表出了问题，不能正确的认出，那么由于mbr中有FAT的结构，这个硬盘会被认为是软盘映像。但如果用户使用--floppy来安装的话，就会覆盖了mbr表，那么只有第一个分区能用了。这是一个比较严重的问题。因此，我觉得在没有必要的时候，最好不要复制bpb。
+bootlace 是这么操作的：
+
+当 MBR 上的分区表被确认是正确的时候，才进行以下操作，否则，拒绝操作。
+
+只有当磁道 1 的第一扇区含有 FAT 格式的 BPB 时，才构造 MBR 上的 BPB。
+
+因此，MBR 上有 BPB 的时候，分区表一定是正确的。
+
+当然，也许后续的某个软件重新建立了分区表，导致分区表错误。
+
+此时使用 --floppy 是危险的。
+
+不过我们可以这样改进，来加强安全性检查：当用户使用 --floppy 时，我们就先按照宽松的条件来检查分区表的存在性，如果发现分区表，则拒绝操作。
+grubinst现在是这样操作的：
+
+先进行严格的测试，成功后作为MBR处理
+再进行一般的测试，成功后作为有问题的MBR处理，如果有--skip-mbr-test，则顺利安装，否则出错退出
+然后再进行FAT，NTFS和EXT2的测试
+
+这样的话，误判的几率比较小，当然，也不是完全不可能。我的想法是，如果没有必要的话，尽量不要复制bpb，这样至少可以减少一种误判的情形。
+我是这么想的：--floppy 是明确要毁掉分区表的，有经验的人是不会这么用的。
+
+剩下的人可能是误操作而用了 --floppy，不过，正如你所说，分区表的特征是比较容易发现的，所以，我们的程序也很容易拒绝对分区表进行写入。可以说，只要有分区表，我们总是可以检测出来的，一个都不会漏掉：
+
+1. 四个表项的 boot indicator 要么是 80 要么是 00
+2. CHS的扇区号不能是0, 分区起始扇区号和分区长度也不能是0
+
+满足以上条件的，不一定都是分区表，但都被我们拒绝了。这不要紧。关键是所有的分区表，都在拒绝之列，无一遗漏。所以，--floppy 的安全性就绝对有保证了。
+
+既然这里没问题了，那么默认时写入 BPB 就同样安全了。
+
+一些用户往往不知道需要将 BPB 写入 U 盘的 MBR。如果我们默认时不写入，他自己也不容易发现需要写入。这样，他通常会放弃使用 grub4dos 的。
+
+U 盘和硬盘很难区分，所以，默认时，应该写 BPB，不管它是 U 盘，还是硬盘。
+用 bootlace --read-only 0x80 看看是否成功。
+
+如果不成功，那么分区表一定是错误的。
+
+假如分区表是错误的，用 fdisk /mbr 是无济于事的。这条 fdisk /mbr 的目的是用来修复主引导记录上的引导代码的，不是用来修复分区表的。这点请一定要注意了。
+
+MBR 是硬盘的引导扇区，位于硬盘最开头，共 512 字节。开头的 446 字节是引导代码（是程序），结尾的 66 字节是分区表（是数据）。
+
+FDISK /MBR 仅仅把 446 字节的引导代码强行变成了微软的引导代码，而结尾的 66 字节的分区表，根本不会改动。
+
+所以，如果用 fdisk /mbr，那么原来正确的分区表，仍然正确，而原来是错误的分区表，仍旧是错误的。
+
+http://bbs.znpc.net/forum.php?mod=viewthread&tid=4156&highlight=%2Bbean
+bean发表于 2007-10-15 18:23
+关于新一代GRUB4DOS的想法
+
+目前0.4.*系列GRUB4DOS已经基本上稳定，功能比较完善了，除了A20的兼容问题外，其余需要改动的地方不是很多了。但在结构上而言，GRUB4DOS还是存在一定的问题，不容易进行扩展。我想在新一代的GRUB4DOS里可以作以下的改动：
+
+1、启动管理器分离
+
+把启动管理器的代码从GRUB4DOS里分离出去，形成软件tinyboot。而在GRUB4DOS里，生成单一的二进制代码文件stage2，在不同环境里启动GRUB4DOS是通过tinyboot里实现。
+
+2、使用Unicode，不区分中英文版本
+
+摒弃现在打中文补丁的方法，采用统一的代码。配置文件里使用UTF-8的编码，这样可以兼容ascii的菜单，也可以在一个菜单里同时使用不同的语言。
+
+3、利用gettext实现多语言支持
+
+现在显示中文帮助需要在源代码基础上进行补丁，这个方法使得修改变得困难，而且很难支持多种语言。一个较为简单的方法是使用gettext进行转换，把英文转为相应的语言。文本的映射从外部载入，这样可以节省内存空间，也使得语言的动态改变成为可能。
+
+4、内存管理器和动态模块
+
+使用内存管理器可以更好的利用内存空间，特别是扩展内存。动态模块是在GRUB4DOS启动后加载的模块，它们可以和GRUB4DOS的主体进行通信，实现扩展的功能。模块的设计可以参考syslinux里的comboot api：
+
+http://syslinux.zytor.com/comboot.php
+
+5、图形界面的改进
+
+修改目前图形显示的一些问题，实现可定制的图形界面，支持更多的图片格式。
+
+
+当然，要完全实现以上的功能是一个很漫长的过程，但无论如何，需要有一个起点。我想可以启动一个新的分支，0.5.*，来逐渐实现以上的功能。而目前的代码，则作为 0.4.* 分支，继续进行维护。不知道大家的意见如何。
+
+http://bbs.znpc.net/forum.php?mod=viewthread&tid=4273&extra=page%3D6
+bean发表于 2007-12-6 20:57  
+利用loadbin在不同的启动管理器中启动grub，grub2，grub4dos 和 ntldr
+
+loadbin是grubutil里的一个新加工具，它可以把各种系统文件转化为Linux内核的格式，从而达到在多个启动管理器里启动的目的。
+
+对于不同的启动文件，loadbin提供相应的头文件，
+
+可以用三种方式启动系统文件，以ntldr为例：
+
+1，直接使用头文件ldntldr.bin。以头文件作为内核，ntldr作为initrd:
+
+kernel ldntldr.bin
+initrd ntldr
+boot
+
+2，利用mkimage工具把头文件和系统文件结合起来，生成单一的启动文件：
+
+mkimage ldntldr.bin ntldr ntldr.bin
+
+然后把ntldr.bin作为内核就行了：
+
+kernel ntldr.bin
+boot
+
+由于不少的启动管理器在启动Linux内核时不会传递正确的DL值，因此需要在头文件里进行设置，你可以使用-x参数在生成单一的启动文件时指定DL值，例如:
+
+mkimage -x 0x80 ldntldr.bin ntldr ntldr.bin
+
+有些系统，例如grub2，还支持分区参数，你可以用以下方式来指定：
+
+mkimage -x 0x80,0 ldgrub2.bin core.img grub2.bin
+
+这样启动后grub2会自动把根设备设为第一只硬盘第一个主分区(hd0,1)。
+
+如果是在CDROM里启动，可以使用设备号0xe0，比如
+
+mkimage -x 0xe0 ldgrub.bin stage2 grub.bin
+
+这样，grub启动后就可以利用(cd)设备来访问文件了。
+
+3，同2一样，先生成单一的启动文件ntldr.bin，然后可以利用grldr.mbr启动：
+
+安装到mbr:
+
+grubinst -b=ntldr.bin DEVICE
+
+生成相应的ntldr.mbr，在boot.ini里启动：
+
+grubinst -o -b=ntldr.bin ntldr.mbr
+
+目前支持的启动文件格式：
+
+1，GRUB Legacy
+头文件ldgrub.bin，对应的系统文件是stage2
+
+2，GRUB2
+头文件是ldgrub2.bin，对应的系统文件是core.img
+
+3，GRUB4DOS和NTLDR
+头文件是ldntldr.bin，对应的系统文件是ntldr和grldr
+
+至于启动管理器，只要它支持Linux内核格式，就可以使用loadbin，这其中包括grub legacy, grub2, grub4dos, syslinux/isolinux/pxelinux, lilo等等。
+
+下载地址：
+
+http://download.gna.org/grubutil/
+
+http://bbs.znpc.net/forum.php?mod=viewthread&tid=4311&highlight=%2Bbean
+bean发表于 2007-12-20 22:09
+关于迷你grub4dos的想法
+
+grub4dos中有不少的功能是很少会用到的。如果把它们去掉的话，就可以在很大程度上减少grub4dos的大小，从而可以包含在64K的boot rom里。以下是一些想法：
+
+1，在configure里增加--mini选项，当使用该选项时，生成迷你grub4dos。
+2，使用一个文件来存储迷你grub4dos使用的编译参数，这样修改起来比较容易。
+3，grub4dos中最大的模块是builtins.c，我想可以对每个命令定义一个宏，通过它来进行条件编译，比如说：
+
+#ifndef DISABLE_CMD_CMP
+static int
+cmp_func ...
+
+static struct builtin builtin_cmp = ...
+#endif
+
+我大概试了一下，使用现在svn上的版本，利用参数：
+./configure --enable-preset-menu=../preset_menu.lst --disable-ffs --disable-ufs2 --disable-minix --disable-reiserfs --disable-vstabs --disable-jfs --disable-xfs --disable-graphics --disable-hercules --disable-serial
+
+进行编译，生成的stage2是149K，如果使用lzma来压缩，得到的文件73K，这和64K的目标已经比较接近了。只要稍微精简一些，应该可以放到boot rom里了。
+
+http://bbs.znpc.net/forum.php?mod=viewthread&tid=4311&page=1&fromuid=12697#pid25764
+不点发表于 2007-12-21 10:24
+象征意义和实在意义。
+
+ffs， ufs2， vstabs， jfs， xfs，等等，这些文件系统的支持能力，被看作是 grub 的优点。但是，在我看来，它们的象征意义大于实在意义。实际上，它们占用了 grub 内核的大量代码，而很少有人需要这些文件系统的支持。
+
+是的，grub4dos 现在在我们手上，我们完全可以按照自己的意愿去改造，而没有任何约束。
+
+bean 可以大胆地改，改什么都可以，不怕改坏了，改坏了还可以再改回来。我已经删掉了 builtins.c 中的四条命令。稍候我把代码上载到 jot 上。
+
+我们可以吸收 grub2 里面的一些有价值的东西进来。但是，grub4dos 似乎很难与 grub2 融合在一起，也只能各自独立发展了。
+
+以下是我不成熟的考虑，关于内存的使用。
+
+GRUB legacy 的内存使用，在常规内存部分，几乎都用光了，这个结构（即内存使用布局）我们还是保留它吧。GRUB legacy 对常规内存的使用似乎不够经济，但是，我们还是可以忍受的，就认了吧。在 grub 中，常常要切换到实模式使用 BIOS 来访问硬件。常规内存只能给这些实模式程序保留。
+
+对于 1M 以上的内存，我们相对来说有比较自由的发挥空间（使用空间）。有些已经被我们使用了，比如 2M 处是保存 DOS 使用内存的地方。
+
+现在内存很便宜，机器往往有很多内存。所以，16M 以下的内存，都可以被我们的 grub4dos 内核保留，比如存放字体字模等。
+
+为了确保 A20 不会发生问题，我们还可以在 grub4dos 中尽量不使用“奇数兆”的内存。 grub4dos 的内核中的程序代码，一定要放在“偶数兆”的地址空间。grub 要不停地在实模式和保护模式之间切换，当切换到实模式执行 BIOS 调用时，有些 BIOS （的有些功能调用）可能会自动把 A20 关闭。因此为了保险起见，我们需要把 grub4dos 内核的代码（和数据）控制在“偶数兆”的地址空间范围。这样，16M中实际上只有8M可用。
+
+在此基础上，我们可以为 grub4dos 增添运行用户程序的功能（当然先得建立内存管理机制）。那些不经常用到的命令，都可以以用户程序的形式存在于磁盘上。这部分 bean 就考虑考虑吧（对我来说这很复杂）。我只把那个 A20 问题解决了，就完成任务了。
+
+对了，几何参数自适应功能已经全部完成。12月14日的就是此功能的完整版本。
+
+最终我们似乎需要把代码都改成汇编。
+不点，新版本的代码已经改了不少了，如果没有什么问题的话，可以上传到gna.org。
+上传到 gna，你来做吧，diff 文件已经上传到 jot，你可先看看有无问题，再上载到 gna。我觉得它仍然属于 0.4.3 的后续版。当开始测试新的 A20 功能时，才改变版本号。我在 unbuntu 论坛上曾经说，0.4.4pre 是 A20 新功能，人家看到之后，有可能参与 A20 的测试。所以，现在我们还不能用 0.4.4 这个版本号。
+
+补充：在 changelog 里面，可以写上被删除的四条命令。
+试了一下新版的makerom来制作grub 0.97的bootrom，直接使用./configure，没有特殊指令。这样生成的stage2有98K,生成的grub.bin有53K，如果去掉3K的头和lzma解压程序，那么压缩后grub有50K，大约有50%的压缩率。
+不点，jot上的grub4dos_r54.diff上的应该就是最新版本的补丁吧，如果没有问题的话我就传到gna上了。还有，上传时使用的标题，最好也写一写。
+
+从这个版本开始，我打算另起一个分支，以进行mini grub的研究。因为改动的地方会比较多，中文补丁很难跟上，因此会暂时去掉中文支持。况且，mini grub里空间本来就很紧，中文看来没有什么用处。
+好的，就照这么办吧。
+
+grub4dos_r54.diff 就是最新的了，我这段时间很忙，不会再有更新了。
+
+r55 的变更消息可以提两点：1. cdrom 仿真支持，2. bios 几何参数自适应，或者再加上 3. 其他一些调整、变通、修复。哦，也许还应该提到删除了 4 条命令这件事。
+
+http://bbs.znpc.net/forum.php?mod=viewthread&tid=4315&highlight=%2Bbean
+bean发表于 2007-12-21 18:50  
+使用makerom制作grub，grub4dos，grub2和grldr.mbr的启动bootrom
+
+makerom是grub-mkrom的改进版本，使用它可以很容易地制作bootrom:
+
+下载：
+http://download.gna.org/grubutil/
+
+1. grub legacy/grub4dos
+makrom rom_xxx.img stage2 grub.bin
+
+2. grub2
+makerom rom_xxx.img core.img grub2.bin
+
+3. grldr.mbr
+makerom -s 0 rom_xxx.img grldr.mbr grldr.bin
+
+rom_xxx.img代表以下的其中一个映像：
+
+rom_isa.img: isa rom
+rom_pci.img: pci rom
+rom_zisa.img：支持lzma压缩的isa rom
+rom_zpci：支持lzma压缩的pci rom
+
+当使用压缩时，需要加上-z参数，并且需要使用lzma兼容的rom，例如：
+
+makerom -z rom_zisa.img stage2 grub.bin
+
+另外，grubutil发布的版本里不包含lzma.exe，你可以到以下打包里找：
+http://grub4dos.sourceforge.net/grub2/makerom.zip
+
+makerom还支持以下的参数：
+
+-m message
+启动时显示的信息
+
+-t timeout
+倒计时，缺省值2秒
+
+-k key
+热键，缺省值是SPACE
+
+-d edx
+启动前设置的edx值，缺省值是0
+
+-s skip
+在输入文件开头里跳过一定数量的字节，缺省值是512，这适合于stage2和core.img，但当输入文件grldr.mbr时，需要把该值设为0。
+
+-z
+使用lzma压缩输入文件
+
+-p parm
+在调用lzma时，使用的扩展参数。在缺省情况下，程序使用
+
+lzma e -si -so
+
+来运行lzma，如果使用需要其他选项，可以在这里进行设置。
+
+-v
+显示详细信息
+
+ 
+http://bbs.znpc.net/forum.php?mod=viewthread&tid=4335&highlight=%2Bbean
+bean发表于 2007-12-25 22:35
+
+测试：迷你版grub4dos
+
+下载：
+http://grub4dos.sourceforge.net/grub4dos/grub4dos-test-mini-2007-12-25.zip
+
+新版的build脚本支持参数mini，使用它可以生成迷你grub4dos：
+
+./build mini
+
+mini版本使用mini.lst里的选项进行配置，你可以修改该文件，以增加或减少需要的功能。mini.lst里的选项说明如下：
+
+--disable-ntfs-comp
+去掉NTFS模块里对压缩文件的支持。
+
+--disable-ffs
+--disable-ufs2
+--disable-minix
+--disable-reiserfs
+--disable-vstafs
+--disable-jfs
+--disable-xfs
+--disable-pxe
+去掉相应的文件系统模块。只保留了fat,ntfs,ext2fs和iso9660的支持。
+
+--disable-md5-password
+去掉md5密码的支持
+
+--disable-graphics
+去掉图形模式的支持
+
+--disable-hercules
+--disable-serial
+这两个是用于终端模拟的，基本上不会用到
+
+--disable-cmd-testload
+--disable-cmd-testvbe
+--disable-cmd-setkey
+--disable-cmd-setup
+--disable-cmd-module
+这里去掉一些不常用的命令
+
+--disable-boot-bsd
+--disable-boot-multi
+去掉启动bsd内核和multiboot内核的代码
+
+--enable-preset-menu=../preset_menu.lst
+这是缺省菜单
+
+使用这些参数编译后，得到的stage2可以使用makerom生成bootrom:
+
+makerom -z rom_zisa.img stage2 grub.bin
+
+这里是制作好的版本：
+http://grub4dos.sourceforge.net/grub4dos/grub.bin
+
+http://bbs.znpc.net/forum.php?mod=viewthread&tid=4591&highlight=%2Bbean
+bean发表于 2008-3-28 16:23
+grub4dos新功能测试：在不同时间段执行不同的命令
+
+这个补丁增加一个新的命令checktime。使用它，你可以使得某些命令只有在某一时间段内才执行。
+
+命令格式如下：
+
+checktime * * * * *
+
+checktime后面的五个参数分别表示分钟，小时，日期，月份和星期几。*表示全范围，你也可以使用数字，用-表示某一范围，用/表示每隔一定数字取一个值，具体的用法可以查看一下crontab的语法。例子：
+
+1-4
+2,5-6
+1-2,4-5,7
+*/2
+
+checktime本身只是一个测试函数，它判断当前时间是否符合参数的指定。但把它和&&相结合，你就可以使得某些命令只有在一定的条件下才会执行，例如：
+
+上午使用第一项作为缺省项，下午使用第二项
+checktime * 0-12 * * * && default 0
+checktime * 13-23 * * * && default 1
+
+四季使用不同的背景图片
+checktime * * * 1-3 * && splashimage /spring.xpm
+checktime * * * 4-6 * && splashimage /summer.xpm
+checktime * * * 7-9 * && splashimage /fall.xpm
+checktime * * * 10-12 * && splashimage /winter.xpm
+
+附件里包含补丁文件和英文版的grldr。
+
+http://bbs.znpc.net/forum.php?mod=viewthread&tid=5496&extra=page%3D7
+bean发表于 2009-1-1 01:57  
+测试：grub4dos 的 gfxmenu 支持 （更新v3）
+
+以下的补丁为grub4dos增加gfxmenu支持（对应于svn r63）。使用时，在menu.lst里加上这句（message文件在附件里）：
+
+gfxmenu (hd0,0)/message
+
+注意这命令只能用在配置文件里，在命令行是无效的。
+
+不过，使用gfxmenu需要的内存很多，需要定制grub4dos以去掉不需要的模块，附件里的grldr是使用以下的命令来设置的：
+
+../configure --disable-ffs --disable-ufs2 --disable-minix --disable-reiserfs --disable-vstafs --disable-jfs --disable-xfs --disable-graphics --disable-hercules --disable--serial --disable-iso9660 --disable-ext2fs --disable-md5-password --disable-pxe --disable-gunzip --enable-preset-menu=../preset_menu.lst
+
+文件系统只保留fat和ntfs，其他能禁止的选项都禁止了。
+
+附件里的文件在linux下编译，在msys里编译的也能用，只是略为大一些，message文件也能装载。
+
+其实，可以按照minigrub的做法，把一些很少使用的功能禁止掉，需要的话在configure里打开。这样能节省不少的空间，便可以支持更大的message文件。
+
+v2更新：
+新版的grldr基本解决了大小的限制，启动的问题也解决了。而且，grub4dos原有的功能全在，不再需要简化。不过，我在configure.ac脚本里还是把一些很少用的文件系统的缺省值改为禁止（ffs, ufs2, minix, vstafs, jfs 和 xfs）。编译参数：
+
+./configure --enable-preset-menu=preset_menu.lst
+make
+
+v3更新:
+支持新版3.3.x系列的message文件。旧版的也照旧能使用，程序会自动检测message的版本。
+
+grub4dos的内容没有改动，原有的功能全部包含。
+
+漂亮的gfxboot文件可以在以下网址找到：
+http://gnome-look.org/content/search.php?xsortmode=new&search=1&type=0&name=gfxboot&user=&text=&sort=0&scorefilter=0&license=99&page=0
+http://kde-look.org/content/search.php?xsortmode=new&search=1&type=0&name=gfxboot&user=&text=&sort=0&scorefilter=0&license=99&page=0
+
+附件
+ grub_gfxmenu_v2.zip (201.95 KB)
+2009-1-1 23:23, 下载次数: 1786
+ grub_gfxmenu_v3.zip (220.5 KB)
+2009-1-4 23:46, 下载次数: 3339
+ message-3.2.zip (115.8 KB)
+2009-1-5 02:21, 下载次数: 1289
+3.2 系列中文菜单，包含500个常用汉字
+ message-3.3.zip (878.45 KB)
+2009-1-5 02:21, 下载次数: 4088
+3.3系列中文菜单，包含3500个常用汉字
+
+http://bbs.znpc.net/forum.php?mod=viewthread&tid=5629&extra=page%3D1
+bean发表于 2009-5-4 15:48
+关于万能启动U盘的想法。
+
+U盘启动的最大问题在于磁盘的参数，自动检测也不是万能的。其实，我们可以在存储方面做些功夫，就可以迅速而正确地获得参数。
+
+基本结构：
+扇区0：MBR，第一个分区开始于16065扇区。
+扇区1-16064：在固定的位置里保存标识和当前扇区序号。
+扇区16065：第一个分区开始
+
+读取磁道0，磁头1，扇区1，获得序号，便得到每磁道的扇区数
+读取磁道1，磁头0，扇区1，如果没有序号，磁头数255，否则根据序号可以算出磁头数。
+
+扇区1-16064里还有很多空间的，用来存放grub4dos或者grub2的payload。
+
+这个方案的缺点是在u盘开始需要腾出大约8m的空间。不过这对于现在的u盘容量来说根本不算什么。而且，从外部看来，u盘使用的是单分区mbr结构，应该不会和其他工具发生冲突。
+
+http://bbs.znpc.net/forum.php?mod=viewthread&tid=5631&extra=page%3D8
+bean发表于 2009-5-6 02:32
+分享：万能启动u盘制作工具fbinst （最新稳定版本1.2）
+万能启动U盘的原理在以下帖子里有说明和讨论：
+http://bbs.znpc.net/forum.php?mod=viewthread&tid=5629&extra=page%3D1
+新人注意：
+对于新加入测试fbinst技术的新人，我们推荐你只下载和使用顶楼帖子（也就是本帖子）推荐的fbinst发布版本（其它版本都是有bug的或者是仅用于调试的版本）。同时，在使用fbisnt制作启动U盘时，我们推荐你使用457# 的grldr（保持原样不要修改），测试时要尽量简单化（从参数简单化入手），不复制文件到U盘，启动时能看到grub命令行就算成功了，如果成功了一般情况下就不需要汇报了。我们更想看到启动不成功的情况（尤其是那些用其它技术可以成功但fbinst不成功的情况），反馈失败时请反馈尽量详细的信息，例如你的启动U盘制作步骤及相应的命令行，失败时的现象等，同时，如果你觉得没有能力及时按照bean的指示下载专门的测试版本并及时反馈情况，请事先注明，免得浪费大家尤其是bean的时间。
+
+457#的grldr（英文）下载：http://bbs.znpc.net/attachment.php?aid=3281
+注意：该grldr只能用于1.2版本，它和最新的1.3不兼容
+
+目前写了一个测试版本，具有基本的引导功能，有兴趣的可以测试一下。
+目前已经出了数十个测试版本，推荐你使用下面的最新稳定版进行测试：
+
+最新的1.2版本可以在gna下载：
+http://download.gna.org/grubutil/
+
+#438：增加--nand和--raw选项。下载链接：http://bbs.znpc.net/attachment.php?aid=3279
+
+#408（408楼）：1.2稳定版本。下载这个附件也可以：
+ fbinst_v1.2#408.zip (13.7 KB)
+
+ 
+
+下面的内容由Climbing根据408# 1.2版本的fbinst功能进行了适当的补充和纠错，这些内容会用标蓝或者粗体的形式显示出来。2009.05.11 23:00
+制作步骤：
+1，插入u盘，并使用fbinst列出磁盘信息：
+
+fbinst --list
+或
+fbinst -l
+
+屏幕上会显示硬盘设备(hdN)和对应的大小，不要弄错了。
+
+2，格式化
+
+以下假定u盘在(hd1)，用以下命令格式化：
+fbinst (hd1) format --force
+
+它会自动建立mbr和一个fat分区，mbr里预留8m左右的空间，其余的都分到fat里。这一步会破坏u盘原来的信息，切记！你可以使用--fat16或者--fat32选项来设置fat分区的类型，如果没有指定的话，会根据u盘大小自动选择，512m以下的缺省使用fat16，512m以上的缺省使用fat32.另外，可以使用的参数为--unit-size N，用来设置U盘分区的簇大小，其中N以扇区（512字节）为单位，例如，设置成N=32就是每簇16K，原理上讲，将U盘的簇设置的跟U盘写入页面大小接近时可以提高U盘的写入效率，还有一个--align参数，就是将簇与U盘内部页对齐，目的也是为了提高U盘的写入性能。还有一个--base参数，在1.2版本中该参数固定为63，一般不需要乞改动。格式化时还有一个--zip参数用于将U盘格式化成USB-ZIP格式。
+
+格式化后，因为改动了mbr，最好把u盘弹出来再重新接入。
+
+3，导入grldr
+
+fbinst (hd1) load C:/grldr
+上面命令是将c:盘根目录下的grldr文件导入U盘前面8M的隐藏空间内。
+或
+fbinst (hd1) load grldr
+上面命令是导入当前目录下的grldr文件。
+
+
+也可以导入ntldr。
+
+4，还有一些其他命令：
+
+fbinst (hd1) info
+显示mbr里的信息
+
+fbinst (hd1) clear
+清除原来load的映像，于是可以使用load载入新的映像。也即，在load新的映像前，需要先使用clear清除原来的映像。
+
+fbinst (hd1) update
+更新mbr代码，调试比较好用。只更新mbr代码，不改动映像和其他参数。
+
+
+fbinst (hd1) format
+更新mbr代码，同时兼有clear的功能。
+
+fbinst (hd1) sync
+sync用于将第一分区的bpb参数同步到mbr中或者从中清除
+--copy-bpb 用于将U盘第一个分区的bpb参数复制到mbr中。
+--clear-bpb 用于清除mbr中的bpb参数
+原则上，我们不建议你复制bpb参数到mbr中。
+复制内容到剪贴板
+代码:
+fbinst 命令语法：
+D:\fbinst>fbinst -V
+fbinst version : 1.2
+
+D:\fbinst>fbinst -h
+Usage:
+        fbinst [OPTIONS] DEVICE_OR_FILE COMMANDS [PARAMETERS]
+
+Global Options:
+  --help,-h             Display this message and exit 帮助
+  --version,-V          Print version information and exit 版本
+  --list,-l             List all disks in system and exit
+  --verbose,-v          Print verbose messages 更详细的输出信息
+
+Commands:
+  format                Format disk
+    --raw               Format with normal layout (not bootable) （格式化为通常模式，可以用于回收8m空间，不过fbinst的代码就清空了）
+    --force             Force the creation of data partition
+    --zip               Format as USB-ZIP
+    --align             Align to cluster boundary
+    --fat16             Format data partition as FAT16
+    --fat32             Format data partition as FAT32
+    --unit-size NUM     Unit size for FAT16/FAT32 in 512 bytes block
+    --base,-b NUM       Set base boot sector
+    --size,-s NUM       Set size of data partition 指定数据分区的大小
+  sync                  Synchronize disk information
+    --copy-bpb          Copy bpb from the first partition
+    --clear-bpb         Clear bpb in the boot sector
+  info                  Show disk information
+  update                Update boot code
+  load FILE             Load image file
+  clear                 Clear image file
+
+
+常见问题：
+1，USB-HDD/USB-ZIP模式
+在缺省情况下，fbinst会把u盘格式为HDD模式，在format里加了--zip参数后，会格式为ZIP模式。不过，fbinst所做的只是在MBR里设置一定的数值以影响bios的判断，但不同bios的检测算法有很大差别，因此很难保证一定可以检测为某个模式。
+
+一般来说，ZIP模式的兼容性更好一些。有些bios就不能识别格式为HDD的u盘。不过，ZIP模式启动后根设备是(fd0)，数据分区为(fd0,0)。目前grub4dos里使用(fd0,0)的一些限制，因此没有(hd0,0)来的方便。而且，据说ntldr也不能处理(fd0,0)分区。不过，其实可以用grub4dos里的map命令把(fd0)映射为(hd0)，这样使用起来就没有问题了。
+
+有些bios是根据数据分区里的微软标志MSWIN4.1和文件系统标志FAT16/FAT32来识别ZIP的。如果把数据分区格式化为NTFS，就可能跳过这两个标志而变为HDD模式。不过，格式化为NTFS后，mbr里的文件系统id改变了。fbinst缺省情况下会在0-63扇区里都保存启动扇区。要把0扇区里的id更新到其他启动扇区里，可以使用以下命令：
+
+fbinst (hd1) sync
+
+sync命令还可以把第一个分区的bpb复制到mbr里，只要加上--copy-bpb选项：
+
+fbinst (hd1) sync --copy-bpb
+
+其实，复制bpb的效果和--zip基本上一样，都会使u盘被检测为ZIP模式。不过，我不太赞成复制bpb，原因有两个。一是bios里对于bpb的检测，一般是按照FAT16的方式来进行的，如果数据分区是FAT32或者NTFS，复制bpb反而可能有副作用。二是，--zip不依赖于数据分区，只要在format里指定就行了。而复制bpb依赖于数据分区，分区结构改变后都需要使用sync同步。因此，建议先试试--zip，真的不行时才试试复制bpb。
+
+2，如何更新fbinst引导代码。
+更新有两种方法，一是format然后重新装载grldr文件。二是使用update命令。update只更新代码，比较方便，不过有时候不太彻底。format重新建立mbr里结构，就和初始化时一样。
+
+另外，不带--force命令时，format命令只会改动mbr的结构，不会格式化数据分区，是比较安全的方法。建议只在第一次建立u盘结构时使用--force，以后用普通的format命令来格式化。
+
+http://bbs.znpc.net/forum.php?mod=viewthread&tid=5664&extra=page%3D8
+bean发表于 2009-5-29 19:50  
+fbinst v1.4：增加文件管理功能
+
+format命令增加选项--primary和--extended，可以用于设置主数据区和扩展数据区的大小。取消了--reserve选项，因为--reserve其实就是--primary和--extended的总和。例子：
+
+fbinst (hd1) format --primary 10m --extended 20m --force
+
+由于文件不能跨越主数据区和扩展数据区。如果映像比8m稍大的话，以前版本必须再预留同样大小的扩展空间，现在则可以通过调整主数据分区的大小来解决。
+
+增加/更新文件：
+
+fbinst (hd1) add c:/aa.img "aa.img"
+
+另外，可以加上选项--extended，表示把文件保存在扩展数据区。--extended选项是对每个文件而言的，取消了config里的--extended-data。
+
+fbinst (hd1) add --extended c:/aa.img "aa.img"
+
+导出文件:
+
+fbinst (hd1) export "aa.img" c:/aa.img
+
+删除文件：
+fbinst (hd1) remove "aa.img"
+
+#2更新：
+
+info命令可以显示空闲空间。
+
+增加命令rename，可以重命令文件。如何目标文件已经存在，则先删除目标文件再进行重命令。
+fbinst (hd1) rename "aa_old.txt" "aa_new.txt"
+
+增加命令pack，用于压缩空闲空间。删除文件后留下空块。新加的文件会自动寻找合适的空间。不过增加和删除操作比较多后，会造成碎片。这个命令压缩空间，把空块都连接起来。
+fbinst (hd1) pack
+
+#3更新：
+
+保存文件创建时间，在info里可以看到。info里还显示文件是在主数据区或者扩展数据区（file后的数字0/1）。
+
+增加命令resize，可以用于改变文件大小/创建新文件，例如：
+
+fbinst (hd1) resize aa.txt 1024
+
+有两个选项，一是--extended，意义同add命令。不过，它只有创建新文件时有效，旧文件维持在原来的区域。另一个是--fill，当创建新文件/扩大文件时，缺省用0填充，用--fill可以指定填充字符的ascii码。例如：
+
+fbinst (hd1) resize --fill 32 aa.img 1024
+
+32就是空格。
+
+增加命令copy，可以复制文件。
+
+fbinst (hd1) copy aa_old.txt aa_new.txt
+
+复制的文件和原来文件在同一区域。
+
+rename命令改名为move。
+
+grub4dos也更新了，支持最新的fbinst，而且优化了(ud)设备，现在主数据区域里的文件也可以用write写入了。
+
+#4更新：
+clear命令增加选项--menu和--file，表示只清除菜单项（text, menu, boot）或者文件项。不带参数时全部清除。
+
+增加check命令，用于检查主数据区的完整性。
+
+#5更新：
+正确检测u盘容量，自动调整lba读取的扇区数。
+
+更新：
+增加--max-sectors参数。1.4正式版，下载在：
+http://download.gna.org/grubutil/
+附件
+ fbinst.zip (17.87 KB)
+2009-5-29 19:50, 下载次数: 702
+#1
+ grldr.zip (114.68 KB)
+2009-5-29 19:50, 下载次数: 627
+#1对应的grldr
+ fbinst.zip (18.31 KB)
+2009-5-29 21:53, 下载次数: 298
+#2
+ fbinst.zip (19.12 KB)
+2009-5-30 13:15, 下载次数: 356
+#3
+ grldr.zip (114.58 KB)
+2009-5-30 11:10, 下载次数: 937
+#3对应的grldr
+ fbinst.zip (19.46 KB)
+2009-5-30 22:29, 下载次数: 423
+#4
+ fbinst.zip (19.55 KB)
+2009-6-2 23:04, 下载次数: 630
+#5
+
+http://bbs.znpc.net/forum.php?mod=viewthread&tid=5669&extra=page%3D1&page=1
+bean发表于 2009-6-7 03:14
+fbinst v1.5：分离菜单文件，支持syslinux
+
+1.5版本里，菜单项在文件里指定。增加菜单文件的命令是：
+
+fbinst (hd1) add-menu fb.cfg c:\fb.txt
+
+该命令会解析菜单文件c:\fb.txt，生成二进制的菜单文件，并保存为ud设备的文件fb.cfg。
+
+fb.cfg是缺省的菜单文件，启动时会自动调用fb.cfg里的菜单。
+
+外部的菜单文本的命令有：
+
+default N
+设置缺省菜单项
+
+timeout N
+设置缺省等待时间
+
+text TEXT
+显示文本
+
+menu KEY sub_sys ..
+菜单项，key是热键，sub_sys是启动子系统，目前只支持grldr，可以启动grldr/g2ldr/ntldr。grldr后面的参数是文件名字。这里是指fb设备内部的文件，你需要用add命令把实际的文件加到ud设备里。
+
+还有一点，新的add命令顺序改变了。第一个参数是内部文件名字，第二个参数是外部文件名，这样是为了和其他的文件管理命令更加统一：
+
+fbinst (hd1) add grldr c:\grldr
+
+这是一个完整的例子：
+
+fbinst (hd1) format
+fbinst (hd1) add grldr c:\grldr
+fbinst (hd1) add ntldr c:\ntldr
+fbinst (hd1) add-menu fb.cfg c:\fb.txt
+
+fb.txt内容如下：
+default 0
+timeout 5
+text "Please choose menu"
+text "F1. grldr"
+menu F1 grldr grldr
+text "F2. ntldr"
+menu F2 grldr ntldr
+
+另外，新加命令cat，可以显示ud里的文本文件的内容：
+
+fbinst (hd1) cat aa.txt
+
+要显示菜单文件的内容，可以使用cat-menu：
+
+fbinst (hd1) cat-menu fb.cfg
+
+另外，新版本整合了一般版本和调试版本，使用--debug可选择调试版。update命令可以用于在一般版本和调试版本之间切换：
+
+切换到调试版：
+fbinst --debug (hd1) update
+
+切换到一般版：
+fbinst (hd1) update
+
+更新#2
+add-menu增加两个选项--append和--direct，--append用于向已有的菜单添加新项而不是重新创建。而--direct用于在命令行里传递参数而不是通过外部文件。例子：
+
+fbinst (hd1) add-menu --append --direct fb.cfg "text grldr_2" "menu F2 grldr grldr_2"
+
+支持syslinux。首先，下载syslinux代码包并解压里面的ldlinux.bin，把它加到ud设备，然后使用以下的菜单：
+
+text "F2. syslinux"
+menu F2 syslinux ldlinux.bin
+
+ldlinux.bin必须放在扩展数据区，否则出错。而且，在导入菜单时会自动修改ud里的ldlinux.bin使得它可以正常启动。如果更新了ldlinux.bin文件，必须再次导入菜单。
+
+我测试时利用syslinux-3.81，其他版本也应该可以。
+
+更新#3
+add命令增加--syslinux选项，在加入文件的同时就修改ldlinux.bin文件。在导入菜单时就不再修改了。改进了一下syslinux的处理，不需要重新读取文件。
+
+add-menu命令的--direct选项改为--string，短形式是-s。现在很多选项都有短形式，不需要输入很多字符了。
+
+text命令可以支持多个参数，在参数间自动加入空格，比如，以下的命令是等价的：
+
+text "aaa bbb ccc"
+text "aaa bbb" ccc
+text aaa bbb ccc
+
+text命令还加了参数-n，表示在输出后不换行，例如：
+text -n "aaa"
+text "bbb"
+输出是 aaabbb
+
+fb.txt里增加color命令，以选择文字颜色，颜色名字和grub4dos里相同：black, blue, green, cyan, red, magenta, brown, light-gray, dark-gray, light-blue, light-green, light-cyan,
+  light-red, light-magenta, yellow, white。前景和背景色间用/分割。背景色是黑色时可以省略。例如：
+
+color red/blue
+
+前景红色，背景蓝色。颜色还可以使用normal,表示正常颜色，相当于light-gray/black 前景白色，背景黑色。
+
+以下是一个例子：
+timeout 5
+color red
+text -n "F1. "
+color normal
+text syslinux
+menu F1 syslinux ldlinux.bin
+
+更新#4
+可以保存/恢复存档文件。
+
+建立存档文件利用save命令:
+
+fbinst (hd1) save aa.fba
+
+需要恢复时，使用load命令:
+fbinst (hd1) load aa.fba
+
+load命令不会删除原有的文件，不过有重名的情况下存档里的文件会覆盖原来的版本。如果想要(hd1)里的文件和aa.fba里一模一样，可以在load前运行format或者clear。
+
+保存时和恢复时，fb的结构不需要相同。主数据和扩展数据区的大小都可以不一样，只要保证空间足够就行了。而且文件的创建参数将会被保留。比如说，原有文件使用了--syslinux的，在恢复时也会加上--syslinux参数。
+
+fbinst里的大部分命令也能作用于存档文件，可以用它们来参看和编辑存档文件。以下命令是有效的：info,clear,add,add-menu,resize,remove,copy,move,export,cat,cat-menu,pack, save, load。例如:
+
+fbinst aa.fda info
+fbinst aa.fda cat-menu fb.cfg
+
+另外，修改了菜单按键的处理过程，不相关的键将被忽略而不是出错结束。
+
+删除了config命令。default和timeout参数需要在菜单里设置。
+
+format里--menu-size改为--list-size，因为现在菜单的大小没有限制了，--list-size设置的是文件列表的大小。
+
+更新#5
+format命令增加参数--archive，使用存档文件里的数据来格式化，例如：
+
+fbinst (hd1) format --archive aa.fba
+
+注意，如果在新u的盘里建立mbr结构，需要加上--force，不过这样的话也会重新格式化数据分区，慎用！
+
+格式化后主数据区和扩展数据区的大小和原来相同。
+
+另外，新版存档文件格式有所改动，和使用#4制作的不兼容。
+
+更新#6
+支持装载linux内核，比如说，你可以使用memdisk来虚拟磁盘：
+
+text "F3. memdisk"
+menu F3 linux "memdisk" "floppy.img" ""
+
+linux的三个参数分别是内核,initrd和命令行参数。
+
+更新#7
+增加msdos的支持。使用时，把io.sys加入ud设备，其他文件如CONFIG.SYS, COMMAND.COM 和 AUTOEXEC.BAT放在数据分区。菜单:
+
+text "F4. msdos"
+menu F4 msdos io.sys
+
+更新#8
+在装载linux内核时，显示装载进度。每隔512k打印一个点。
+
+
+http://bbs.znpc.net/forum.php?mod=viewthread&tid=5663&extra=&page=1
+发表于 2009-5-28
+fbinst启动问题专用贴
+
+目前1.5版本已经基本稳定，如何遇到还不能启动的主板，请用以下的方法进行测试。
+
+1，下载附件里的fbinst.exe和test.fba，用以下命令可以制作u盘（该命令会删除原有u盘的内容，务必留意，而且，需要把(hd9)改为正确的设备名）：
+
+fbinst --debug (hd9) format --archive test.fba --force
+
+2，启动成功的标准是可以进入grldr命令行，grub4dos使用以及PE相关的问题请不要在这里报告。
+
+3，如何不能启动，可以试一下fat16 + copybpb的方式。
+
+4，新版的format增加--max-sectors参数，用来设置最大读取的扇区数。数值为1时兼容性最高，不过速度也最慢。前面步骤都不成功建议试试用 --max-sectors 1 格式化：
+
+fbinst --debug (hd9) format --archive test.fba --force --max-sectors 1
+
+5，以上步骤都不能成功时，如果屏幕上没有任何显示，就是说u盘mbr完全被跳过，那样也没有什么办法。否则的话，把屏幕上的信息抄下来。
+附件
+ test.zip (114.81 KB)
+2009-6-19 23:28, 下载次数: 7800
+存档文件
+ fbinst.zip (24.31 KB)
+2009-6-19 23:28, 下载次数: 7329
+1.5
+
+http://bbs.wuyou.com/viewthread.php?tid=169595&highlight=fbinst%2B1.6
+最新 fbinst 1.6 正式版,8月10日更新,1楼有 FbinstTool 10601正式版
+详细可看http://www.burgloader.com/bbs/index.php?topic=54.0   注册后反馈！
+
+趁现在 bean 一直在关注 fbinst ，大家多多反馈，否则很可能又要等好久了！
+请大家把握这个难得的机会！
+例如：成功率？兼容性？文件列表？启动速度？各种模式？。。。。。。。
+也别光用了，不反馈！
+请大家详细测试，及时反馈，以便于 bean 大师及时更新，制作成功的 fbinst 为大家使用！
+我没有完整的测试环境，所以无法做更详细的报告！拜托大家..........................
+
+fbinst 菜单：
+1. menu HOTKEY SUBCOMMAND
+启动内核的命令都以menu开始，HOTKEY是对应的热键，子命令有
+
+  a) grldr FILENAME
+  启动grldr/ntldr文件
+
+  b) syslinux FILENAME
+  启动ldlinux.bin文件
+ 
+  c) msdos FILENAME
+  启动io.sys文件
+  
+  d) freedos FILENAME
+  启动kernel.sys文件
+
+  e) chain FILENAME
+  加载启动扇区文件
+
+  f) linux KERNEL INITRD PARAM
+  启动linux内核
+
+2. text STR
+显示一行文字
+
+3. timeout NUM
+设置自动启动的时间
+
+4. default NUM
+设置自动启动的menu项
+
+5. color FG/BG
+设置颜色，前景/背景的格式，颜色值有
+暗色：black, blue, green, cyan, red, magenta, brown, light-gray,
+亮色：dark-gray, light-blue, light-green, light-cyan, light-red, light-magenta, yellow, white
+
+背景只能使用暗色。也可以用normal来表示普通色，它相当于light-gray/black。
+
+举例：
+
+timeout 1
+default 0
+color red
+text "                          fbinst v1.6 menu by bean"
+text "                          ----------[01]----------"
+color green
+text "                          Press F1  > GRLDR"
+menu F1 grldr "grldr"
+color red
+text "                          ----------[02]----------"
+color green
+text "                          Press F2  > WDC-SYSLINUX"
+menu F2 syslinux "ibmlinux.bin"
+color red
+text "                          ----------[03]----------"
+color green
+text "                          Press F3  > MSDOS 7.1"
+menu F3 msdos "io.sys"
+color red
+text "                          ----------[04]----------"
+color green
+text "                          Press F4  > SKTQB"
+menu F4 grldr "SKTQB"
+color red
+text "                          ----------[05]----------"
+color green
+text "                          Press F5  > MaoTao WinPE"
+menu F5 grldr "LDRXPE"
+color red
+text "                          ----------[06]----------"
+color green
+text "                          Press F6  > XORLDR"
+menu F6 chain "XORLDR.MBR"
+color red
+text "                          ----------[07]----------"
+color green
+text "                          Press F7  > BULDR"
+menu F7 grldr "BULDR"
+color red
+text "                          ----------[08]----------"
+color green
+text "                          Press F8  > CJJJP"
+menu F8 grldr "CJJJP"
+color red
+text "                          ----------[09]----------"
+color green
+text "                          Press F9  > NTLDR"
+menu F9 grldr "NTLDR"
+color red
+text "                          ----------[10]----------"
+color green
+text "                          Press F10 > BOOTMGR"
+menu F10 grldr "BOOTMGR"
+color red
+text "                          ----------[11]----------"
+color green
+text "                          Press F11 > GMYghost.img"
+menu F11 linux "memdisk" "GMYghost.img" "c=142 h=4 s=36 floppy"
+
+U盘制作fbinst启动方法请见：
+http://bbs.wuyou.com/viewthread.php?tid=142426&extra=page%3D1
+http://bbs.wuyou.com/viewthread.php?tid=175985&extra=page%3D1
+http://bbs.wuyou.com/viewthread.php?tid=170034&extra=page%3D2
+
+更新历史：
+v11d:
+bean 大师测试此版没什么问题，就将此版定为正式版。
+【8月10日更新】
+* format命令增加参数--nalign，可以指定数据分区开始扇区的对齐，例如：
+fbinst DISK format --nalign 512
+
+* 增加命令create，可以用于创建空的存档文件，例如:
+fbinst ARFILE create
+v11c:【7月26日更新】
+* 在-l列表里，用*来表示fb设备
+v11b  :【7月16日更新】
+* 当数据大于20m时, add, export, save, load, format等命令显示进度。每个点代表5%。
+* 修正了进度条的一个bug
+* 在XP下强制格式化后更新u盘内容。
+v11:   【7月13日更新】
+* 当数据大于20m时, add, export, save, load, format等命令显示进度。每个点代表5%。
+v10b  【7月9日更新】
+* 调整了一下chs检测了代码。以前需要--chs选项才能启动的用户可以测试一下这个版本，看在没有--chs的情况下是否正常。
+v10:
+* 修改了一下chs模式的测试
+* initrd装载地址改为32m
+v9b:
+* sync命令增加选项--reset-bpb
+* info命令显示bpb的三种状态，copy, init和zero
+* 在搜索文件时忽略大小写
+v9:
+* sync命令增加选项--reset-bpb
+* info命令显示bpb的三种状态，copy, init和zero
+v8:
+* 修正了linux命令的问题
+* 支持最新的syslinux 4
+* 增加菜单命令chain，可以启动mbr文件，例如：
+text "F4. chainload MBR"
+menu F4 chain mbr.bin
+v7:
+* 修正了菜单文件fb.cfg超过512时出问题的bug
+* export和add命令里的FILE参数可以省略，这时，将从标准输入和输出读取数据，例如：
+cat aa | fbinst DISK add aa
+fbinst DISK export aa > aa
+* sync命令增加--max-sectors, --chs和--zip参数，不需要format命令就可以修改这些参数。
+* export命令会自动创建输出文件的父层目录
+* info命令增加debug version和copy bpb的信息
+* 修正了FAT32格式化的bug，现在最大可以支持2T
+v5：
+* 在没有--force时不锁定磁盘
+v4:
+* 可以读取编辑过的fba文件
+* 增加fba文件的format option输出
+* 根据fb mbr没有初始化和被覆盖显示不同的信息：fb mbr not initialized, fb mbr corrupted。后者可以用restore命令恢复。
+v3:
+* 缺省列表使用最大值456960。
+* format命令增加参数--chs，强制使用chs模式。这可以用于某些不能自动检测模式的bios。
+* info命令新增输出format options，显示格式化参数。
+格式化参数只有-p,-e,-l,--zip, --chs, --max-sectors的值，没有数据分区格式化的参数（它们无法自动检测）。而且，如果某一数值和缺省值相同时，将不会显示。-l里显示的数值将上调到510的倍数（实际保存的数值是以扇区为单位的）。
+chenall :新的GRUB4DOS已经上传,有条件的朋友请测试一下。
+下载地址:
+http://grub4dos-chenall.googlecode.com/files/grub4dos-0.4.5b-2010-06-21.zip
+2010-06-21 applied bean's patch(supported new (ud) device created with fbinst1.6).
+V2:   
+  （2010年6月19日更新）
+* 支持大的文件列表。当前缺省值是32640，最大可支持456960。
+  (天涯海角1216注：这个对与UD区放入多个文件很有效，防止出现文件列表不够)
+* 增加缺省启动文件。如果fb里没有配置菜单fb.cfg，则自动启动buldr。
+* 支持使用盘符来表示设备，比如：
+fbinst F: info
+fbinst F: format
+(hdx)的形式依然支持，不过使用盘符更加直观。
+这个版本里磁盘存储结构有较大改变，以前的grldr和buldr都用不了。测试时请用附件里文件。
+bean 用最新版本的fbinst制作了一个burg的fba，里面包含了所有的风格：
+http://grub4dos.sourceforge.net/burg_fba_v2.zip
+fbinst编译脚本说明：
+首先，需要下载burg的编译包，然后把附件grubutil_scripts.zip解压到msys的bin目录里。
+grubutil_dirs
+这个文件设置路径。SRCDIR是源码的存放目录，OBJDIR是编译文件目录。
+grubutil_update
+下载最新代码
+grubutil_compile
+编译代码
+V1:
+（2010年6月17日更新）
+支持windows vista/7（需要提升至管理员权限），现在格式化后会remount分区，不需要弹出u盘。
+将新版 fbinst.exe 与 FbinstTool 放在同一个目录下，再选外置FBINST即可。
+或
+例子：
+fbinst (hdx) format --force --primary 10m --extended 40m --menu-size 4096 --align --zip
+

@@ -1,0 +1,71 @@
+= 实现samba与系统密码同步 =
+  实际上配置samba与系统密码同步的原理十分简单，我们都知道密码都是由Pam进行管理的，理论上，当我们使用命令来修改系统密码的时候是调用了pam的密码管理机制，才修改成功的，那么我们其实只要在Pam里加上当修改系统密码的时候也一起让pam把samba的密码给修改掉，我们就赢了~~
+
+  于是带着这样的想法，我们找到了一个模块，samba官方提供的专门用于使用pam来管理密码的模块：pam_smbpass.so
+
+  它的位置位于：
+x86 : /lib/security/pam_smbpass.so
+x64 : /lib64/security/pam_smbpass.so
+
+  然后我们只需要将这个模块加入到密码验证的机制里即可：
+vim /etc/pam.d/system-auth
+
+编辑system-auth这个pam文件
+
+修改里面的password段插入一行新的password行（这里我的system-auth的配置，注意我加了一行关于pam_smbpass.so的内容）：
+
+auth        required      pam_env.so
+auth        sufficient    pam_unix.so nullok try_first_pass
+auth        requisite     pam_succeed_if.so uid >= 500 quiet
+auth        required      pam_deny.so
+
+account     required      pam_unix.so
+account     sufficient    pam_succeed_if.so uid < 500 quiet
+account     required      pam_permit.so
+
+password    requisite     pam_cracklib.so try_first_pass retry=3
+password    required      /lib64/security/pam_smbpass.so nullok use_authtok try_first_pass
+password    sufficient    pam_unix.so md5 shadow nullok try_first_pass use_authtok
+password    required      pam_deny.so
+
+session     optional      pam_keyinit.so revoke
+session     required      pam_limits.so
+session     [success=1 default=ignore] pam_succeed_if.so service in crond quiet use_uid
+session     required      pam_unix.so
+
+然后保存，这时理论上，当你修改系统密码的时候，关联的这个模块也会修改samba的密码。
+
+但是这还不够，我们还要对samba进行一些设置：
+vim /etc/samba/smb.conf
+
+在[global]段设置samba的加密方式为：
+
+        security = user
+#      passdb backend = tdbsam
+        encrypt passwords = yes
+        smb passwd file = /etc/samba/smbpasswd
+        pam password change = yes
+
+注意，请务必注释掉默认的passdb backend = tdbsam项
+
+然后重启samba:
+/etc/init.d/smb restart
+
+如果一切正确的话，在/etc/samba下应该已经有一个 smbpasswd这个文件了。这个文件里记录的就是所有可以登陆samba的用户以及密码，初始情况下应该是空才对。
+
+说明一点：
+    samba3.x的早期版本默认使用tdb库也就是smb.conf默认设定为passdb backend = tdbsam，只需要注释掉该行添加smb passwd file = /etec/samba/smbpasswd即可使用smbpasswd存储加密密钥。
+    从samba3.5.6开始samba规范了passdb backend参数的使用，取消了smb passwd file设定，如果简单注释掉passdb backend参数，密钥文件也不会被存储到smbpasswd。所以很多人说怎么修改smb.conf的配置，smbpasswd文件都无法生成，就算手工创建，内容也是0字节。要用传统的文本方式存储只需这样设定
+    passdb backend = smbpasswd:/etc/samba/smbpasswd（后面跟的是绝对路径）
+   不要再写smb passwd file = /etc/samba/smbpasswd，该参数已经不适用于新版本的samba了。
+
+接下来就需要我们手动使用smbpasswd –a 往里添加用户了。
+
+注意：只有在smbpasswd中已经存在的系统用户，当你修改该系统用户的密码的时候，才会一同修改smbpasswd中的用户。
+
+这样，我们就达成了让用户从Web修改自己用户系统密码，然后同步到smb的任务。
+
+pam password change = no
+passwd chat = **NEW*UNIX*password* %n\n *Retype*new*UNIX*password* %n\n *successfully*
+passwd program = LANG=en_US /usr/bin/passwd %u
+unix password sync = yes

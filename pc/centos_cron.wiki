@@ -1,0 +1,192 @@
+crontab命令常见于Unix和Linux的操作系统之中，用于设置周期性被执行的指令。
+该命令从标准输入设备读取指令，并将其存放于"crontab"文件中，以供之后读取和执行。
+
+在Linux系统中，Linux任务调度的工作主要分为以下两类：
+1、系统执行的工作：系统周期性所要执行的工作，如备份系统数据、清理缓存
+2、个人执行的工作：某个用户定期要做的工作，例如每隔10分钟检查邮件服务器是否有新信，这些工作可由每个用户自行设置
+
+一、/etc/crontab、/etc/cron.deny 、 /etc/cron.allow文件介绍
+
+系统调度的任务一般存放在/etc/crontab这个文件下，里面存放了一些系统运行的调度程序，通过命令我们可以看一下里面的内容：
+
+[root@xiaoluo ~]# cat /etc/crontab 
+SHELL=/bin/bash
+PATH=/sbin:/bin:/usr/sbin:/usr/bin
+MAILTO=root
+HOME=/
+
+# For details see man 4 crontabs
+
+# Example of job definition:
+# .---------------- minute (0 - 59)
+# |  .------------- hour (0 - 23)
+# |  |  .---------- day of month (1 - 31)
+# |  |  |  .------- month (1 - 12) OR jan,feb,mar,apr ...
+# |  |  |  |  .---- day of week (0 - 6) (Sunday=0 or 7) OR sun,mon,tue,wed,thu,fri,sat
+# |  |  |  |  |
+# *  *  *  *  * user-name command to be executed
+
+
+这些任务都会是系统在运行起来后自动进行调度的。同时在/etc目录下还存放了/etc/cron.deny 和 /etc/cron.allow 文件
+
+/etc/cron.deny 表示不能使用crontab 命令的用户
+/etc/cron.allow 表示能使用crontab的用户。
+
+如果两个文件同时存在，那么/etc/cron.allow 优先。 
+如果两个文件都不存在，那么只有root用户可以安排作业。
+
+二、crontab命令语法及其各个参数含义
+
+crontab命令的语法为：
+
+crontab [-e [UserName]|-l [UserName]|-r [UserName]|-v [UserName]|File ] 
+
+注意：crontab 是用来让使用者在固定时间或固定间隔执行程序之用，换句话说，也就是类似使用者的时程表。-u user 是指设定指定 user 的时程表，这个前提是你必须要有其权限(比如说是 root)才能够指定他人的时程表。如果不使用 -u user 的话，就是表示设定自己的时程表。
+
+各个参数说明：
+
+-e [UserName]: 执行文字编辑器来设定时程表，内定的文字编辑器是 vi
+-r [UserName]: 删除目前的时程表
+-l [UserName]: 列出目前的时程表
+-v [UserName]:列出用户cron作业的状态
+
+三、crontab命令的格式
+
+我们如果要创建自己的一个任务调度，可以使用  crontab -e 这个命令，如：
+
+[root@xiaoluo ~]# crontab -e
+
+此时会进入到vi编辑界面，来编写我们要调度的任务，crontab调度命令的格式如下：
+
+* * * * * command path　　// 前五个字段可以取整数值，指定何时开始工作，第六个域是字符串，即命令字段，其中包括了crontab调度执行的命令。 各个字段之间用spaces和tabs分割。
+
+调度命令的规则：
+字段名称 -- 说明                 -- 取值范围
+分钟     -- 每小时的第几分钟执行 -- 0-59
+小时　　 -- 每日的第几个小时执行 -- 0-23
+日期     -- 每月的第几天执行     -- 1-31
+月历     -- 每年的第几月执行     -- 1-12
+星期     -- 每周的第几天执行     -- 0-6
+命令名   -- 欲执行的命令及参数   --
+
+crontab命令中的一些常用特殊符号：
+符号　 -- 说明
+*      -- 表示任何时刻
+,      -- 表示分割
+－     -- 表示一个段，如第二段里： 1-5，就表示1到5点
+/n     -- 表示每个n的单位执行一次，如第二段里，*/1, 就表示每隔1个小时执行一次命令。也可以写成1-23/1.
+
+
+ 43 21 * * *                -- 每天的21:43 执行
+ 15 05 * * * 　　           -- 每天的05:15 执行
+ 0 17 * * *                 -- 每天的17:00 执行
+ 0 17 * * 1                 -- 每周一的 17:00 执行
+ 0,10 17 * * 0,2,3          -- 每周日,周二,周三的 17:00和 17:10 执行
+ 0-10 17 1 * *              -- 毎月1日从 17:00到7:10 毎隔1分钟 执行
+ 0 0 1,15 * 1               -- 毎月1日和 15日和 一日的 0:00 执行
+ 42 4 1 * * 　              -- 毎月1日的 4:42分 执行
+ 0 21 * * 1-6　　           -- 周一到周六 21:00 执行
+ 0,10,20,30,40,50 * * * *　 -- 每隔10分 执行
+ */10 * * * * 　　　　　    -- 每隔10分 执行
+ * 1 * * *　　　　　　　　  -- 从1:0到1:59 每隔1分钟 执行
+ 0 1 * * *　　　　　　　　  -- 1:00 执行
+ 0 */1 * * *　　　　　      -- 毎时0分 每隔1小时 执行
+ 0 * * * *　　　　　　      -- 毎时0分 每隔1小时 执行
+ 2 8-20/3 * * *　　　       -- 8:02,11:02,14:02,17:02,20:02 执行
+ 30 5 1,15 * *　　　　      -- 1日 和 15日的 5:30 执行
+
+四、创建我们自己的crontab命令
+
+①实例一：如果我希望每隔一分钟，就将系统的时间写入到/home目录下的date1.txt文件里面，则输入下面的命令
+
+[root@xiaoluo ~]# crontab -e
+
+在crontab命令编辑界面输入crontab命令：　　* * * * * date >> /home/date1.txt　　
+(前面五个* * * * *表示时间是每隔一分钟  date命令就是得到当前的系统时间， >> 命令表示将结果累加到文件后面 > 命令则表示将结果覆盖文件 )
+
+保存以后如果出现crontab: installing new crontab 这句话，则表示该调度命令已经成功
+
+我们可以到/home目录下看是否已经存在了该文本文件，并查看里面的信息：
+
+[root@xiaoluo home]# cat date1.txt 
+Sat Apr  6 16:15:09 CST 2013
+Sat Apr  6 16:16:02 CST 2013
+Sat Apr  6 16:17:01 CST 2013
+
+此时我们发现，我们刚才编写的那个crontab命令已经正常在运行了，只要没有执行终止命令或者系统关机，这个命令就会一直执行下去
+
+②实例二：如果我们需要同时完成两件命令，即每隔一分钟就将系统时间写入到/home目录下的date1.txt文件里面，同时再每隔一分钟将该date1.txt文件拷贝到/目录下生成一个date2.txt的文件。这时我们通常该怎么做呢？方法有两种：
+
+a) 最简单最直接的方法(不推荐)：直接输入crontab -e 命令，在后面再追加一个命令即可，如：
+
+[root@xiaoluo ~]# crontab -e
+
+* * * * * date >> /home/date1.txt
+* * * * * cp /home/date1.txt /date2.txt
+
+最后我们退出保存即可，此时我们可以发现/目录下已经有了date2.txt这个文件了，打开后可以看到其内容和date1.txt一样：
+
+虽然这种方法比较简单，但是并不推荐这种，因为如果命令一多的话，并且如果我需要不同用户执行不同的命令时，这种方法在维护起来不方便，所以这里介绍另外一种方法。
+
+b) 首先编写一个可执行的sh文件，然后将我们要执行的任务写着sh文件里面，最后通过crontab来执行我们的sh文件即可(推荐)
+
+首先我们在/目录下编写一个task.sh的文件，里面的内容就是我们刚要执行的两条命令：
+
+[root@xiaoluo /]# vi task.sh
+
+task.sh里面的命令
+date >> /home/date1.txt
+cp /home/date1.txt /date3.txt
+
+此时我们的task.sh还不是可执行文件，通过ls -l命令我们可以看到
+
+-rw-r--r--.   1 root root    54 4月   6 16:27 task.sh　　//tash.sh是不可执行的，我们要修改其权限
+
+所以我们需要通过chmod命令来修改task.sh的权限：
+
+[root@xiaoluo /]# chmod 744 task.sh
+
+此时再查看，就发现task.sh已经是可执行文件了：
+
+-rwxr--r--.   1 root root    54 4月   6 16:27 task.sh
+
+然后我们输入crontab -e 命令，将之前的两条命令删除掉，或者在前面加 # 号注释掉：
+
+#* * * * * date >> /home/date1.txt
+#* * * * * cp /home/date1.txt /date2.txt
+
+* * * * * /task.sh
+
+这时我们发现根目录下面已经存在了date3.txt文件了，打开就可以发现里面的内容为：
+复制代码
+
+
+五、crontab的其他一些命令
+
+如果我们需要列出自己创建的任务调度都有哪些命令，可以使用 crontab -l 命令来查看
+
+[root@xiaoluo /]# crontab -l
+#* * * * * date >> /home/date1.txt
+#* * * * * cp /home/date1.txt /date2.txt
+
+* * * * * /task.sh
+
+如果我们需要终止自己刚创建的任务调度，则使用 crontab -r 命令即可
+
+[root@xiaoluo /]# crontab -r
+
+此时我们可以发现，crontab里面的任务都已经没有了
+
+六、cron服务的启动
+
+我们可以通过 chkconfig --list | grep cron 命令来查看cron服务的启动情况：
+
+[root@xiaoluo home]# chkconfig --list | grep cron
+crond              0:关闭    1:关闭    2:启用    3:启用    4:启用    5:启用    6:关闭
+
+我们可以看到，系统启动级别如果是1-4，cron服务都会开机自动启动的，我们可以通过如下命令来设置该服务的启动项：
+
+/sbin/service crond start / stop / restart / reload
+以上1-4行分别为启动、停止、重启服务和重新加载配置。
+
+要把cron设为在开机的时候自动启动，在 /etc/rc.d/rc.local 脚本中加入 /sbin/service crond start 即可。

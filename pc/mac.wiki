@@ -1,0 +1,149 @@
+== Option 2 (GPT, one partition): ==
+Code (Text):
+
+# repartition /dev/disk1 GPT, one partition
+# EFI will be created automatically
+# second partition, "install_osx", HFS+J, remainder
+diskutil partitionDisk /dev/disk1 1 GPT HFS+J "install_osx" R
+ 
+ 
+1. 一个mac环境
+2. 两只16G容量以上的U盘（最好是USB3.0的）
+3. 一块64G以上的SSD固态硬盘（机械硬盘）
+4. 一台你准备要黑的PC机
+苹果环境主要用于创建安装盘、安装clover（引导系统）、以及对config.plist修改调试。
+
+= 1. 创建安装盘 =
+    在mac系统里，打开app store，登录你的apple ID，下载最新版macOS Sierra，目前最新版是10.12.1（16B2657）。下载好以后它应该躺在你的“应用程序”文件夹里，名字为“安装 macOS Sierra.app“。
+    现在插入你的一只U盘，在lanuchpad里打开”终端“程序，按以下步骤输入：
+第一步，敲“sudo”（无引号）
+第二步，空格
+第三步，拖拽文件“createinstallmedia”到终端（文件位置在“安装 macOS Sierra.app”-右键-显示包文件-Contents-Resources里）
+第四步，敲“--volume”（无引号）
+第五步，空格
+第六步，从桌面把你之前插入的U盘的图标拖进终端
+第七步，敲“--applicationpath”（无引号）
+第八步，空格
+第九步，拖“应用程序”里的“安装 macOS Sierra.app”到终端
+第十步，敲“--nointeraction”（无引号）
+
+第十一步，回车
+第十二步，输入密码（密码不显示）
+回车，静待安装盘建立完成。
+
+  可以简化为一个终端命令：
+    sudo /Applications/Install\ macOS\ Sierra.app/Contents/Resources/createinstallmedia --volume /Volumes/Untitled（你的U盘名称） --applicationpath /Applications/Install\ macOS\ Sierra.app --nointeraction
+
+= 2. 创建引导盘 =
+
+    clover（四叶草）是目前主流的黑苹果引导软件，地址：https://sourceforge.net/projects/cloverefiboot/?source=typ_redirect
+
+  解压后得到一个clover_v2.3k_r3922.pkg。现在插入第二只u盘，将U盘在磁盘工具里用MS-DOS(FAT)格式抹掉，名称为EFI，方案为“主引导记录”。接下来双击运行“clover_v2.3k_r3922.pkg”，更改安装位置为你这只名字为EFI的U盘，选择自定安装，仅勾选前两项。
+    输入密码，完成安装。
+
+== config.plist ==
+
+    现在安装盘、引导盘都有了，可是先别急，你面前还有一个“大魔头”：config.plist ，位于U盘EFI的EFI>CLOVER目录下
+
+    安装前你需要对它进行修改，这时你又需要一个工具：Clover Configurator。目前最新版4.34
+    下载解压后，得到Clover Configurator.app，把它拖到“应用程序”文件夹。
+
+    用“文本编辑”程序在你的苹果电脑桌面建立一个空白文档，保存，退出“文本编辑”，然后把这个文件改名叫“config.plist"。（注意，要在“Finder偏好设置-高级”里先勾选“显示所有文件扩展名”）
+
+    右键这个文件，选择“用Clover Configurator.app打开”。
+
+  第一页“Acpi”这边，按右上位置的加号，增加两行内容，双击填写。具体如下图： 这一页的其他内容不用管，下面相同。
+
+  点进“Kernel and Kext Patches”这一页，同样方法增加以下内容：
+
+  点进“System Parameters”这一页，按下图修改以下内容：
+
+  command S保存，command Q退出Clover Configurator。
+
+  config.plist拖到启动U盘EFI的EFI>CLOVER目录下覆盖
+
+== kexts ==
+
+  来到启动U盘EFI的EFI>CLOVER>kexts>，把下面这个文件解压后放到10.12这个文件夹里去。kexts文件夹里的其他目录可以删掉。
+  至此，你安装macOS所用的两个U盘就制作完成了。下面转战到你的准备黑的PC机那边。
+
+= 3. 设置BIOS。 =
+    开机按del键，进入BIOS。
+（1）peripherals（外围设备）页：“支持传统USB规格设备”、“XHCI Hand-off”两项设置为“开启”；
+（2）chipset（芯片集）页：“VT-d（虚拟机功能）”、“Internal Graphics（集合显卡）”两项设置为“Disabled”。
+    保存退出，重启。
+
+= 4. 启动安装 =
+
+  EFI的启动U盘，插在电脑上，开机后进入BIOS，选择从这只U盘启动，来到了clover引导界面。这时插入第一只U盘（mac安装盘），相应的启动选项会立刻跳出来。
+  按下回车，如果你足够幸运，在读取一阵进度条之后，就会来到了欢迎界面。
+
+  当然，十有八九你是没那么好命的。没关系，拔掉你的EFI启动U盘，到mac环境下去做些修改。
+  
+  用Clover Configurator打开U盘里的config.plist，在SMBIOS那一栏点魔法棒图标，把机器型号先改成iMac(14,1)，存盘退出。（针对黑屏）
+    
+    顺便再给config.plist文件添个小功能，这个事儿Clover Configurator做不了，我得再给你个小工具。
+  下载后解压，得到一个PlistEdit Pro.app，把它拖到应用程序文件夹。右键config.plist，选择用PlistEdit Pro.app打开。
+  在Root下面，ACPI之后，添加一个“new child”，起名叫Boot，“class”改成“dictionary”。Boot下面新建一个“新孩子（new child）”，起名叫Arguments，“class”为“string”，“value”栏写一个"-v"
+  Command S，Command Q。
+
+  上面做的是给config.plist添加一个verbose参数，俗称啰嗦模式，
+  
+  把你的EFI拔下来再插到黑苹果上，重复启动步骤。
+
+  进去了么？还是没进去。好吧，我再把我压箱底的东西给你。
+
+    下载这个文件，解压后得到一个drivers64UEFI文件夹，把它拖到U盘的CLOVER文件夹，覆盖原来的那个。
+    再去试试吧。
+    基本上来说，在我技嘉的两块主板上，经过这么一番折腾，黑苹果都是可以顺利安装的。
+
+config.plist这个配置文件是整个clover的灵魂，“clover图文详解”，用Clover Configurator和PlistEdit Pro这两个工具逐项看看，修改试试
+但一定要遵循一个原则：针对安装阶段的config.plist配置，一定要简单简单再简单，多余的选项一个也不要选。
+
+== mac系统的驱动程序 ==
+
+mac系统的绝大部分驱动，存放在\系统\资源库\Extensions这个目录，英文版的话就是\System\Library\Extensions，高手一般简称\S\L\E。驱动程序后缀名一般为kext
+
+clover帮你想了新点子，那就是在它的自己一套体系里添加。具体方法是，你可以将几乎所有你必须用到但却被mac系统视为非法的kext文件扔到一个目录里，clover自己帮你使它们变得有效。这个目录是EFI启动分区的EFI>CLOVER>kext>（相对应的mac版本，我们现在是）10.12。
+
+好了，理论知识就先说这么多，我们现在动手操作。现在还要最后一次用到你之前的那个mac环境，把启动U盘EFI从黑苹果上拔下来，插到先前你做启动盘的那个电脑上，把下面这个附件下载下来，解压，然后拷到U盘的EFI>CLOVER>kext>文件夹中去。
+
+说明：我在这个文件夹里放了网卡驱动（适用于我的技嘉主板，其他未验证）、USB通用驱动、ALC声卡驱动以及之前的FakeSMC.kext，这些都是最基本要用到的。目前黑苹果屏幕显示太别扭了，接下来我们先把显卡搞定。
+
+还是用这只U盘引导，启动黑苹果，进入系统后你发现应该可以上网了。网卡是否能工作可以到“系统偏好设置-网络”里去看一下：
+
+我们接下来在把clover装在硬盘上，这样以后你就可以脱离U盘了。BTW，我发现最新版的clover似乎有些问题，这里建议你下载一下前一版的clover_3911，你要是像我一样PB币吃紧的话就还用3922也问题不大。
+
+安装之前还有个事儿（我真是想到哪说哪），macOS10.12有个很讨厌的修改就是它认为不安全的软件它都默认禁止安装了，我们先把它改过来。
+
+打开终端，输入 “sudo spctl –master-disable”，回车，输入密码，回车，搞定！
+
+好，安装clover，这次装在你mac的系统盘上，选项如下：
+
+插一句，因为写这个东西，我把之前安装黑苹果的步骤也都做了一遍，我发现之前在11楼写的在U盘上安装clover的步骤有点问题，如果你是读到这里再做的，请把Drivers64EFI这个选项也勾上。
+
+点“安装”，安装完成后，桌面上会多了个EFI的盘符，点开，把你启动U盘EFI里的config.plist文件、kexts文件夹这些东西都拷到你硬盘EFI>CLOVER的相应位置上去。
+
+想办法把Clover Configurator.app这个程序拖到你黑苹果的“应用程序”文件夹。
+
+右键这个新位置的config.plist,用Clover Configurator打开，修改以下内容：
+
+（修改声卡启动项）
+
+（勾选NvidiaWeb）
+
+接下来装显卡驱动。显卡驱动比较特别，不是放在kexts里面，要单独安装，我是N卡的750Ti和970，对于N卡7xx之后10xx之前的显卡，统一安装NVIDIA公司的WebDriver这个软件即可，其他的显卡驱动，还是要麻烦自行寻找。
+
+WebDriver这个驱动比较扯，针对每一个mac系统小版本号，都有一个特殊的对应版本，我们安装的这一版10.12.1，对应的WebDriver版本号是367.15.10.15f03，这个程序太大我没法上传了，我帮你找到了它的官方下载地址是：http://www.nvidia.com/download/driverResults.aspx/110856/en-us ，下载估计需要翻墙。实在有困难的同学在下面留下邮箱我发给你。
+
+安装界面长这样：
+
+安装完以后要求重启，让它重启。
+
+重启后按del进入BIOS，把你mac系统硬盘固定为第一启动项。
+
+进入mac系统后，看看你的显卡和声卡是否都正常工作了。
+
+显卡声卡网卡大概就是这样，能正常工作的话，你的电脑基本就不算个半残了。这里再次强调，因为硬件千差万别，你的驱动安装过程可能没有这么顺利，还是会出现罢工的情况，这个就需要你去多多了解适合你硬件的驱动程序了。不管怎样，安装的原理差不多就是这样。
+
+

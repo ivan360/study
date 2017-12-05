@@ -1,0 +1,112 @@
+
+--------------------------------------------------
+= yum =
+--------------------------------------------------
+yum whatprovides libstdc++.so.6
+部分常用的命令包括：
+yum install yum-fastestmirror -- 自动搜索最快镜像插件：
+yum install yumex             -- 安装yum图形窗口插件：
+yum grouplist                 -- 查看可能批量安装的列表：
+
+1. 安装
+yum install            -- 全部安装
+yum install package1   -- 安装指定的安装包package1
+yum groupinsall group1 -- 安装程序组group1
+
+2. 更新和升级
+yum update             -- 全部更新
+yum update package1    -- 更新指定程序包package1
+yum check-update       -- 检查可更新的程序
+yum upgrade package1   -- 升级指定程序包package1
+yum groupupdate group1 -- 升级程序组group1
+
+3. 查找和显示
+yum info package1    -- 显示安装包信息package1
+yum list             -- 显示所有已经安装和可以安装的程序包
+yum list package1    -- 显示指定程序包安装情况package1
+yum groupinfo group1 -- 显示程序组group1信息yum search string 根据关键字string查找安装包
+
+4. 删除程序
+yum remove / erase package1 -- 删除程序包package1
+yum groupremove group1      -- 删除程序组group1
+yum deplist package1        -- 查看程序package1依赖情况
+
+5. 清除缓存
+yum clean packages       -- 清除缓存目录下的软件包
+yum clean headers        -- 清除缓存目录下的 headers
+yum clean oldheaders     -- 清除缓存目录下旧的 headers
+yum clean, yum clean all -- 清除缓存目录下的软件包及旧的headers
+
+比如，要安装游戏程序组，首先进行查找：
+yum grouplist                              -- 可安装的游戏程序包名字是"Games and Entertainment"
+yum groupinstall "Games and Entertainment" -- 所有的游戏程序包就自动安装了
+
+yum groupinstall "KDE (K Desktop Environment)"
+yum install pirut k3b mikmod
+yum groupinstall "Server Configuration Tools"
+    "Sound and Video"
+    "GNOME Desktop Environment"
+    "Legacy Software Support"
+    "Development Libraries"
+    "Development Tools"
+    "Windows File Server"
+    "System Tools"
+    "X Window System"
+yum install php-gd
+yum install gd-devel
+yum groupinstall "Chinese Support"
+
+yum install samba-common samba
+yum install gcc
+    cpp
+    gcc
+    gcc-c++
+    ncurses
+    ncurses-devel
+    gd-devel
+    gd-devel php-gd
+    zlib-devel
+    freetype-devel freetype-demos freetype-utils
+    libpng-devel libpng10 libpng10-devel
+    libjpeg-devel
+    ImageMagick
+    php-gd
+    flex
+    ImageMagick-devel
+
+yum install system-config-bind         
+yum groupinstall "DNS Name Server"      //安裝 bind 及 bind-chroot 套件
+yum groupinstall "MySQL Database"'
+
+yum clean all
+
+-----------------------------------------------------------------------------------------------------------
+
+1.yum.conf的配置文件
+vim /etc/yum.conf
+    [main]
+    cachedir        = /var/cache/yum： -- yum缓存的目录，yum在此存储下载的rpm包和数据库，一般是/var/cache/yum。
+    keepcache       = 0
+    debuglevel      = 2                -- 除错级别，0──10,默认是2
+    logfile         = /var/log/yum.log -- yum的日志文件，默认是/var/log/yum.log。
+    exactarch       = 1                -- 有两个选项1和0,代表是否只升级和你安装软件包cpu体系一致的包，如果设为1，则如你安装了一个i386的rpm，则yum不会用686的包来升级。
+    obsoletes       = 1
+    gpgcheck        = 1                -- 有1和0两个选择，分别代表是否是否进行gpg校验，如果没有这一项，默认好像也是检查的。
+    plugins         = 1
+    metadata_expire = 1800
+
+yum localinstall wine-* -- 本地自动安装所有的依赖关系
+yum localupdate wine-*  -- 本地自动更新
+
+1. 安装图形版yumex：yum install yumex。
+2. 安装额外的软件仓库
+    rpm.livna.org 的软件包仓库:
+    rpm -ivh http://livna-dl.reloumirrors.net … ease-7-2.noarch.rpm
+
+    freshrpms.net 的软件包仓库:
+    rpm –ivh http://ftp.freshrpms.net/pub/fre … 1.1-1.fc.noarch.rpm
+
+3. 安装最快源
+yum install yum-fastestmirror
+
+#vim:set ft=txt:

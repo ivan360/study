@@ -1,0 +1,58 @@
+--------------------------------------------------
+= linux学习与实践 =
+--------------------------------------------------
+1. linux入门笔记
+[[Linux入门基础]]
+[[linux_study_notes]] -- linux学习笔记
+[[linux_NG]]          -- 鸟哥的Linux私房菜
+[[linux练习笔记]]
+
+2. centos安装及设置
+[[centos_setup]]      -- 安装centos系统
+[[centos7_setup]]
+[[centos7_passwd]] --修改root密码
+[[Linux将中文目录名改为英文]]
+[[centos.systemctl]]
+[[centos.yum]]
+[[centos_PS1_color]]  -- centos颜色配置
+[[centos_soft]] --建立本地源
+
+3. linux系统常用命令
+[[shell快捷键]]
+[[centos_command]]    -- centos 常用命令
+[[centos_cip]] 调整挂载点磁盘配额 扩展分区大小
+[[centos.jobs]] --后台任务执行相关命令
+[[centos.kill]]
+centos.top
+centos.ps
+centos.pgrep
+centos.free
+[[centos_cron]]       -- crontab命令的使用方法
+[[nmap]]
+[[ftp]]
+[[timedatectl]]
+[[find.grep]]
+[[iconv.linux]]
+
+4. 分区与硬盘格式
+ll /dev/disk/by-uuid --查看硬盘uuid
+[[ntfs.3g]]--挂载ntfs硬盘
+[[parted.mount]]--parted分区格式及挂载
+[[quest_for]]
+
+5. linux常用软件
+
+6. centos7技巧
+[[centos7.skill]]
+[[lsblk.centos]]
+[[删除乱码文件]]
+[[centos.rpm]]
+[[centos.raid]]
+[[centos.mail]]
+[[centos.smartctl]]
+[[监控脚本]]
+[[linux备份脚本]]
+[[Linux系统巡检常用命令]]
+error [[network.service]]
+[[lvm]]
+[[install_thunderbird]]

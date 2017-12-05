@@ -1,0 +1,24 @@
+在 CentOS/RHEL 7/6 系统上，你需要安装下面的安装包：
+
+    # yum install yum-cron -y
+
+在 CentOS/RHEL 7　系统上启用自动安全更新
+
+安装完成以后，打开 /etc/yum/yum-cron.conf，然后找到下面这些行内容，你必须确保它们的值和下面展示的一样
+
+    update_cmd = security
+    update_messages = yes
+    download_updates = yes
+    apply_updates = yes
+
+最后，打开并启用 yum-cron 服务：
+
+    ------------- On CentOS/RHEL 7 ------------- 
+    systemctl start yum-cron
+    systemctl enable yum-cron
+    
+    ------------- On CentOS/RHEL 6 -------------  
+    # service yum-cron start
+    # chkconfig --level 35 yum-cron on
+
+恭喜你，你已经成功的在 CentOS/RHEL 7/6 系统上设置了自动升级。

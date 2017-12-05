@@ -1,0 +1,49 @@
+ 将FTP映射为本地磁盘（mount FTP) 2010-05-21 16:59:20
+
+分类： LINUX
+
+1、安装
+    apt-get install curlftpfs
+
+2、简单使用方法
+   username：   FTP用户名
+   password:    FTP密码
+   192.168.1.111:     FTP地址
+   /mnt/ftp:          准备挂载到的路径
+curlftpfs ftp://username:password@192.168.1.111 /mnt/ftp
+
+   卸载ftp:     fusermount -u /mnt/ftp
+3、开放权限，这样其它用户也能读写了,uid和gid改成你自己的id
+    sudo curlftpfs -o rw,allow_other,uid=1000,gid=1000 ftp://dewdew:dewdew@192.168.1.111 /mnt/ftp
+
+4、开机自动挂载
+   sudo echo "curlftpfs#username:password@192.168.1.111 /mnt/ftp fuse allow_other,uid=userid,gid=groupid 0 0" >> /etc/fstab
+ 
+ 
+Mount FTP file system on CentOS
+
+有SFTP后，FTP 几乎没有用武之地了，研究 FTP 大多是因为某些软件或服务器只支持 FTP。
+
+1&1 独立主机附赠一个跟硬盘容量相等的 FTP 备份空间，此 FTP 只能由 root server 访问，但 1&1 并没有提供现成的备份软件（1＆1 营销上的失误）。FTP 备份空间对我来说用处不大，但 250 G 的空间空着也是浪费，于是我自创了我的备份方案，此中关键点是如何在 CentOS 上加载 FTP 文件系统。
+
+经一番搜索，找到 curlftpfs，用它可以加载 FTP 文件系统，但 Fedora 可以直接 yum install curlftpfs，CentOS 里没有，得用 DAG repository，所以第一步：安装 DAG repository。
+
+rpm -Uhv http://apt.sw.be/redhat/el5/en/x86_64/rpmforge/RPMS//rpmforge-release-0.3.6-1.el5.rf.x86_64.rpm
+
+第二步：安装 curlftpfs
+
+yum install curlftpfs
+
+第三步：没有第三步，已经可以使用 curlftps 了。如果要加载 FTP 文件系统
+
+curlftpfs ftp://ftp_host/sub_dir mount_point -o user="ftp_username:ftp_password", uid=user_id, gid=group_id, allow_other
+
+如果在启动时自动加载 FTP 文件系统，在 /etc/fstab 中添加一行
+
+curlftpfs#ftp_uername:ftp_password@ftp_host/sub_dir mount_point fuse rw,uid=user_id, gid=group_id,user,allow_other 0 0
+(很多关于 curlftpfs in fstab 的介绍使用了 noauto，这样的话，还需执行 mount mount_point 才能真正加载)
+
+卸载 FTP 文件系统
+
+fusermount -u mount_point
+

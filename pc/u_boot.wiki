@@ -1,0 +1,18 @@
+[[UEFI and grub2]] --使用心得
+[[grub2_base_study]] --grub2基础教程
+[[grub2_2]]
+[[grub2.iso]] 引导光盘镜像的制作
+[[grub2.make]]
+http://gnu.april.org/software/grub/manual/grub.html
+https://help.ubuntu.com/community/Grub2/
+
+
+[[grub4dos]]
+[[grub2实战]]
+
+[[grub2.pxe]]
+[[grub.cfg]]
+
+[[boot.menu]]
+[[grub2.centos7]]
+

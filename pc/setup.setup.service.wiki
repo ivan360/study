@@ -1,0 +1,30 @@
+============================================
+= 部门内部文件共享服务器安装及相关设置教程 =
+============================================
+                            2014/12/24 8:37:29
+
+一、centos7安装及设置
+[[centos7.install.and.setup]]
+
+二、samba安装及设置
+[[samba.install.and.setup]]
+
+三、账号及目录设置
+[[account.and.directory.set]]
+
+四.通过changepassword同步修改samba密码
+[[changepassword.install.and.set]]
+
+五、win端设置
+    1.编辑C:\Windows\System32\drivers\etc\hosts
+    192.168.10.187 localhost.localdomain centos7
+    ip地址是centos的ip，localhost.localdomain表示centos的hostname，最后一个参数centos表示centos的别名，即可以通过\\centos访问centos的共享文件夹
+    
+    2.win系统下删除samba连接
+    net use * /del /y
+五、部门内samba用户使用说明
+[[user.of.samba.readme]]
+
+六、文档数据备份策略
+[[data.backup]]
+

@@ -1,0 +1,21 @@
+==================
+= 账号和目录设置 =
+==================
+1.建立用户和用户组目录文件(username.txt)
+    使用excel创建，用户和用户组各一列
+2.编写用户和用户组添加及删除脚本
+    下载安装expect脚本解释器
+yum install expect
+
+    1. 检查账号和用户组文件并提取账号列和用户组列
+    - [[check_and_extract]]
+    2. 添加samba用户和密码
+    - [[expect_smb.sh]]
+    3. 创建用户账号和用户组，并自动更新到samba
+    - [[adduser.sh]]
+    4. 创建samba共享目录
+    - [[mkdir.sh]]
+    5. 删除用户账号和用户组
+    - [[userdel.sh]]
+    6. 删除samba共享目录
+    - [[dirdel.sh]]

@@ -1,0 +1,124 @@
+= 常用快捷键 =
+
+== 任务 ==
+`ins` 新任务 
+`alt+ins` 新子任务 
+
+
+== 创建及删除任务 == 
+`ctrl+shift+m` 进入 inbox 窗口 
+`Insert` Create a task (Context)
+`Alt+Insert` Create a subtask
+`Ctrl+Del` Delete a task (Context)
+
+== 设置时间及闹钟 == 
+`F4` 插入时间 
+`Ctrl+=` `Ctrl+-` Increase/decrease task due date by one day.
+`Ctrl+Alt=` `Ctrl+Alt-` Increase/decrease task due date by one week.
+`Alt+D` Set Due Date for a task
+`Alt+X` Max time required 
+`Alt+R` Reminder
+
+== 任务属性设置 == 
+`Alt+1` Toggle between Task List and Task Notes
+`Alt+L` Select Context for a task from the list
+`Alt+J` Toggle "This is a Project"
+`Alt+P` Toggle complete subtasks in order 
+`Alt+W` Toggle Weekly goal 
+`shift+ctrl+s` 加星 
+`Ctrl+H` Highlight a task
+
+== 调整任务 ==
+Alt+Shift+Left 
+Alt+Shift+Right
+Alt+Shift+Up
+Alt+Shift+Down Rearrange tasks in the outline
+`shift+ctrl+ins` 新文件夹 
+`ctrl+d` 复制任务 
+`ctrl+m` 转移到 
+ 
+== 调整及查看视图 ==
+F6 Collapse entire task list
+F7 Expand entire task list
+F3 Open current workspace in new window
+Ctrl+Up Ctrl+Down Select next/previous visible task 
+Alt+V Select View 
+`shift+ctrl+0`  设置书签0
+`ctrl+0`   转到书签0
+
+`shift+ctrl+r` reminders window 提醒窗口 
+Ctrl+R Zoom-in
+Ctrl+Alt+R Zoom-out
+ 
+Alt+Left 
+Alt+Right
+ Jump back/forward to previously selected task
+Jump forward to the next task in history
+ 
+==============================
+
+--
+--
+
+Shortcut	Action or command
+Alt+F1	Task views pane open/close 
+Alt+F2	Properties pane open/close 
+F12	Full screen
+Alt+1	Toggle between Task List and Task Notes (Contexts List and Contexts Notes)
+Alt+2	General properties section open/close
+Alt+3	Timing & Reminder properties section open/close
+Alt+4	Effort properties section open/close
+Alt+5	Project properties section open/close
+Alt+6	Dependencies properties section open/close
+Alt+7	Format properties section open/close
+Alt+8	Review properties section open/close
+Alt+9	Task Statistics properties section open/close
+F6	Collapse entire task list
+F7	Expand entire task list
+F3	Open current workspace in new window
+Alt+Shift+Left
+Alt+Shift+Right
+Alt+Shift+Up
+Alt+Shift+Down	Rearrange tasks in the outline
+Ctrl+Up
+Ctrl+Down	Select next/previous visible task without focusing this task list. The current active control will be still focused during task change by this shortcut. Useful to iterate quickly through the list of tasks and change specific task parameter.
+Alt+Up
+Alt+Down	Select next/previous sibling in the current outline
+Ctrl+Alt+Up
+Ctrl+Alt+Down	Select next/previous project in the current outline
+Ctrl+`	Collapse/Expand all subtasks of the current task
+Shift+Ctrl+0
+Shift+Ctrl+1
+...
+Shift+Ctrl+9	Set quick bookmark #1, 2...9 to a task in the outline 
+Ctrl+0
+Ctrl+1
+...
+Ctrl+9
+ 	Go to bookmark #1, 2...9 in the outline 
+Ctrl+<
+Ctrl+>	Go to previous/next bookmark set
+Ctrl+Alt+>	Open Bookmarks dialog
+Alt+C	Edit Context for a task
+Alt+L	Select Context for a task from the list
+Alt+V	Select View 
+Alt+P	Toggle complete subtasks in order 
+Alt+Y	Toggle hide in todo 
+Alt+R	Reminder
+Alt+J	Toggle "This is a Project"
+Alt+X	Max time required 
+Alt+W	Toggle Weekly goal 
+Alt+D	Set Due Date for a task
+Ctrl+= 
+Ctrl+-	Increase/decrease task due date by one day.
+Ctrl+Alt= 
+Ctrl+Alt-	Increase/decrease task due date by one week.
+Insert	Create a task (Context)
+Alt+Insert	Create a subtask
+Ctrl+Del	Delete a task (Context)
+Ctrl+R	Zoom-in
+Ctrl+Alt+R	Zoom-out
+Alt+Left
+Alt+Right	Jump back/forward to previously selected task
+Jump forward to the next task in history
+Ctrl+H	Highlight a task

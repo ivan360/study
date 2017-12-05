@@ -1,0 +1,29 @@
+#!/bin/bash
+
+# filename:dirdel.sh
+# 2014/12/22 11:20:31
+
+# 这支程序用来删除samba共享目录
+
+export PATH=/bin:/sbin:/usr/bin:/usr/sbin
+
+#mydirs="backs managers offices sales_hf sales_hg services shares"
+read -p  "请确认是否要删除系统中用户文档？（YES or NO）: " yesno #获取输入变量
+
+echo "您的回答是 $yesno !"
+
+#提取用户组名称
+mydirs=$(./check_and_extract.sh "g")
+
+if [ "$yesno" != "YES" ]; then
+  echo "用户数据不可再生，想好了再确认删除！"
+  exit 1
+else
+  for mydir in $mydirs
+  do
+    rm -rf /myhome/{$mydir,shares/$mydir}
+    echo /myhome/{$mydir,shares/$mydir} "dir has been del!"
+  done
+fi
+
+# vim:set ft=sh:

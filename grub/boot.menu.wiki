@@ -1,0 +1,45 @@
+menuentry "GRUB2引导盘中的GRUB4DOS 菜单" {
+insmod ntfs
+set root=(hd0,1)
+linux /grub.exe
+# linux /grub/grub.exe
+# linux /boot/grub/grub.exe
+}
+title [18] GRUB2
+find --set-root --ignore-floppies --ignore-cd /gr2ldr
+kernel /gr2ldr
+
+
+title 多系统启动菜单GRUB4DOS 0.4.6a引导版 \n find /menu.lst, /boot/grub/menu.lst, /grub/menu.lst
+    errorcheck off
+    configfile /boot/grub/menu.lst
+    configfile /grub/menu.lst
+    if "%@root%"=="(ud)" && calc *0x82A0=*0x82b9&0xff
+    if "%@root:~1,1%"=="f" && find --set-root --devices=f /menu.lst && configfile /menu.lst
+    find --set-root --ignore-floppies --ignore-cd /menu.lst && configfile /menu.lst
+    find --set-root --ignore-floppies --ignore-cd /boot/grub/menu.lst && configfile /boot/grub/menu.lst
+    find --set-root --ignore-floppies --ignore-cd /grub/menu.lst && configfile /grub/menu.lst
+    errorcheck on
+    commandline
+
+title 多系统启动菜单GNU GRUB 2.00引导版 \n find /grub2/core.img, /grub2/i386-pc/core.img, /grub/core.img \n /grub/i386-pc/core.img/boot/grub2/core.img/boot/grub2/i386-pc/core.img
+    errorcheck off
+    find --set-root --ignore-floppies --ignore-cd /grub2/core.img && kernel /grub2/core.img && boot
+    find --set-root --ignore-floppies --ignore-cd /grub2/i386-pc/core.img && kernel /grub2/i386-pc/core.img && boot
+    find --set-root --ignore-floppies --ignore-cd /grub/core.img && kernel /grub/core.img && boot
+    find --set-root --ignore-floppies --ignore-cd /grub/i386-pc/core.img && kernel /grub/i386-pc/core.img && boot
+    find --set-root --ignore-floppies --ignore-cd /boot/grub2/core.img && kernel /boot/grub2/core.img && boot
+    find --set-root --ignore-floppies --ignore-cd /boot/grub2/i386-pc/core.img && kernel /boot/grub2/i386-pc/core.img && boot
+    find --set-root --ignore-floppies --ignore-cd /boot/grub/core.img && kernel /boot/grub/core.img && boot
+    find --set-root --ignore-floppies --ignore-cd /boot/grub/i386-pc/core.img && kernel /boot/grub/i386-pc/core.img && boot
+    errorcheck on
+    commandline
+
+title 进入Grub命令行模式
+        commandline
+
+title 重启启动计算reboot
+        reboot
+
+title 关闭计算机halt
+        halt

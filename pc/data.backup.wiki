@@ -1,0 +1,32 @@
+====================
+= 文档数据备份策略 =
+====================
+linux mail利用外部邮箱地址发邮件
+修改/etc/nail.rc (/etc/mail.rc)
+
+--------------------
+#!/bin/sh
+cat MyFiles > TempList
+find /usr/share -iname *.png >> TempList
+find /tmp -iname *.iso >> TempList
+tar -cpzMf /dev/st0 -T TempList
+--------------------
+
+== 备份策略 == 
+主机硬件：使用一个独立的 filesystem 来储存备份数据，此 filesystem 挂载到 /backup 当中；
+每日进行：目前仅备份 MySQL 数据库；
+每周进行：包括 /home, /var, /etc, /boot, /usr/local 等目录与特殊服务的目录；
+自动处理：这方面利用 /etc/crontab 来自动提供备份的进行；
+异地备援：每月定期的将数据分别 (a)烧录到光盘上面 (b)使用网络传输到另一部机器上面。
+
+备份软件：Bacula
+    功能特点：
+    支持完全备份，增量备份，差异备份。
+    支持多种恢复方式
+    支持多种文件系统下的备份恢复（ext3、ext2、reiserfs、xfs、jfs、smbfs、iso9660、ntfs等）
+    支持各种备份介质
+    支持多种操作系统
+    强大的内部功能
+
+[[backupday.sh]]
+[[backupwk.sh]]

@@ -1,0 +1,44 @@
+
+1. 安装搜狗输入法:
+$sudo wget http://repo.fdzh.org/FZUG/FZUG.repo -P /etc/yum.repos.d/ && sudo dnf install sogoupinyin fcitx-qt5 im-chooser -y
+在 im-chooser 选择 fcitx; 重启 Gnome 即可使用。
+
+2. 使用 dnf 缓存： /etc/dnf/dnf.conf 添加 keepcache=true 即可
+使用 dnf 最快源: /etc/dnf/dnf.conf 添加 fastestmirror=true
+
+3. 启用 RPM Fusion 库：
+sudo dnf install http://download1.rpmfusion.org/nonfree/fedora/rpmfusion-nonfree-release-25.noarch.rpm http://download1.rpmfusion.org/free/fedora/rpmfusion-free-release-25.noarch.rpm
+
+4. 安装 Fedy:
+  $ dnf update
+  $ curl https://satya164.github.io/fedy/fedy-installer -o fedy-installer && chmod +x fedy-installer && ./fedy-installer
+  
+5. 安装 7zip:
+  $ dnf install unrar p7zip
+  
+6. 关闭SELinux
+  $sudo vi /etc/sysconfig/selinux
+  - SELINUX=enforcing
+  + SELINUX=disabled
+  
+7. 新建普通账户并为其设置密码（推荐）：
+useradd <username>
+passwd <username>
+
+8. 赋予 sudo 权限:
+# visudo
+在 root ALL=(ALL) ALL 下加入:
+  <username> ALL=(ALL) ALL
+
+9. 扫描局域网ip
+nmap -sS 192.168.1.0/24
+
+10. ssh //192.168.1.110
+11. ssh ivan@192.168.1.110
+12. 
+13. 挂载SAMBA目录
+    sudo mount -t cifs //192.168.1.110/public /home/ivan/sambadir -o username=ivan
+    sshfs ivan@192.168.1.110/public ~/smbdir
+
+[[添加ca证书]]
+[[exchange ews url]]

@@ -1,0 +1,17 @@
+1. 安装linux
+2. 添加
+2015/6/15 19:11:46
+a.换root登录
+
+b.开Terminal，运行命令"yum -y install mariadb*"
+
+c.启动数据库，Terminal运行命令"service mariadb start"
+
+d.修改root密码，"mysqladmin -u root password '在这里设密码'"
+
+e.登录数据库，"mysql -u root -p",输入上一步设定的密码
+
+f.提示符下输个"show databases;"命令试试
+
+g.设置mariadb服务开机自启动
+root用户#提示符下输入"systemctl enable mariadb.service"

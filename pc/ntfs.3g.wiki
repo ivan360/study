@@ -1,0 +1,28 @@
+
+== 1.下载之后进行解压 ==
+http://www.tuxera.com/community/ntfs-3g-download/
+wget http://tuxera.com/opensource/ntfs-3g_ntfsprogs-2014.2.15.tgz
+
+tar  -xvf  ntfs-3g_ntfsprogs-2014.2.15.tgz
+
+== 2.编译并进行安装 ==
+进入ntfs-3g_ntfsprogs-2014.2.15文件夹中
+./configure && make && make install 
+上面的命令也可以分三次执行完成
+
+== 3.挂载NTFS ==
+mount -t ntfs-3g /dev/sda2  /mnt/Windows
+
+ps:mount重启之后就会失效
+
+== 4.CentOS 7 开机自动挂载NTFS（当然 如果不希望自动挂载的，可以不做这一步。） ==
+
+  更改/etc/fstab,更改前备份下 cp /etc/fstab  /etc/fstab.bak
+
+/dev/sda1 /mnt/windows ntfs-3g defaults 0 0
+
+ps:如果不知道是sda几，用fdisk -l 查看下分区表就可以了。/etc/fstab内的挂载点不能有空格，就算是用\转义掉空格貌似也没用（估计是没成功），这是个人的经验。
+
+比如：fstab中有个挂载点是：/mnt/Virtual\ Machines  保存重起之后就直接进入只读文件系统了，这时候你是不能修改fstab中的内容的，可以运行如下命令，之后在重新vi就可以了。
+mount -n -o remount,rw /   注意,逗号之间是没有空格的，/前面有空格。
+然后vi fstab 删除有空格的挂载点就是/mnt/Virtual\ Machines 就可以了。

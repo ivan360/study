@@ -1,0 +1,13 @@
+ 关于iptables允许samba的问题 2014-04-04 00:06:07
+分类： LINUX
+     最近写了很多iptables规则，今天同事跟我说他们部门的共享不能用了，想了想，最近变更的只有iptables，于是看看是否是这个原因，发现没有允许samba的入站和出站规则，我的iptables规则默认是所有都drop的，但是不知确切的samba的端口号，网上搜索了下，samba的端口号用到的有tcp的139和445，还有udp的137和138.
+     新增iptables规则如下：
+点击(此处)折叠或打开
+#新增入站规则
+iptables -A INPUT -p tcp -m multiport --dports 139,445 -j ACCEPT
+iptables -A INPUT -p udp -m multiport --dports 137,138 -j ACCEPT
+#新增出站规则
+iptables -A OUTPUT -p tcp -m multiport --sports 139,445 -j ACCEPT
+iptables -A OUTPUT -p tcp -m multiport --sports 137,138 -j ACCEPT
+
+iptables-save

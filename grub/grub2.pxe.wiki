@@ -1,0 +1,52 @@
+grub2:
+下载源码：
+git clone git://git.savannah.gnu.org/grub.git
+cd grub
+
+生成configure文件
+./autogen.sh   
+
+一、pxe bios：
+./configure    --with-platform=i386-pc  --prefix=$HOME/grub-bios
+make
+make install
+cd $HOME/grub-bios
+bin/grub-mkimage  -d lib/grub/i386-pc/ -O i386-pc  -p /grub2 -o ~/core.0 pxe pxechain net tftp
+cat lib/grub/i386-pc/pxeboot.img ~/core.0 > /tftpboot/pxeboot.0
+mkdir /tftpboot/grub2
+cp -R $HOME/grub-bios/lib/grub/i386-pc  /tftpboot/grub2
+
+        或直接  bin/grub-mknetdir  -d lib/grub/i386-pc/   --net-directory=/tftpboot/ --subdir=grub2  --modules="pxe pxechain net tftp"
+
+二、pxe uefi：
+cd $HOME/grub-efi
+./configure    --with-platform=efi  --prefix=$HOME/grub-efi   
+make &&make install
+bin/grub-mkimage  -O x86_64-efi  -o /tftpboot/bootx64.efi --prefix='(pxe)/grub2' efinet normal tftp  
+mkdir /tftpboot/grub2
+cp -R $HOME/grub-efi/lib/grub/x86_64-efi  /tftpboot/grub2
+
+
+
+三、使用HTTP方式
+
+menuentry "sysrecd PXE uefi or Bios" --class windows --class os {
+        insmod http
+        set root=http,net_default_server
+        linux  /altker64 dodhcp root=auto netboot=http://10.0.8.6/sysrecd/sysrcd.dat
+        initrd  /initram.igz
+}
+
+
+IPXE：
+ipxe  官方源不支持efi 引导设备
+我用第三方源替换文件完成的
+git clone  git://git.ipxe.org/ipxe.git ipxe
+git clone  git://git.ipxe.org/vendor/xcat/ipxe.git ipxe-xcat     #第三方源
+cp ipxe-xcat/image/efi_image.c  ipxe/image/efi_image.c     #替换EFI相关文件
+
+BIOS平台编译：make bin/undionly.kpxe
+uefi平台编译: make bin-x86_64-efi/snponly.efi
+
+提供的附件grub2文件是从ubuntu版的grub2的，PXE BIOS 的grub2 HTTP传送能达到10MB/s 而UEFI只有500KB和tftp 相当。从官方源码编译过来的2种都只在500KB以下
+我测试了gpxelinux.0 HTTP最快有13MB/s，win 8.1 版pxe bootmgr 的pxeboot.n12 有8MB/s ,VM+centos+apache 主机，VM客户机测试仅供参考。

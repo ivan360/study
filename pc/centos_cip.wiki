@@ -1,0 +1,50 @@
+Centos 调整挂载点磁盘配额 扩展分区大小
+作者: Space.As 日期: 2012 年 03 月 06 日 发表评论 (1) 查看评论
+
+公司内网服务器。
+当初买了两块1T的硬盘，本来打算做Raid。结果主板不支持。后来就简单分了下区使用。
+使用的是Centos的LVM分区模式。
+
+当初考虑的是/home存放文件多一些。就给/home分了1.7T。剩余的给了/。
+结果后来把FTP和WEB都放在了/var下。自然就在根分区了。
+
+下午同事上传文件居然传不上去了。
+一看是磁盘空间不足。于是决定把/home的1.7T 压缩到50G，把多余出来的空间扩展到/根挂在点上。
+
+查阅了一些资料，操作成功后记录如下。
+
+1.首先查看磁盘使用情况
+# df -h
+# pvscan
+
+2.看过之后就首先把/home卸载了 执行压缩操作。压缩目标/home使用50G。
+# resize2fs -p /dev/mapper/VolGroup-lv_home 50G
+
+3.卸载/home，准备开始操作。
+# umount /home
+这里可能会提示无法卸载，有进程占用/home
+那就使用如下命令来终止占用进程。
+# fuser -m -v -i -k /home
+此命令会干死所有占用/home的进程，不过在弄死它们之前会询问你。肯定是清一色y了。
+
+4.成功卸载/home之后，开始调整
+# resize2fs -p /dev/mapper/VolGroup-lv_home 50G
+这里也许会提示让你线运行 “e2fsck -f /dev/mapper/VolGroup-lv_home”。那没法，运行吧。
+# e2fsck -f /dev/mapper/VolGroup-lv_home
+花点时间等待一下。然后再次 resize2fs -p /dev/mapper/VolGroup-lv_home 50G 搞定。
+
+5.挂载上/home看一下目前磁盘使用情况。
+# mount /home
+# df -h
+
+6.可能发现/home已经压缩到50G了。现在开始把缩减出来的空间闲置出来。
+# lvreduce -L 1000G /dev/mapper/VolGroup-lv_home
+上边命令是把压缩过的/home中空闲的1000G空间闲置出来。在操作时候，建议把数字搞清楚。
+可以使用vgdisplay命令等查看一下可以操作的大小。
+
+7.然后把闲置出来的空间挂在到/根目录下
+# lvextend -L +1000G /dev/mapper/VolGroup-lv_root
+稍等一下，完成之后用df查看一下。已经搞定了。
+
+打完收工！
+

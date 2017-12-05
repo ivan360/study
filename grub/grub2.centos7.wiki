@@ -1,0 +1,29 @@
+2、CenTOS7的使用方法：
+ 
+2．1、系统安装方式的引导：
+ 
+系统启动直接进入GRUB2模式，在GRUB2命令中输入如下命令：
+
+01.grub>set root=(hd2,msdos1) 
+02.grub>loopbadk loop /cents71.iso 
+03.grub>linux (loop)/isolinux/vmlinuz linux repo=hd:/dev/sdb1:/
+04.grub>initrd (loop)/isolinux/initrd.gz 
+05.grub>boot 
+
+其中repo=hd:/dev/sdg2:/CentOS7参数中hd代表使用硬盘安装，/dev/sdg2代表ISO镜像所在分区，/CentOS7代表ISO镜像所在目录。“:”应该是参数格式要求的分割符，请用户按照自己ISO所在目录和分区进行修改。关于分区问题需要说明下，/CentOS7安装程序启动后会将安装在计算机上的硬盘设置成为/dev/sda,我是使用移动硬盘进行启动程序加载CentOS7的，开始在hd:后使用/dev/sdb2，但安装程序总是报无法找到ISO文件错误，因为安装时硬件环境中有RAID卡设备，后来查看引导日志发现安装程序启动后会将移动硬盘修改为/dev/sdg，将hd:后的分区修改为/dev/sdg2果然就可以顺利进入CentOS7安装界面并顺利完成系统安装。
+ 
+2．2、系统救援模式的引导：
+ 
+进入GRUB2模式，在GRUB2命令中输入如下命令：
+01.grub>set root=(hd0,2) 
+
+02.grub>loopbadk loop /CentOS7/CentOS7.iso 
+
+03.grub>linux (loop)/isolinux/vmlinuz linux rescue repo=hd:/dev/sdg2:/CentOS7 
+
+04.grub>initrd (loop)/isolinux/initrd.gz 
+
+05.grub>boot linux rescue 
+我们对比可以发现其实使用GRUB2引导CentOS7ISO启动救援模式也是只需要为启动内核加入linux rescue参数即可实现从安装模式到救援模式的转换。
+ 
+通过以上方式，我们的系统管理员可以直接在移动硬盘上创建GRUB2引导器，并在移动硬盘中建立相应系统的目录文件夹及相应系统的ISO镜像文件，即可方便的使用该移动硬盘来完成系统的安装及救援模式，尤其在数据中心存在多种LINUX系统的环境中，该方法确实降低了管理员的工作强度，同时也使系统安装和救援更易于操作。

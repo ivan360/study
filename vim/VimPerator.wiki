@@ -1,0 +1,100 @@
+
+==============================
+= vimperator =
+==============================
+
+:set nextpattern=\s*下一页|下一张|下一章|下页\s*,\bnext\b,^>$,^(>>|»)$,^(>|»),(>|»)$,\bmore\b
+:set previouspattern=\s*上一页|上一张|上一章|上页\s*,\bprev|previous\b,^<$,^(<<|«)$,^(<|«),(<|«)$ 
+
+：bmark（默认按键为a） 添加到书签栏
+然后：open的时候会根据你设置的提示顺序（书签，历史等等）显示出来
+
+：qmark 添加到快速书签
+比如把豆瓣用qmark d指令收藏后
+下次按god（……）就可以快速访问了
+
+f(F) hints模式最为重要的一个键可以让你快速打开一个链接.
+* h,j,k,l 这个熟悉vi的都不用介绍了，导航键
+* H,L 前进后退键
+* Ctrl+n 下一个tab
+* Ctrl+p 上一个tab
+* Ctrl+6 前后两个tab切换
+* o url 在当前tab打开url
+* o 关键字 用浏览器的缺省搜索引擎搜索关键字(用当前tab）
+* t url 在新tab打开url
+* t 关键字 用浏览器的缺省搜索引擎搜索关键字（用新tab）
+* / 在当前页面搜索
+* d 关闭当前tab
+* u 重新打开之前关闭的tab
+* zi 页面放大
+* zo 页面缩小
+* zz 恢复页面大小 
+gf：查看页面源代码。
+　　h/l：由于默认左右移动功能很少用到，所以，重新映射为前/后标签页。noremap h gT，noremap l gt。
+ 其实，Vimperator已默认设置为 editor=gvim.exe -f。因此，只要把gvim.exe所在的目录，加入系统变量path即可（或许要重启动）。也可以尝试一下 :se editor=notepad.exe 来间接验证此方法的可行性。se editor=”d:/soft/Vim/vim72/gvim.exe -f” 。按下ctrl+i，直接在vim中编辑当前文本框内容。
+设置默认搜索引擎
+1.[:dialog searchengines]来查看一下, 列表中是否有baidu. 如果没有的话去addons中搜下baidu, 找个安上即可.
+2.[:set defsearch=baidu]或者[:set ds=baidu]
+3.保存一下:[:mkv],当然如果以前保存过设置的话,需要覆盖下,在前边加个"!".
+
+== vimperator的快速书签 ==
+QuickMarks quickmarks
+
+go
+go{a-zA-Z0-9}
+
+Jump to a QuickMark in the current tab. Open any QuickMark in the current tab. You can mark any URLs with {a-zA-Z0-9}. These QuickMarks are persistent across browser sessions.
+
+gn
+gn{a-zA-Z0-9}
+
+Jump to a QuickMark in a new tab. Works like {a-zA-Z0-9} but opens the QuickMark in a new tab. Whether the new tab is activated or not depends on the option.
+Mnemonic: Go in a new tab. would make more sense but is already taken.
+
+M
+M{a-zA-Z0-9}
+
+Add new QuickMark for current URL. You can go to a marked URL in the current tab with {a-zA-Z0-9} or in a new tab with {a-zA-Z0-9}. These QuickMarks are persistent across browser sessions.
+
+:delqm :delqmarks
+:delqm[arks] {marks}
+:delqm[arks]!
+
+Delete the specified QuickMarks. QuickMarks are presented as a list.
+
+Examples:
+
+    deletes QuickMarks A, a, b and p
+
+    deletes all QuickMarks in the range b to p
+
+    deletes all QuickMarks
+
+:qma :qmark
+:qma[rk] {a-zA-Z0-9} [url]
+
+Mark a URL with a letter for quick access. You can also mark whole groups like this:
+
+:qmarks
+:qmarks [arg]
+
+Show all QuickMarks. If [arg] is specified then limit the list to those QuickMarks mentioned.
+Saving for posterity - vimperatorrc vimperatorrc
+
+Once you get Vimperator set up with your desired options, maps, and commands, you'll probably want them to be available the next time you open Vimperator. Continuing the Vim theme, this is done with a vimperatorrc file.
+
+To save your current settings and allow them to be loaded automatically next time you start Vimperator, issue the command.
+
+This will create the file $HOME/.vimperatorrc containing your settings. It is a simple text file, just like a vimrc file and can be easily edited to suit your preferences.
+Find the exit nearest you quitting-without-menus
+
+Vimperator supports all of Vim's classic methods of exiting.
+
+    — command to quit and save the current browsing session for next time; the default.
+
+    — command to quit without saving the session
+
+    — Normal mode mapping equivalent to
+
+    — Normal mode mapping equivalent to
+

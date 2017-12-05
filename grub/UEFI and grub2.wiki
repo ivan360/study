@@ -1,0 +1,40 @@
+MBR硬盘的启动方式：
+    1.系统加电
+    2.BIOS自检
+    3.硬盘获得权限，读取0号扇区，找出带有活动分区标记的分区，并指向这一分区的第一扇区(也就是我们常说的PBR)。
+    4.硬盘PBR要求指向bootmgr,bootmgr又指向BCD，BCD又指向(某一分区)\windows\system32\winload.exe
+至此内核引导完毕。系统启动成功。
+
+UEFI硬盘启动方式：
+    1.上电后，找到硬盘。
+    2.找到硬盘第一个格式为FAT或FAT32的分区。
+    3.读取该分区中的efi\boot\bootx64.efi
+    4.bootx64.efi指向 \efi\microsoft\boot\BCD
+    5.BCD指向某一分区的\windows\sysytem32\winload.efi
+至此内核加载完毕。
+
+其中第4步要注意，.bootx64.efi指向 \efi\microsoft\boot\BCD  是因为那个bootx64.efi是微软自己写的，所以他固定指向 \efi\microsoft\boot\BCD
+在/efi/microsoft/boot/bootmgfw.efi
+大家注意一下，这个bootmgfw.efi与bootx64.efi同一个文件。如果你的efi/boot/bootx64.efi丢失了，可以用bootmgfw.efi代替，但要把名改成bootx64.efi,复制到efi/boot/目录中
+
+这是我从ubuntu中截取的专门适用于uefi系统的grub2
+具体使用方法是：
+    1.解压缩文件
+    2.删除\efi\boot下的bootx64.efi
+    3.将grub.cfg  grubx64.efi   shimx64.efi这三个文件拷贝到\efi\boot\下
+    4.将shimx64.efi改名为bootx64.efi
+重启之后，你会发现进入了grub2的控制台界面
+
+怎么引导进入windows呢？
+在grub4dos下，分区这样表示（hd0,0)  、(hd1,4)
+但是gpt下没有什么主分区，逻辑分区，那怎么表示呢
+这样表示(hd0,gpt1) 、 (hd1,gpt2)
+一般像我启动我的windows8.1
+我都这么写
+grub>chainloader (hd0,gpt2)/efi/Microsoft/boot/bootmgfw.efi
+grub>boot
+完美进入windows
+每个人的分区号可能不一样
+你们的efi分区可能是(hd0,gpt3)或是(hd0,gpt4)等等
+uefi的grub只识别efi分区，想找到你的efi分区是多少，先用ls命令显示所有分区号
+再用ls (hd0,gptx)来查看根目录。如果不是efi分区，它会显示：unkonown filesystem

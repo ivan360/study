@@ -1,0 +1,72 @@
+--------------------------------------------------
+= systemd =
+--------------------------------------------------
+systemd是服务管理程序，他整合了service和chkconfig的功能为一体，可以永久性或只在当前会话中启用/禁用服务。
+
+#查看正在运行的服务
+systemctl
+
+#启动，停止，重启服务
+systemctl start  foo.service
+systemctl stop foo.service
+systemctl restart foo.service
+
+#查看一个服务的状态
+systemctl status foo.service
+
+#开机时启用一个服务
+systemctl enable foo.service
+
+#开机时关闭一个服务
+systemctl disable foo.service
+
+#查看服务是否开机启动
+systemctl is-enabled foo.service
+
+
+例：开机启动sshd服务
+
+systemctl enable sshd.service
+Centos7 修改运行级别
+(2014-08-08 21:18:52)
+转载▼
+	分类： linux系统
+systemd使用比sysvinit的运行级别更为自由的target概念作为替代
+第三运行级：
+multi-user.target
+第五运行级：
+graphical.target
+
+#前者是符号链接指向了后面的target
+runlevel3.target -> multi-user.target
+runlevel5.target -> graphical.target
+
+#切换到：运行级3
+#这两种都可以
+systemctl isolate multi-user.target
+systemctl isolate runlevel3.target
+
+#切换到：运行级5
+#这两种都可以
+systemctl isolate graphical.target
+systemctl isolate runleve5.target
+
+#修改开机默认运行级别
+systemd使用链接来指向默认的运行级别。
+由/etc/systemd/system/default.target文件中决定
+切换到运行级3：
+先删除:/etc/systemd/system/default.target
+ln -sf /lib/systemd/system/multi-user.target /etc/systemd/system/default.target
+ln -sf /lib/systemd/system/runlevel3.target /etc/systemd/system/default.target
+#用这个也可以
+systemctl set-default multi-user.target
+
+切换到运行级5
+ln -sf /lib/systemd/system/graphical.target /etc/systemd/system/default.target
+ln -sf /lib/systemd/system/runlevel5.target /etc/systemd/system/default.target
+#用这个也可以
+systemctl set-default graphical.target
+
+#查看当前运行的级别
+runlevel  //仍然可用
+

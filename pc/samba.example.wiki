@@ -1,0 +1,257 @@
+
+下面我们通过两个例子来验证一下Samba服务器是否可以正常访问
+
+实例一：现有一个工作组workgroup，需要添加samba服务器作为文件服务器，并发布共享目录/share，共享名为public，此共享目录允许所有员工访问。
+
+1.首先我们要修改一下我们的smb.conf文件，(我们最好先将这个文件备份一下)
+复制代码
+
+#======================= Global Settings =====================================
+
+[global]                                                  //该设置与Samba服务整体运行环境有关，它的设置项目针对所有共享资源       
+
+# ----------------------- Network Related Options -------------------------
+#
+# workgroup = NT-Domain-Name or Workgroup-Name, eg: MIDEARTH
+#
+# server string is the equivalent of the NT Description field
+#
+# netbios name can be used to specify a server name not tied to the hostname
+
+        workgroup = WORKGROUP                             //定义工作组，也就是windows中的工作组概念
+        server string = Samba Server Version %v     //定义Samba服务器的简要说明
+        netbios name = SambaSamba                         //定义windows中显示出来的计算机名称
+
+# --------------------------- Logging Options -----------------------------
+#
+# Log File let you specify where to put logs and how to split them up.
+
+        log file = /var/log/samba/log.%m                  //定义Samba用户的日志文件，%m代表客户端主机名
+                                                          //Samba服务器会在指定的目录中为每个登陆主机建立不同的日志文件
+# ----------------------- Standalone Server Options ------------------------
+#
+# Scurity can be set to user, share(deprecated) or server(deprecated)
+
+        security = share                                  //共享级别，用户不需要账号和密码即可访问
+
+#============================ Share Definitions ==============================
+
+[public]                                                  //设置针对的是共享目录个别的设置，只对当前的共享资源起作用
+        comment = Public Stuff                            //对共享目录的说明文件，自己可以定义说明信息
+        path = /share                                     //用来指定共享的目录，必选项
+        public = yes                                      //所有人可查看,等效于guest ok = yes
+
+2.因为上面设置了共享目录为/share，下面就需要建立/share目录：
+
+[root@xiaoluo /]# mkdir share
+
+然后在该目录下创建两个空文件：
+
+[root@xiaoluo /]# touch samba.txt
+[root@xiaoluo /]# touch test.txt
+
+由于要设置匿名用户(也就是所有的用户)可以下载或上传共享文件，所以要给/share目录授权为nobody权限。
+
+[root@xiaoluo /]# chown -R nobody:nobody share　　// 将share目录授权为nobody权限，任何用户都可以对其进行访问
+[root@xiaoluo /]# ll /share/
+总用量 0
+-rw-r--r--. 1 nobody nobody 0 4月   6 00:42 samba.txt
+-rw-r--r--. 1 nobody nobody 0 4月   6 00:42 test.txt
+
+3.重启smd、nmd服务：
+
+4.测试smb.conf是否配置成功
+
+我们可以通过testparm来验证刚修改的smb.conf是否配置有错
+复制代码
+
+[root@xiaoluo /]# testparm
+Load smb config files from /etc/samba/smb.conf
+rlimit_max: increasing rlimit_max (1024) to minimum Windows limit (16384)
+Processing section "[homes]"
+Processing section "[printers]"
+Processing section "[public]"
+Processing section "[hr]"
+Loaded services file OK.
+Server role: ROLE_STANDALONE
+Press enter to see a dump of your service definitions
+
+[global]
+    workgroup = MYGROUP
+    netbios name = MYSERVER
+    server string = Samba Server Version %v
+    log file = /var/log/samba/log.%m
+    max log size = 50
+    idmap config * : backend = tdb
+    cups options = raw
+
+[homes]
+    comment = Home Directories
+    read only = No
+    browseable = No
+
+[printers]
+    comment = All Printers
+    path = /var/spool/samba
+    printable = Yes
+    print ok = Yes
+    browseable = No
+
+[public]
+    comment = Public Stuff
+    path = /share
+    guest ok = Yes
+
+复制代码
+
+5.访问Samba服务器的共享文件
+
+　　a.在Linux下访问Samba服务器的共享文件
+
+[root@xiaoluo /]# smbclient //192.168.113.128/public
+Enter xiaoluo's password: 
+Anonymous login successful
+Domain=[MYGROUP] OS=[Unix] Server=[Samba 3.6.9-151.el6]
+smb: \> ls
+  .                                   D        0  Sat Apr  6 00:42:53 2013
+  ..                                 DR        0  Sat Apr  6 00:42:43 2013
+  test.txt                                     0  Sat Apr  6 00:42:53 2013
+  samba.txt                                    0  Sat Apr  6 00:42:51 2013
+
+        35355 blocks of size 524288. 16458 blocks available
+smb: \> 
+
+
+【注意】如果在出现smb: \>时，则表示Samba服务器已经配置成功，我们可以通过 ls 命令来查看该分享文件夹下面的文件列表信息，如果是第一次访问可能会在输入ls 以后出现以下错误：
+
+NT_STATUS_ACCESS_DENIED listing \*　　
+
+[root@xiaoluo /]# smbclient //127.0.0.1/sambar -U sambar%sambar
+    Domain=[WORKGROUP] OS=[Unix] Server=[Samba 3.5.10-114.el6]
+    smb: \> ls
+    NT_STATUS_ACCESS_DENIED listing \*
+     
+                    52265 blocks of size 1048576. 48406 blocks available
+
+解决方法如下：关闭SELIUNX
+
+[root@xiaoluo /]#　　getenforce ;　　// 查看当前状态 
+ Enforcing
+
+SELINUX几种状态表示：
+
+enforcing：强制模式，代表 SELinux 运行中，且已经正确的开始限制 domain/type 了；
+permissive：宽容模式：代表 SELinux 运行中，不过仅会有警告信息并不会实际限制 domain/type 的存取。这种模式可以运来作为 SELinux 的 debug 之用；
+disabled：关闭，SELinux 并没有实际运行。
+
+所以我们通过以下命令将SELIUNX设置成disabled或者permissive就行了
+
+[root@xiaoluo /]# setenforce 0 ;    //    关闭 0表示permissive
+
+这时我们再在上面的smb: \> 输入  ls命令时，就可以看到我们共享文件夹里面的东西了
+
+　　b.在windows系统中访问Samba服务器的共享文件
+
+　　通过【开始】——【运行】中输入\\192.168.113.128\来访问samba服务器192.168.113.128上面提供的服务。
+
+　　
+
+实例二：一个公司现有多个部门，因工作需要，将hr部的资料存放在samba服务器的/hr 目录中集中管理，以便hr人员浏览，并且该目录只允许hr部员工访问。
+
+1.首先我们需要添加hr组以及hr组的组员
+
+建立用户的同时加入到相应的组中的方式：useradd -g 组名 用户名
+
+2.在根目录下建立/hr 文件夹
+
+3.将刚才建立的两个帐户添加到samba的账户中，通过 smbpasswd -a USER姓名 命令
+
+4.修改主配置文件如下：
+复制代码
+
+#======================= Global Settings =====================================
+
+[global]
+
+# ----------------------- Network Related Options -------------------------
+#
+# workgroup = NT-Domain-Name or Workgroup-Name, eg: MIDEARTH
+#
+# server string is the equivalent of the NT Description field
+#
+# netbios name can be used to specify a server name not tied to the hostname
+
+        workgroup = WORKGROUP
+        server string = David Samba Server Version %v
+        netbios name = DavidSamba
+
+# --------------------------- Logging Options -----------------------------
+#
+# Log File let you specify where to put logs and how to split them up.
+
+        log file = /var/log/samba/log.%m
+
+# ----------------------- Standalone Server Options ------------------------
+#
+# Scurity can be set to user, share(deprecated) or server(deprecated)
+
+        security = user                                   //用户级别，由提供服务的Samba服务器负责检查账户和密码
+
+#============================ Share Definitions ==============================
+
+[homes]                                                   //设置用户宿主目录
+        comment = Home Directories
+        browseable = no
+        writable = yes
+;       valid users = %S
+;       valid users = MYDOMAIN\%S
+
+[public]
+        comment = Public Stuff
+        path = /share
+        public = ye
+[hr]                                                      //hr 组目录，只允许hr组成员访问
+        comment = HR
+        path = /hr
+        valid users = @hr　　　　　　// 这个表示只有hr组的成员才能够访问hr目录
+
+
+5.重新加载主配置文件smb.conf，通过service smb reload 命令
+
+6.到windows客户端验证，访问\\192.168.113.128，提示输入用户名和密码，在此输入chris验证，如下图：
+
+7.访问成功，可以看到公共的public目录，用户chris的宿主目录，和其有权限访问的hr目录
+
+六、Linux客户端访问操作
+
+上面介绍了windows客户端访问Samba服务器的操作，那么在Linux作为客户端时，查看其它Linux Samba服务器共享的文件时，我们通过可以对其服务器共享的文件进行操作，这时用到smbclient这个工具，系统默认自带了这个命令，Smbclient常见用法介绍如下：
+
+1、查看Samba服务器的共享资料
+
+[root@xiaoluo /]# smbclient  –L  //Samba服务器的ip地址  -U  Samba用户名
+
+"-L"即为list的含义，"-U"是user的意思，如果Samba服务器是无密码访问的话，可以省略"-U  Samba用户名"。
+
+例如：samba需要密码登陆时，查看共享方法如下：
+
+[root@xiaoluo /]# smbclient  -L //192.168.113.128/public –U chris
+
+Samba无密码访问时，执行如下命令：
+
+[root@xiaoluo /]# smbclient  -L //192.168.113.128/public
+
+password: 直接回车即可。
+
+2、登陆Samba服务器
+
+如果需要在Linux客户端登陆Samba服务器，用法如下：
+
+[root@xiaoluo /]# smbclient  //Samba服务器的ip地址  -U  Samba用户名
+
+例如下面执行的操作：
+
+[root@xiaoluo /]# smbclient //192.168.113.128/public –U chris
+
+smb: \> ?                     //在这里输入?即可查看在smb命令行可用的所有命令。
+
+操作过程与登陆FTP服务器很类似，登陆Samba服务器后，就可以进行文件的上传与下载，如果有足够的权限，还可以进行修改文件操作。

@@ -1,0 +1,60 @@
+#!/bin/bash
+
+# 2014/12/26 9:25:53
+# filename:adduser.sh
+
+# 这支程序用来创建新增账号和用户组，功能有：
+# 1. 判断家目录与skel;
+# 2. 创建系统账号和用户组；
+# 3. 同步更新至samba;
+
+export PATH=/bin:/sbin:/usr/bin:/usr/sbin
+
+# 设定添加账号文件地址和家目录位置
+homename="/myhome/homes"
+myskel="../skel"
+
+if [ ! -x $homename ]; then
+  echo "所需要的家目录不存在，系统自动创建 $homename "
+  mkdir -p $homename
+fi
+
+if [ ! -x $myskel ]; then
+  echo "所需要的$myskel不存在，自动使用系统skel "
+  myskel="/etc/skel"
+fi
+
+mygroups=$(./check_and_extract.sh "g")
+
+for mygroup in $mygroups
+do
+  groupadd $mygroup
+  echo $mygroup "group has been created!"
+done
+
+usernames=$(./check_and_extract.sh "u")
+
+i=0
+
+for username in $usernames
+do
+  #根据$i将username.txt中每个账号对应的群组名取出。
+  i=$((i+1))
+  groupname=$(./check_and_extract.sh "d"|sed -n "${i}p")
+
+  # 新增账号，将账号后面的群组设置为初始群组，不可登入系统，家目录为homename
+  useradd -g $groupname -m -d $homename/$username -k $myskel -s /sbin/nologin $username
+
+  # 与账号相同的口令
+  echo $username | passwd --stdin $username
+
+  # 强制登陆修改口令
+  #        chage -d 0 $username 
+
+  echo $username "user has been created!"
+
+  #使用expect程序添加samba用户和密码
+  ./expect_smb.sh $username $username
+done
+
+# vim:set ft=sh:

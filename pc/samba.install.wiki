@@ -1,0 +1,67 @@
+1. 安装Samba软件包
+# yum -y install samba samba-client
+# rpm -qa | grep samba --- 安装后查询版本
+    samba-common       --- 主要提供samba服务器的设置文件与设置文件语法检验程序testparm 
+    samba-client       --- 客户端软件，主要提供linux主机作为客户端时，所需要的工具指令集 
+    samba              --- 服务器端软件，主要提供samba服务器的守护程序，共享文档，日志的轮替，开机默认选项 
+    samba-swat         --- 基于https协议的samba服务器web配置界面 （此处没有安装） 
+
+Samba服务器安装完毕，会生成配置文件目录/etc/samba和其它一些samba可执行命令工具，
+    /etc/samba/smb.conf --- samba的核心配置文件，
+    /etc/init.d/smb     --- samba的启动/关闭文件。
+
+2. 开启smb服务
+# systemctl status smb.service --- 查看samba的服务启动情况
+# systemctl start smb.service  --- 启动Samba服务 (start/stop/restart)
+# chkconfig --level 35 smb on  --- 设置开机自启动 ，在3、5级别上自动运行samba服务 
+# systemctl list-unit-files | grep smb
+# systemctl list-unit-files | grep nmb
+
+三、SElinux和Iptables设置
+最简单的就是直接关闭，最好是通过设置发挥相关作用
+
+1. 关闭SElinux和Iptables
+# getenforce         --- 查看SElinux的状态 
+# setenforce 0       --- 暂时关闭SElinux，在/etc/selinux/config中把SELINUX=disable可以永久关闭SELinux 
+
+# service iptables status --- 查看Iptables的状态
+# service iptables stop   --- 暂时关闭
+# chkconfig iptables off  --- 永久关闭防火墙
+
+systemctl stop firewalld
+systemctl disable firewalld
+
+最后关闭后的状态应该是
+SElinux：Disabled 
+Iptables：Firewall is not running 
+这两个服务在没配置时一定要是关闭状态，不然会访问不到！
+
+2.1. 设置samba共享文档让其通过SElinux
+
+# /smbhome 为samba共享文档,参考[[samba_selinux]],参考 [[SELinux安全系统基础]]
+
+# 查看目录的selinux策略信息
+ls -Z -d /smbhome/sales/
+
+chcon -t samba_share_t -R /smbhome
+semanage fcontext -a -t samba_share_t "/smbhome(/.*)?"
+restorecon -R -v /var/eng/
+
+2.2. 开启防火墙端口号
+(0)端口说明
+    1）Port 137 (UDP) - NetBIOS 名字服务 ； nmbd
+    2）Port 138 (UDP) - NetBIOS 数据报服务
+    3）Port 139 (TCP) - 文件和打印共享 ； smbd （基于SMB(Server Message Block)协议，主要在局域网中使用，文件共享协议）
+    4）Port 389 (TCP) - 用于 LDAP (Active Directory Mode)
+    5）Port 445 (TCP) - NetBIOS服务在windos 2000及以后版本使用此端口
+    6）Port 901 (TCP) - 用于 SWAT，用于网页管理Samba
+
+(1)开启UDP端口：
+# /sbin/iptables -I INPUT -p udp --dport xxx -j ACCEPT
+
+(2)开启TCP端口：
+# /sbin/iptables -I INPUT -p tcp --dport xxx -j ACCEPT
+
+(3)保存配置：
+# service iptables save
+================================================================================

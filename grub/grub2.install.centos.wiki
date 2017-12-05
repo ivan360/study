@@ -1,0 +1,27 @@
+假设，我已经安装了grub。ubuntu-10.10-desktop-i386.iso 为了方便，用ubuntu.iso代替，并放在（hd0,3)里。
+进入grub2命令行。
+
+loopback loop (hd0,3)/ubuntu.iso
+这是利用grub的回放设备，挂iso,这样可以使你不用把casper文件夹提取出来了。
+set root=(loop)
+这是设置grub的根目录。
+linux /casper/vmlinuz boot=casper iso-scan/filename=/ubuntu.iso
+这是让grub挂内核。并传递参数boot=casper 给initramfs
+initrid /casper/initrid.lz
+boot
+
+menuentry "Install RedFlag Linux" {
+    loopback loop (hd0,2)/linux.iso
+    linux (loop)/isolinux/vmlinxz0 isofrom=/dev/dhc2/linux.iso boot=live quiet noejct noprompt
+    initrd (loop)/initrd4disk.img
+}
+
+首先下载最新版的Syslinux，解开压缩包，memdisk文件夹下面有一个memdisk文件（没有任何扩展名），把memdisk文件复制到U盘boot文件夹下
+menuentry 'Boot Windows 8 PE ISO'{
+        set root='(hd0,msdos1)'
+        echo 'Loading Memdisk...'
+        #insmod memdisk
+        linux16 /boot/memdisk iso raw
+        echo 'Loading ISO...'
+        initrd16 /boot/Win8PE.iso
+}

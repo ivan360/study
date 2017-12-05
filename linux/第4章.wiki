@@ -1,0 +1,374 @@
+一个完整的Shell脚本应该包括“脚本声明”、“注释信息”和“可执行语句”
+包括有单分支、双分支与多分支，其中多分支是最为灵活且复杂的结构，结构为if……then……elif……then……else……fi
+for条件循环语句的结构为“for 变量 in 取值列表 do …… done”
+
+= 4.1 Vim文本编辑器 =
+Linux系统中一切都是文件，而配置一个服务就是在修改其配置文件的参数
+
+命令模式：控制光标移动，可对文本进行删除、复制、粘贴和查找等工作。
+输入模式：正常的文本录入。
+末行模式：保存、退出与设置编辑环境。
+
+== 4.1.2 配置主机名称 ==
+hostname命令来查看本机的hostname。也可以直接cat /proc/sys/kernel/hostname查看
+显示主机IP： # hostname -i
+
+hostname命令可以设置系统的hostname
+　　hostname newname "临时性"
+    vim /etc/hostname
+    最后，重启后查看主机名 uname -n
+
+/etc/hosts作用相当如DNS，提供IP地址到hostname的对应
+hosts文件格式是一行一条记录，分别是IP地址 hostname aliases，三者用空白字符分隔，aliases可选。
+
+　　127.0.0.1到localhost这一条建议不要修改，因为很多应用程序会用到这个，比如sendmail，修改之后这些程序可能就无法正常运行。
+
+　　修改hostname后，如果想要在本机上用newhostname来访问，就必须在/etc/hosts文件里添加一条newhostname的记录。比如我的eth0的IP是192.168.1.61，我将hosts文件修改如下：
+
+　　#hostname blog.infernor.net
+　　# cat /etc/hosts
+　　127.0.0.1 localhost.localdomain localhost
+　　192.168.1.61 blog.infernor.net blog
+
+　　这样，我就可以通过blog或者blog.infernor.net来访问本机。
+
+== 4.1.3 配置网卡信息 ==
+第1步:首先咱们要切换到"/etc/sysconfig/network-scripts"目录中（该目录存放着网卡的配置文件）。
+
+第2步:使用vim编辑器修改网卡文件"ifcfg-eno16777736"，逐项写入配置参数，并保存退出。
+
+-  设备类型:TYPE=Ethernet
+-  地址分配模式:BOOTPROTO=static
+-  网卡名称:NAME=eno16777736
+-  是否启动:ONBOOT=yes
+-  IP地址:IPADDR=192.168.10.10
+-  子网掩码:NETMASK=255.255.255.0
+-  网关地址:GATEWAY=192.168.10.1
+-  DNS地址:DNS1=192.168.10.1
+
+第3步:重启网卡设备并测试网络是否联通。
+systemctl restart network
+
+== 4.1.4 配置Yum仓库 ==
+第1步:首先咱们要进入到"/etc/yum.repos.d/"目录中（因为该目录存放着yum仓库的配置文件）
+第2步:使用vim编辑器创建一个名为rhel7.repo的新配置文件（文件名称可随意，但后缀必需为repo）
+
+    [rhel-media]:yum仓库唯一标识符，避免与其他仓库冲突。
+    
+    name=linuxprobe :yum仓库的名称描述，易于识别仓库用处。。
+
+    baseurl=file:///media/cdrom :提供方式包括FTP（ftp://..）、HTTP（http://..）、本地（file:///..）
+
+    enabled=1 : 设置此源是否可用，1为可用，0为禁用。
+
+    gpgcheck=1 : 设置此源是否校验文件，1为校验，0为不校验。
+
+    gpgkey=file:///media/cdrom/RPM-GPG-KEY-redhat-release :若为校验请指定公钥文件地址。
+
+第3步:按配置参数的路径将光盘挂载，并将光盘挂载信息写入到/etc/fstab文件中。
+第4步:使用"yum install httpd -y"命令检查Yum仓库是否已经可用。
+
+
+# cd /etc/yum.repos.d/
+# vim rhel7.repo
+-    [rhel7]
+-    name=rhel7
+-    baseurl=file:///media/cdrom
+-    enabled=1
+-    gpgcheck=0
+创建挂载点后进行挂载操作，并设置成开机自动挂载：
+
+# mkdir -p /media/cdrom
+# mount /dev/cdrom /media/cdrom
+
+
+# vim /etc/fstab
+-   /dev/cdrom /media/cdrom iso9660 defaults 0 0
+
+= 4.2 编写Shell脚本 =
+系统中所有可用的Shell解释器
+# cat /etc/shells
+# echo $SHELL
+
+== 4.2.1 编写简单的脚本 ==
+脚本第一行添加脚本解释器路径
+#!/bin/bash 
+
+ 两种方式运行脚本
+ 1. bash example.sh
+ 
+ 2. ./example.sh
+   chmod u+x example.sh
+
+== 4.2.2 接收用户的参数 ==
+$0对应当前Shell脚本程序的名称
+$#对应总共有几个参数
+$*对应所有位置的参数值
+而$1,$2,$3……依次类推则分别对应着第N个位置的参数
+
+vim example.sh
+[[[
+#!/bin/bash
+echo "当前脚本名称为$0"
+echo "总共有$#个参数，分别是$*。"
+echo "第1个参数为$1，第5个为$5。"
+]]]
+
+== 4.2.3 判断用户的参数 ==
+条件判断语句按照测试对象可分为文件测试、逻辑测试、整数值比较与字符串比较
+
+条件测试语法能够判断表达式是否成立，若条件成立则返回数字0，否则便返回其他随机数值
+
+1. 文件测试即用来按照指定条件来判断文件是否存在或权限是否满足
+-d   测试是否为目录
+-f   判断是否为文件
+-e   测试文件或目录是否存在
+-r   测试当前用户是否有权限读取
+-w   测试当前用户是否有权限写入
+-x   测试当前用户是否有权限执行
+
+# [ -d /etc/fstab ]
+# echo $?
+
+2. 逻辑测试则是用于判断用户给出的条件是为真还是假
+01. Shell终端中逻辑“与”符号是&&，它代表当前面的命令执行成功后才会执行后面的命令
+
+# [ -e /dev/cdrom ] && echo "Exist"
+
+02. 逻辑“或”符号为“||”，它代表当前面的命令执行失败后才会执行后面的命令
+
+[linuxprobe@localhost ~]$ [ $USER = root ] || echo "user"
+user
+
+03. 逻辑“非”的符号就是一个叹号，它代表将条件测试中的判断结果取相反值，有一种负负为正的感觉。
+
+[root@linuxprobe root]# [ $USER != root ] || echo "administrator"
+administrator
+
+[root@linuxprobe ~]# [ $USER != root ] && echo "user" || echo "root"
+root
+
+3. 整数比较运算符是仅对数字的测试操作
+  不能将数字与字符串、文件等内容一起操作，而且不能想当然的使用日常生活中的等号、大于号、小于号等来做判断
+
+-eq   判断是否等于
+-ne   判断是否不等于
+-gt   判断是否大于
+-lt   判断是否小于
+-le   判断是否等于或小于
+-ge   判断是否大于或等于
+
+测试下10是否大于10以及10是否等于10
+# [ 10 -gt 10 ]
+# echo $?
+1
+
+# [ 10 -eq 10 ]
+# echo $?
+0
+
+先用free -m查看以兆为单位的内存使用量情况,然后通过grep Mem:关键词匹配过滤出剩余内存量的行
+再用awk '{print $4}'过滤只保留第三列,最后用FreeMem=`语句`的方式将语句内执行的结果赋值给变量，
+
+# FreeMem=`free -m | grep Mem: | awk '{print $4}'`
+# echo $FreeMem 
+
+# [ $FreeMem -lt 1024 ] && echo "内存不足"
+
+4. 字符串比较是判断测试字符串是否为空值，或两个字符串是否相同的操作
+  常常用来判断某个变量是否未被定义（即内容为空值），理解起来也比较简单，常见的操作运算符如下：
+
+=    比较字符串内容是否相同。
+!=   比较字符串内容是否不同。
+-z   判断字符串内容是否为空。
+
+咱们可以通过判断String变量是否为空值，从而判断是否未被定义：
+
+# [ -z $String ]
+# echo $?
+0
+
+判断用于保存当前语系的环境变量值是否为英语
+# echo $LANG
+en_US.UTF-8
+# [ $LANG != "en.US" ] && echo "Not en.US"
+Not en.US
+
+= 4.3 流程控制语句 =
+== 4.3.1 if条件测试语句 ==
+1. 单分支的if条件语句结构，这种结构仅用if、then、fi关键词组成，只在条件成立后才执行预设命令，
+
+# vim mkcdrom.sh
+    #!/bin/bash
+    DIR="/media/cdrom"
+    if [ ! -e $DIR ]
+    then
+    mkdir -p $DIR
+    fi
+  
+2. 双分支的if条件语句结构，这种结构仅用if、then、else、fi关键词组成，进行两次条件判断匹配，两次判断中任何一项匹配成功后都会执行预设命令，
+
+# vim chkhost.sh
+{{{
+  #!/bin/bash
+  ping -c 3 -i 0.2 -W 3 $1 &> /dev/null
+  if [ $? -eq 0 ]
+  then
+  echo "Host $1 is On-line."
+  else
+  echo "Host $1 is Off-line."
+  fi
+}}}
+
+3. 多分支的if条件语句结构，这种结构需要使用if、then、else、elif、fi关键词组成，进行多次条件判断匹配，多次判断中任何一项匹配成功后都会执行预设命令
+   
+# vim chkscore.sh
+{{{
+
+#!/bin/bash
+read -p "Enter your score（0-100）：" GRADE
+if [ $GRADE -ge 85 ] && [ $GRADE -le 100 ] ; then
+echo "$GRADE is Excellent"
+elif [ $GRADE -ge 70 ] && [ $GRADE -le 84 ] ; then
+echo "$GRADE is Pass"
+else
+echo "$GRADE is Fail" 
+fi
+
+  }}}
+
+== 4.3.2 for条件循环语句 ==
+for循环语句可以让脚本一次性读取多个信息值，然后逐一对信息值进行循环操作处理
+
+执行批量创建用户的Shell脚本程序，在输入为帐户设定的密码口令后将由脚本全自动的检查并创建这些帐号，
+# vim Example.sh
+{{{
+
+#!/bin/bash
+
+read -p "请输入用户的密码：" PASSWD
+for UNAME in `cat users.txt`
+do
+  id $UNAME &> /dev/null
+  if [ $? -eq 0 ]
+  then
+    echo "已经存在"
+  else
+    useradd $UNAME &> /dev/null
+    echo "$PASSWD" | passwd --stdin $UNAME &> /dev/null
+    if [ $? -eq 0 ]
+    then
+      echo "$UNAME , 成功建立"
+    else
+      echo "$UNAME , 未能建立"
+    fi
+  fi
+done
+
+}}}
+
+让脚本自动的从文本中读取主机列表，然后进行自动逐个测试对方是否在线吧~
+
+# vim CheckHosts.sh
+{{{
+
+#!/bin/bash
+HLIST=$(cat ~/ipadds.txt)
+
+for IP in $HLIST
+do
+ping -c 3 -i 0.2 -W 3 $IP &> /dev/null
+if [ $? -eq 0 ] ; then
+echo "Host $IP is On-line."
+else
+echo "Host $IP is Off-line."
+fi
+done
+
+}}}
+  
+== 4.3.3 while条件循环语句 ==
+这是一种让脚本根据某些条件来重复执行命令的条件循环语句，而这种循环结构往往在执行前并不确定最终执行的次数
+{{{
+
+#!/bin/bash
+PRICE=$(expr $RANDOM % 1000)
+TIMES=0
+echo "商品实际价格为0-999之间，猜猜看是多少？"
+while true
+do
+  read -p "请输入你猜测的价格数目：" INT
+  let TIMES++
+  if [ $INT -eq $PRICE ] ; then
+    echo "恭喜你答对了，实际价格是 $PRICE"
+    echo "你总共猜测了 $TIMES 次"
+    exit 0
+  elif [ $INT -gt $PRICE ] ; then
+    echo "太高了！"
+  else
+    echo "太低了！"
+  fi
+done
+  
+  }}}
+== 4.3.4 case条件测试语句 ==
+判断输入的文字
+{{{
+
+#!/bin/bash
+read -p "请输入一个字符，并按Enter键确认：" KEY
+case "$KEY" in
+  [a-z]|[A-Z])
+    echo "您输入的是 字母 $KEY。"
+    ;;
+  [0-9])
+    echo "您输入的是 数字 $KEY。"
+    ;;
+  *)
+    echo "您输入的是 空格、功能键或其他控制字符。"
+esac
+  }}}
+
+= 4.4 计划任务服务程序 =
+一次性计划任务:今晚11点30分开启网站服务（例如新网站的公测）
+长期性计划任务:每周一的凌晨3点25分将/home/wwwroot目录打包备份为backup.tar.gz
+
+一次性计划任务"at 时间"，查看已设置好但还未执行"at -l"，删除用"atrm 任务序号"
+
+设置系统在今晚23:30分自动重启网站服务吧
+# at 23:30
+at > systemctl restart httpd
+at > 此处请同时按下Ctrl+d来结束编写计划任务
+
+或者
+
+# echo "systemctl restart httpd" | at 23:30
+
+# ps -ef | grep atd ##查看是否开启atd
+# atq ## 查询当前的等待任务，被执行之后就不会显示
+# atrm 任务的工作号 ## 删除系统中由at建立的正在等待被执行的任务
+
+创建、编辑计划任务的命令为"crontab -e"
+查看当前计划任务的命令为"crontab -l"
+删除某条计划任务的命令为"crontab -r"
+如果您登录的是超级用户的话，还可以通过加上-u参数来编辑其他人的计划任务。
+
+`口诀“分、时、日、月、星期 命令”，这是使用crond服务设置任务的参数格式，没有设置的位置也要用*号占位`
+
+减号(-) -- 表示一段连续的时间周期，例如12-15就可以代表每月的12-15日
+除号(/) -- 代表任务的间隔时间，例如/2就是每个2分钟执行一次的意思
+逗号(,) -- 分别表示多个时间段，如8,9,12来代表八月、九月和12月执行任务，
+
+# crontab -e
+# crontab -l
+25 3 * * 1,3,5 /usr/bin/tar -czvf backup.tar.gz /home/wwwroot
+
+# whereis rm
+rm: /usr/bin/rm /usr/share/man/man1/rm.1.gz /usr/share/man/man1p/rm.1p.gz
+# crontab -e
+# crontab -l
+25 3 * * 1,3,5 /usr/bin/tar -czvf backup.tar.gz /home/wwwroot
+0 1 * * 1-5 /usr/bin/rm -rf /tmp/*
+
+`计划任务中的分钟项目必须有数值，绝对不能为空或是*号，而日和周不能同时使用，否则就会发生冲突`
+

@@ -1,0 +1,8 @@
+== 1、格式化硬盘出错原因 ==
+root@ivan:~ # mkfs.ext4 /dev/sdc1
+mke2fs 1.42.9 (28-Dec-2013)
+/dev/sdc1 is apparently in use by the system; will not make a 文件系统 here!
+
+最后发现是之前做mdadm测试时，自动生成了/dev/md127文件没有删除，利用
+root@ivan:~ # mdadm --stop /dev/md127
+后，再次mkfs.ext4 /dev/sdc1，终于解决了。

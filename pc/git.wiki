@@ -1,0 +1,6 @@
+thub版本仓库添加到本机的远程列表中：
+
+# git remote add linuxprobe git@github.com:K130/linuxprobe.git
+# git remote
+linuxprobe
+origin

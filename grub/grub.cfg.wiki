@@ -1,0 +1,7 @@
+menuentry 'Boot Windows 8 PE ISO'{
+  set root='(hd0,msdos1)'
+  echo 'Loading Memdisk...'
+  linux16 /boot/memdisk iso raw
+  echo 'Loading ISO...'
+  initrd16 /boot/Win8PE.iso
+}

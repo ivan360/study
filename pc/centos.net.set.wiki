@@ -1,0 +1,188 @@
+    最小安装的ISO（CentOS-7.0-1406-x86_64-Minimal.iso），发现ifconfig、netstat、route、arp都没有了，在哪儿呢？
+# yum search ifconfig
+    net-tools.x86_64 : Basic networking tools
+    最小安装默认没有包含这些老工具，如果非用不可，就 yum install net-tools 吧，但我就是要看看不用它们我们怎么来管理网络。
+我们将要用到的是ip指令，ss指令和NetworkManager的两个工具 nmtui，nmcli。老实说，这几个工具更加强大了，但还真不太容易习惯呢。
+
+== 一、ip ss指令替代 ifconfig route arp netstat ==
+
+1、ip 指令入门
+ip [ OPTIONS ] OBJECT { COMMAND | help }  
+OBJECT 和 COMMAND可以简写到一个字母
+ip help     　　　　　可以查到OBJECT列表和OPTIONS，简写 ip h
+ip <OBJECT> help　　　查看针对该OBJECT的帮助，比如 ip addr help，简写 ip a h
+ip addr     　　　　　查看网络接口地址，简写 ip a
+
+查看网络接口地址，替代ifconfig：
+# ip addr
+
+网络接口统计信息
+# ip -s link
+
+2、ip route显示和设定路由
+
+显示路由表
+# ip route
+
+太难看了，格式化一下（显示的是默认网关和局域网路由，两行的内容没有共通性）：
+# ip route|column -t
+
+
+添加静态路由
+# ip route add 10.15.150.0/24 via 192.168.150.253 dev enp0s3
+# ip route|column -t
+# ping 10.15.150.1
+
+删除静态路由只需要把 add 替换成 del，或者更简单的只写目标网络
+# ip route del 10.15.150.0/24
+
+但是，ip route 指令对路由的修改不能保存，重启就没了。
+设置永久的静态路由的方法RHEL官网文档讲了几种，试验成功的只有一种：
+# echo '10.15.150.0/24 via 192.168.150.253 dev enp0s3' > /etc/sysconfig/network-scripts/route-enp0s3
+
+重启计算机，或者禁用再启用设备enp0s3才能生效，
+注意：/etc/sysconfig/static-routes,/etc/sysconfig/network 配置文件都不好用。
+
+3、用 ip neighbor 代替 arp -n
+# ip nei
+
+4、用ss 代替 netstat
+对应netstat -ant
+# ss -ant
+
+对应netstat -antp
+# ss -antp
+
+看着真的很别扭，不管多宽的终端屏，users:部分都会折到下一行，其实是在一行的。
+
+格式化一下，内容整齐了，但是标题行串了：
+# ss -antp|column -t
+
+5、旧的network脚本和ifcfg文件
+    Centos7 开始，网络由 NetworkManager 服务负责管理，相对于旧的 /etc/init.d/network 脚本，NetworkManager是动态的、事件驱动的网络管理服务。旧的 /etc/init.d/network 以及 ifup，ifdown 等依然存在，但是处于备用状态，即：NetworkManager运行时，多数情况下这些脚本会调用NetworkManager去完成网络配置任务；NetworkManager么有运行时，这些脚本就按照老传统管理网络。
+# /etc/init.d/network start
+
+注意(via systemctl)。
+
+6、网络配置文件:
+/etc/sysconfig/network   说是全局设置，默认里面啥也没有
+/etc/hostname            用nmtui修改hostname后，主机名保存在这里
+/etc/resolv.conf         保存DNS设置，不需要手工改，nmtui里面设置的DNS会出现在这里
+/etc/sysconfig/network-scripts/            连接配置信息 ifcfg 文件
+/etc/NetworkManager/system-connections/    VPN、移动宽带、PPPoE连接
+
+
+
+二、nmtui配置基本网络连接
+    nmtui 属于curses-based text user interface（文本用户界面)， 类似 Centos6 的 setup 工具，但只能编辑连接、启用/禁用连接、更改主机名。系统初装之后可以第一时间用nmtui配置网络，挺方便。
+    看图吧，功能跳转可以用 tab 键或光标键，用空格或回车执行。每个子功能完成了、退出了或取消了会直接回命令行（觉得不方便就试试 nmtui help，有直达的方法）。
+
+在命令行运行 nmtui
+
+三、nmcli和其他网络设置
+nmcli的功能要强大、复杂的多
+# nmcli help
+
+OBJECT和COMMAND可以用全称也可以用简称，最少可以只用一个字母，建议用头三个字母。OBJECT里面我们平时用的最多的就是connection和device，这里需要简单区分一下connection和device。
+
+device叫网络接口，是物理设备
+connection是连接，偏重于逻辑设置
+多个connection可以应用到同一个device，但同一时间只能启用其中一个connection。
+这样的好处是针对一个网络接口，我们可以设置多个网络连接，比如静态IP和动态IP，再根据需要up相应的connection。
+ 
+
+上篇说了，/etc/udev/rules.d/70-persistent-net.rules 文件没有了，新添加的网卡NetworkManager自动识别。我们现在试试，给Virtualbox虚拟机增加第二块网卡，虚拟机启动后直接可以看到并且生效了。
+
+# nmcli con show
+“Wired connection 1”是新增的网络连接，对应的网络接口叫enp0s8;
+
+“enp0s3”是最初的网络连接，默认与网络接口同名。
+
+我们可以用nmtui把两个连接改成我们熟悉的名字（nmcli也能，但比较麻烦哦）。改完了看看连接：
+
+# nmcli con show
+2.NAME  UUID                                  TYPE            DEVICE
+3.eth3  0c451785-b098-4c5c-994d-9107171b439d  802-3-ethernet  enp0s8
+4.eth0  295e1841-0ff3-4db9-8800-4e25fc2944da  802-3-ethernet  enp0s3
+
+这样就舒服多了！
+
+看看设备：
+# nmcli dev show enp0s3
+# nmcli dev show enp0s8
+
+
+但是试试用连接名查设备呢？
+# nmcli dev show eth0
+2.Error: Device 'eth0' not found.
+
+
+用设备名查连接也是一样出错：
+# nmcli con show enp0s3
+2.Error: enp0s3 - no such connection profile.
+
+
+    这回能看清楚了吧？懂得了连接和设备的区别，在一些指令帮助里面有的参数需要connection，有的需要device，就不会糊涂了。
+
+    需要注意的是，enp0s3设备对应的连接名改为eth0，但对应的ifcfg文件并没有改名，我们改改试试，改之前先备份原配置文件到其他目录（注意，不能备份到network-scripts目录！）。
+# cat ifcfg-enp0s3
+
+# cp ifcfg-enp0s3 /root/
+# mv ifcfg-enp0s3 ifcfg-eth0
+# systemctl restart network
+
+    没有问题，配置文件改名成功，强迫症又一次胜利了，耶！
+    我们还可以看到，ifcfg-eth0里面没有参数指明设备enp0s3，唯一与设备enp0s3相对应的是MAC地址（HWADDR 08:00:27:15:35:D2）。
+
+现在试试增加一个针对新网络接口enp0s8的连接，现有连接是 eth3：
+# cat ifcfg-eth3
+
+嗯，是自动获得IP的。
+
+我们新建一个连接eth3-1，分配固定IP，用nmtui可以很容易的建立
+ 
+# nmcli con show
+    只是增加了一个连接，其他的没有变化。
+我们启动新连接 eth3-1
+# nmcli con up eth3-1
+# nmcli con show
+# nmcli -t -f IP4.ADDRESS dev show enp0s8
+
+“nmcli -t -f IP4.ADDRESS dev show enp0s8” 是以脚本友好的方式显示网络接口信息。
+    现在可以很明显的看到，将连接eth3-1 up了之后，eth3-1占据了原来由eth3占据的DEVICE enp0s8，并且IP地址已经是指定的10.0.3.110/24 了。
+# cat ifcfg-eth3-1
+
+    ifcfg-eth3-1文件里没有HWADDR参数，但是多了一个DEVICE参数，等于enp0s8，你可以对比一下ifcfg-eth3看看区别在哪。
+    连接的配置文件 ifcfg-*，可以用 DEVICE 指定设备名，也可以用HWADDR指定设备的MAC地址，最终结果都一样的指向某个设备（网络接口）。
+
+我们再试试用nmcli增加连接:
+# nmcli con add con-name eth3-2 ifname enp0s8 type ethernet ip4 10.0.3.120/24 gw4 10.0.3.2
+# nmcli con show
+# nmcli con up eth3-2
+# nmcli con show
+# nmcli -t -f IP4.ADDRESS dev show enp0s8
+
+再看看新的ifcfg文件：
+# cat ifcfg-eth3-2
+
+现在up的连接是eth3-2，网络接口enp0s8的IP是10.0.3.120
+如果重新up连接eth3-1，nmcli con up eth3-1，网络接口enp0s8的IP变成了10.0.3.110
+如果重新up连接eth3，  nmcli con up eth3，  网络接口enp0s8的IP就回到原来自动获得的值10.0.3.15
+
+    所以，对一个网络接口设置不同的连接，可以快速的切换不同的网络配置，这个真的满厉害的。
+
+
+编辑连接
+用nmtui编辑连接后，ifcfg文件也会有相应的改动；手工修改ifcfg后，nmtui中也能看到。
+但是，不论用nmtui还是直接修改ifcfg文件，想让新的配置生效，我们需要load连接配置文件并重新up连接。
+
+举例，我们编辑ifcfg-eth3-1，把IP改为10.0.3.111，然后执行nmcli con reload 或 nmcli con load /etc/sysconfig/network-scripts/ifcfg-eth3-1
+# nmcli con load /etc/sysconfig/network-scripts/ifcfg-eth3-1
+# nmcli con up eth3-1
+# ip addr show enp0s8
+
+新的IP地址生效了。
+
+    BONUS：如果有物理WLAN，nmcli能查看wifi，瞅瞅来，好玩吧？（示例来自nmcli-examples(5) man page，指令： man 5 nmcli-examples）
+
+    鉴于很多基本配置可以用nmtui做，而且往往设置一次就够了，nmcli命令行其他强大功能等用的时候再查吧，这里不多讲了。

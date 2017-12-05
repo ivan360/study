@@ -1,0 +1,23 @@
+修改系统语言环境
+
+1.修改系统当前语言环境
+
+export LANG=en_US
+
+2.更新家目录的文件命名
+
+xdg-user-dirs-gtk-update
+
+跳出对话框，提示是否更新成英文，同意即可
+
+3.修改系统当前语言环境为中文
+
+export LANG=zh_CN.UTF-8
+
+修改系统配置文件
+
+1.当前用户的家目录配置文件位置：
+
+vim ~/.config/user-dirs.dirs
+
+2.打开看一下应该就知道如何修改了，关键的一点是：先把中文目录重命名，在去user-dirs.dirs相应的信息

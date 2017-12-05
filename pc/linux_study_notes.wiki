@@ -1,0 +1,1064 @@
+
+2012/11/26                             星期一                  阴雨
+第一天
+==================================================================
+一  linux的历史发展：
+	1960： MIT 美国麻省理工学院 分时兼容系统
+	1965： MIT BELL　GE   300 MUL复合多处理系统 
+    1969:  美国贝尔实验室的Ken Thompson 用汇编语言完成UNIX操作系统
+	1971:  Dennis Ritchie C语言诞生，贝尔实验室(AT&T)
+    1972： Dennis Ritchie 用C语言重写UNIX操作系统
+    1984： Richard Stallman 创建GNU （GNU——GNU is not UNIX 目标：创建一个free UNIX）
+    1991:  芬兰赫尔辛基大学的Linus Torvalds 发布linux
+	1994:  linux加入GNU组织
+    2000： 2.4内核版本问世，linux开始进入企业应用
+    2003： 2.6内核版本问世
+
+Linux全称：GNU/Linux 
+
+UNIX的两大分支：
+    1）	 BSD
+    2）	 System V
+
+二　安装linux系统
+	安装方式：
+	网络安装 ｜ 光驱安装 ｜ 硬盘安装 ｜ U盘安装
+	安装步骤：此次是以局域网安装为例的
+1 重启电脑 按del（F2或者F12，不同电脑的不同）进入BIOS，选择优先启动为网络启动，然后F10保存（不要忘记）。
+2 进入安装界面
+	  是否媒体检测，skil跳过（不需要检测）
+3 选择安装好的界面是英文还是中文（简体中文）
+4 键盘的选择，选US（美式键盘）
+5 选择全新安装
+6 定制分区：
+	/boot:程序的引导分区，大小：100～200M （我设为200M）
+	/	: 根分区，最小不能小于6G。（我设为40G）
+	swap: 数据交换分区，大小：是内存的1.5～2倍。（我设为3G）
+	7 bootloader的引导设置。
+	8 网卡的设置
+	9 时区的设置，选择的是:亚洲上海
+	10 密码的设置
+	11 包的定制：
+		开发：开发工具和开发库要全选
+		语言：中文和英文全选。
+	12 引导安装：防火墙和selinux都选禁用
+注意：
+	关闭防火墙：
+	查看：chkconfig --list iptables
+	打开：chkconfig --level 0123456 iptables on
+	关闭：chkconfig --level 0123456 iptables off
+	selinux关闭：
+	vim /etc/selinux/config
+	SELINUX=disabled  关闭selinux安全包
+＝＝＝＝＝＝＝＝＝＝＝＝＝＝＝＝＝＝＝＝＝＝＝＝＝＝＝＝＝
+三  linux版本
+	安装方式分两大类：
+	以RPM方式安装的文件系统， 如RedHat,Fedora, Suse等。
+	以dpkg方式安转的文件系统，如Ubuntu, Debian, B2D(主要用于银行系统)等。
+
+	按商业性质分：商业版本  和  社群版本
+	商业版本就是软件比较稳定，才会加入到这个版本中。
+	社群版本就是不稳定的一些软件放在一起供大家研习。
+
+	如何查看内核版本：
+	[root@aa openoffice]# uname -r
+	2.6.18-194.el5
+主要看前三位：
+	2：主版本号，数字越大，表示有重大的升级。
+	6：次版本号，奇数表示测试版本，偶数表示稳定版本
+	18：修订号，也可以叫释放版本，
+		在主次版本号不变的情况下，新增加的功能累计到一定程度后所释放的核心版本。
+
+	查看系统平台
+	[root@aa openoffice]# uname -m
+		i686：表示32文系统
+		x86_64:表示的64位系统
+＝＝＝＝＝＝＝＝＝＝＝＝＝＝＝＝＝＝＝＝＝＝＝＝＝＝＝＝＝＝＝
+四  linux的桌面环境
+	分两种：图形界面 PTS
+			字符界面 TTY
+	cat /etc/issue：查看系统版本
+	lsb_release -a：查看系统版本
+
+	ctrl + alt + f1~f6   由图形界面切换到字符界面
+	ctrl + alt + f7		 由字符界面切换到图形界面（6.2版本）
+    ctrl + alt + f1		 由字符界面切换到图形界面（5.5版本）
+
+	如何打开一个终端：
+1）	桌面点击右键－》打开终端
+2）	Alt+F2 –》gnome-terminal
+3）	应用程序－》附件－》终端（5.5版本）
+                应用程序－》系统工具》终端（6.2版本）
+关闭终端：Ctrl+D
+    退出终端：exit
+	ctrl + shift + N    新建一个终端
+	ctrl + shift + t	新建一个标签
+	ctrl + shift + =	放大终端
+	ctrl + -			缩小终端
+
+	alt + f10			窗口最大化
+	alt + f9            窗口最大化
+	ctrl + alt + D		回到桌面
+
+	ctrl + c			终止命令行
+	ctrl + d			结束输入
+
+	关机：init 0 ｜ shutdown -h now | half
+	重启：init 6 | shutdown -r now | reboot
+	定时关机： shutdown -h h:m:n
+		例：晚上8点关机：shutdown -h 20:00 &（&表示放入后台执行）
+
+	定制登录信息：
+		vim /etc/motd
+		i插入
+		##################
+		###   张老师   ###
+		###  勿删资料  ###
+		##################
+		:wq
+	切换到字符界面进行验证
+	输入用户名：root 输入密码 若登录成功，则会显示出来。
+
+	nautilus . & 表示打开当前文件的目录。
+＝＝＝＝＝＝＝＝＝＝＝＝＝＝＝＝＝＝＝＝＝＝＝＝
+如何查看通过网络nfs服务拷贝文件：
+ping 2.2.2.127
+mkdir /ule
+showmount -e 2.2.2.127  表示查看2.2.2.127的共享文件目录
+mount -t nfs 2.2.2.127:/ule /mnt   挂在网络文件到本地磁盘/mnt
+cd /mnt
+cp  * /ule -rf  从/mnt将文件复制到自己刚刚创建的/ule目录下
+*表示复制所有文件  r表示复制目录  f表示强制复制
+
+2012/11/27                  星期二                       阴雨
+=================================================================
+一  linux文件系统目录简介
+显示目录 ls:
+	/:		根目录，所有的目录都是从根开始
+	/bin:	存放二进制可执行文件
+	/sbin:	存放管理员可执行的二进制文件 例如fdisk
+	/home:	普通用户的家目录
+	/root:	root用户的家目录
+		/root/Desktop/	表示桌面  ~/Desktop
+	/boot:	存放引导镜像文件的目录
+	/etc:	存放各种配置文件
+		/etc/rc.d/ 与开机及运行级别有关的目录
+	/dev:	存放设备文件的目录
+		linux下，所有设备都以文件形式体现出来
+	/var:	存放系统经常变化的一些数据，如日志，邮件等
+		/var/log:	系统日志和各种服务日志存放的目录
+		/var/spool/mail:存放邮件信息的目录
+	/lib:	存放系统使用的函数库，当程序运行的时候就会调用。
+	/usr:	存放系统软件安装的目录。
+		/usr/src:linux源代码
+		/usr/include:系统头文件存放目录
+		/usr/lib:	存放常用动态链接共享库，或者静态库
+	/tmp:	临时目录，存放系统运行时产生临时文件。
+	/lost+found:	存放系统运行时出现问题一些遗失的片段。
+	/proc:	虚拟目录，记录系统当前的各种状态
+		/proc/cpuinfo:查看cpu信息
+		/proc/meminfo:查看内存信息
+		/proc/version:查看内核版本的信息
+	/opt:	存放软件扩张包的目录
+	/tftpboot:	tftp共享文件目录
+	/selinux:	系统增强安全的目录
+	/media:	默认的挂在目录，挂载U盘，光盘等
+	/mnt:	也是一个挂载目录
+===================================================================
+二  linux的基本命令
+1. 命令的分类：
+	内部命令和外部命令：
+	内部命令：就是kernel自带的一些命令
+	外部命令：就是以文件的形式存放在磁盘（/bin /sbin, /usr/bin, /usr/sbin）的命令
+
+	如何区分是内部命令还是外部命令：type + commond
+	cd is a shell builtin：表示内部命令
+	mount is /bin/mount：	表示外部命令
+	
+	如何查看外部命令的路径：
+	which + commond
+	例：which mount
+		/bin/mount
+	
+	注意：echo 即使内部命令也是一个外部命令
+	查看所有的内部命令：man bash
+----------------------------------------------
+2. 帮助命令：
+	1） man:
+	格式：man + commond
+	例：man ls
+	退出：q  上下翻动通过方向键。
+	man类型：
+	man 7 man
+	1 Commands   
+		普通用户命令
+	2 System calls
+		系统调用函数库
+	3 Library calls
+		C库函数和一些常用的函数库
+	4 Special files
+		设备文件的一些说明
+	5 File formats and conventions
+		配置文件与一些其他文件的格式
+	6 Games
+		游戏相关的
+	7 Conventions and miscellaneous
+		网络协议相关的命令
+	8 System management commands
+		系统管理员可操作的一些命令
+	9 Kernel routines
+		系统内核相关的文件
+	清屏：clear  ctrl + l
+
+	2） info 
+	格式：info + commond
+	如：info ls mount cd 
+
+	3） help
+	格式：help + commond | commond --help
+
+	4） 百度， 谷歌
+－－－－－－－－－－－－－－－－－－－－－
+tab:
+	命令自动补齐
+	文件或者目录自动补齐
+－－－－－－－－－－－－－－－－－－－－
+ls:查看当前目录下的所有文件或者文件夹
+	格式：ls [option] [filename]
+	[option]:
+	-a:	显示所有文件，包括.和..和隐藏文件
+		.	表示当前目录
+		..	表示上级目录
+	-A:	显示所有文件，但不包括.和..
+	-t:	按最后修改的时间排序
+	-S:	按文件的大小排序
+	-h:	以容量的单位显示文件
+	-i:	显示文件的id
+	-l: 常格式显示文件
+例：ls -l
+drwxr-xr-x 2 root root  4096 11-27 11:15 aa
+-rw-r--r-- 1 root root     6 11-27 10:21 b.txt
+-rw-r--r-- 1 root root     6 11-27 10:24 c.txt
+-rw-r--r-- 1 root root 25542 11-27 11:24 passwd
+文件解释：
+第一列第一个字符：文件的类型
+	-:	表示普通文件
+	d:	目录文件
+	c:	字符设备类文件
+	b:	块设备类文件
+	s:	套设备链接文件
+	l:	链接文件
+	p:	管道文件
+第一列2～10：表示文件的权限
+	权限三位为以组，共三组：
+	r:表示读的权限；w:表示写的权限；x:表示执行的权限
+	第一组(2~4):表示属主的权限(拥有者的权限)
+	第二组(5~7):表示属组的权限
+	第三组(8~10):表示其他用户拥有的权限
+第二列：硬链接数
+	创建硬链接：ln a b
+	创建软链接：ln -s a c
+第三列：文件的属主（拥有者）
+第四列：文件的属组（拥有组）
+第五列：文件的大小
+第六列：文件最后修改的时间
+第七列：文件名
+－－－－－－－－－－－－－－－－－－－
+cd :切换当前目录
+	绝对路径：从根（/）开始
+	相对路径：从当前目录开始
+	
+	.:	表示当前目录
+	..:	表示上级目录
+	~:	表示用户目录
+	-:	表示返回上次操作的目录中
+－－－－－－－－－－－－－－－－－－－
+pwd:显示当前目录的绝对路径
+	
+touch: 表示创建一个文件
+	创建一个文件：touch aa.txt
+	创建多个文件：touch 1 2 3
+				  touch a{1,2,3}b{1,2}
+				  touch a{1,2,3} b{1,2}
+				  touch "a{1,2,3} b{1,2}"
+
+	stat a：显示文件的属性
+		Access: 2012-11-27 11:52:10.000000000 +0800
+		Modify: 2012-11-27 11:52:10.000000000 +0800
+		Change: 2012-11-27 11:52:10.000000000 +0800
+	atime:访问时间
+	ctime:修改时间，(名字的修改，权限的修改)
+	mtime:修改时间，(内容的修改)，会触发它的atime ctime时间
+－－－－－－－－－－－－－－－－－－－－－－－
+rm 删除一个文件
+	格式：rm [option] [filename]
+	[option]
+	-f:强制删除不提示
+	例：rm -f a
+	-r:删除一个目录
+	
+注意：rm * -rf
+	  rm / -rf !!!!!!!!!!!（会删除根目录下所有内容，慎用）
+	  rm ./-aaa  删除-aaa文件
+－－－－－－－－－－－－－－－－－－－－－－
+mkdir:创建一个目录
+	格式：mkdir [option] [name]
+[option]
+	-m:创建的时候指定目录的权限
+	-p:在创建多极目录的时候，如果前一级目录不存在，会自动创建。（这个很好，自己一层一层的创建，比较麻烦）
+	例：创建一个aa目录：mkdir aa
+	例:	mkdir -p test1/test2/test3/test4
+-----------------------------------------------
+rmdir:删除一个目录（只能删除空目录）
+mv:移动文件或者目录，同时也可以给文件或者目录改名
+	格式：mv [src] [dest]
+	文件改名：mv a.txt b.txt
+	文件移动：mv a.txt /     表示把文件a.txt移动的根下
+	移动并改名：mv a.txt /b.txt
+------------------------------------------------------
+cp:复制
+	格式：cp [option] [src] [dest]
+	[option]
+	-r:复制目录
+	例：cp -r bb ee  表示复制bb目录
+	-f:强制复制
+若在复制的时候，目标文件存在且要复制不提示，如何操作？
+	/bin/cp a.txt b.txt
+	\cp a.txt b.txt
+通配符：
+	*:	表示可能出现的任意字符
+	?:	表示可能出现的任意一个字符
+－－－－－－－－－－－－－－－－－－－－－－－－－－
+cat :显示文件的内容
+	格式：cat [option] [filename]
+	[option]
+	-n:显示行号
+		例：cat -n passwd
+	-b:显示行号
+		但是空行不显示
+	-E:显示结束符（$）
+tac passwd 每行返回来显示
+－－－－－－－－－－－－－－－－－－－－－－－
+more:分屏显示文件的内容
+	按回车显示下面的内容
+	more +5 passwd :从第五行开始显示
+	more -5 passwd :每屏显示5行
+less:分屏显示文件的内容
+	可以通过方向键上下翻动查看
+head :
+	head passwd:默认显示前10行的内容
+	head -n 2 passwd：显示前两行的内容
+tail:
+	tail passwd:默认显示后10行的内容
+    tail -n 2 passwd：显示后两行的内容
+－－－－－－－－－－－－－－－－－－－－－－－
+alias 别名
+临时生效：
+	定义别名：alias ken="ls -l"
+	取消别名：unalias ken
+永久生效：
+	vim ~/.bashrc
+	添加一行：alias ken='ls -l'
+	source ~/.bashrc  文件生效
+－－－－－－－－－－－－－－－－－－－－－－－－
+重定向：
+	改变输入输出的方向
+	标准输入：stdin		0	键盘
+	标准输出：stdout	1	显示器
+	错误输出：stderr	2	显示器
+覆盖方式重定向(会把原来的内容覆盖)
+	> 输出重定向
+	ls > a.txt	表示正确输出重定向（将ls显示的内容输出到a.txt
+中，而不是屏幕上）
+	ls /djkshfj > b.txt	表示错误的输出重定向
+	ls /test /jksadfj &> a.txt 表示正确的和错误的都指向一个文件
+	ls /test /jksadfj &> /dev/null：/dev/null表示空洞文件
+追加方式：（不会覆盖原来的内容）
+	>>:
+	echo "AAA" >> a.txt
+输入出重定向：
+	<:表示输入重定向
+	passwd < a.txt  表示输入的从文件里获取
+	<<:输入重定向
+	cat > a.txt << eee
+－－－－－－－－－－－－－－－－－
+管道：|
+	作用：用于将多个命令连接起来，前一个命令的输出作为后一个命令的输入	
+	ls /etc				表示/etc下有多少个文件目录
+	ls /etc | wc -l 	统计有多少个文件目录
+	ls /etc | grep "^d" | wc -l 统计有多少个目录（grep是个查找命令）
+－－－－－－－－－－－－－－－－－－－－－－
+vim :
+	是文本编辑器
+	对程序员来说，是一个程序开发编辑器
+vim 是vi 的升级版本
+
+查看vim的版本：vim 或者 :version
+------------------------------
+vim 的工作模式：
+	一般模式：以vim直接打开的默认模式
+	编辑模式：左下角有插入字符的显示
+	命令模式：左下角没有任何提示，按Esc:进入命令模式
+
+模式之间如何切换：
+－－－－－－－－－－－－－－－－－－－－－
+	一般模式切换到编辑模式：i I o O s S a A
+i：从光标的当前位置插入
+I：从光标所在行的行首插入
+o：从光标所在行的下一行插入
+O：从光标所在行新起一行插入
+a：从光标位置退一行插入
+A：从光标位置退到行尾插入
+s：删除光标位置进行插入
+S：删除光标所在行插入
+
+	按ESC键，退出编辑模式
+	按:进入命令模式
+－－－－－－－－－－－－－－－－
+一般模式：
+	删除：
+	dd:		删除一行
+	ndd:	删除n行
+
+	x:		删除光标所在行的字符
+	nx:		删除多个字符
+
+	dw:		删除一个单词，光标只能放在单词的第一个字母处
+	ndw:	删除n个单词
+	daw:	删除一个单词，可以放在这个单词的任何位置
+
+	d$:		删除光标位置到行尾
+	d^:		删除光标位置到行首
+
+	dgg:	删除当前行到文件头的内容
+dG:		删除当前行到文件末尾的内容
+
+	J：	两行合并为一行
+	u:	撤销前次的操作
+	ctrl + r: 取消撤销
+－－－－－－－－－－－－－－－－－－－－
+复制：
+	yy:		复制一行
+	nyy:	复制多行
+	;m,ny:	复制m行到n行的文本
+	p:粘贴
+
+	可视化的复制：
+	v:对字符的可视操作，按c表示剪贴
+						按y表示复制
+	然后在移动光标到要复制的位置，
+	在一般模式下按p.
+
+	V:可视化行的操作
+
+	可视化模块的操作
+	ctrl + v
+----------------------------------------
+移动：
+	h:光标向左移动一位
+	l:光标向右移动一位
+	j:光标向下移动一位
+	k:光标向上移动一位
+	^:光标移动到行首，第一个有效字符的位置
+	0:光标移动到行首，行的第一个位置
+	$:光标移动到行尾。
+
+	H:表示将光标移动到屏幕的顶端
+	M:表示将光标移动到屏幕的中间
+	L:表示将光标移动到屏幕的行尾
+	gg:光标移动到文件内容的开头
+	ngg:光标移动到文件的第n行
+	G:光标移动到文件内容的结尾
+
+2012/11/28
+第三天
+======================================================================
+一  linux的用户管理
+	用户的分类：
+	管理员：root id=0 ,最高权限
+	系统用户：id(1 ~ 499),安装一些服务建立的帐号，默认是不允许登录的，用于一些服务运行是的所用的身份。
+	普通用户：由管理员创建的用户，id（500以上）。
+		最多支持多少个用户2^32-1
+		echo $[2**32 - 1]
+-----------------------
+跟用户相关的文件
+	/etc/passwd:	用户的帐号文件，用来保存用户的基本信息
+	/etc/shadown:	用户密码文件，用来存放用户的密码及相关的信息
+	/etc/group:		组帐号文件，用来存放组的基本信息
+	/etc/gshadow:	组密码文件。
+/etc/skel:		用户模板文件
+    /var/spool/mail:邮件目录
+－－－－－－－－－－－－－－－－－
+/etc/passwd:文件解析
+	root:x:0:0:root:/root:/bin/bash
+	bin:x:1:1:bin:/bin:/sbin/nologin
+	tom:x:500:500::/home/tom:/bin/bash
+	以:为分割符
+	第一列：用户名，同一个系统帐号对应一个id
+	第二列：表示用户密码，假若为空，表示无密码，为x表示有密码
+	第三列：用户id，用来识别不用户。
+	第四列：组id，跟/etc/group有关
+	第五列：描述性信息，主要用来解释这个帐号的信息
+	第六列：用户家目录，用户在登录的时候起始目录
+			root的家目录/root;普通用户的家目录/home/
+	第七列：用户登录的shell,/nologin表示不允许登录
+－－－－－－－－－－－－－－－－－－
+/etc/shadow:文件解析
+	root:$1$qWXyWSfY$KSqb.pn/pBvt847Wy.awF/:15671:0:99999:7:::
+	tom:$1$5ZvobfaO$VlTrgGxuvg36S3DCJcJUu0:15640:0:99999:7:::
+	ssss:!!:15671:0:99999:7:::
+
+	第一列：用户名，与/etc/passwd相对应
+	第二列：密码，用grub-md5-crypt加密
+			[root@aa test]# grub-md5-crypt
+			Password: （输入自己想设定的密码）
+			Retype password: 
+			$1$NVutw0$qOx.SqnmuGk0/hbeG1iXH.（这就是md5加密好的密码）
+	第三列：上次修改口令的时间，用距1970年1月1日的天数来表示
+	第四列：两次修改口令的一个时间间隔，“0”表示随时可以修改
+	第五列：口令的有效期：99999 无期限
+	第六列：口令过期前的提示
+	第七列：口令过期后多少天还可以使用
+	第八列：距离1970年1月1日之后的口令过期，主要用于收费系统
+	第九列：保留，为了以后功能的扩展。
+－－－－－－－－－－－－－－－－－－－－－－－－
+/etc/group:文件解析
+	root:x:0:root
+	daemon:x:2:root,bin,daemon
+	第一列：组名，建立一个用户的时候，会自动创建一个同名的组
+	第二列：组密码
+	第三列：组id
+	第四列：组成员
+－－－－－－－－－－－－－－－－－－－－－－－－－－－
+/etc/gshadow:文件解析
+	root:::root
+	bin:::root,bin,daemon
+	第一列：组名
+	第二列：组密码
+	第三列：组管理员
+	第四列：组成员
+－－－－－－－－－－－－－－－－－－－－－－－－－－－－
+创建一个用户：
+	格式：useradd [option] [username]
+	创建一个用户：useradd aaaaa
+	[option]
+	-d:	指定家目录的位置 （默认/home）
+	-s:	指定使用的shell（默认/bin/bash）
+	-c:	指定备注信息
+	-g:	指定用户组
+	-G:	指定用户加入另外的组
+	-u:	指定用户的id
+----------------------------------
+设置用户的密码：
+	passwd:
+	格式：passwd + username
+	passwd :表示当前用户设置密码
+	passwd bbb:表示给用户bbb设置密码
+	
+	root:可以修改任何用户的密码
+	普通用户：只能修改自己的密码，而且满足密码复杂度。
+		复杂度：必须有字母，数字，特殊字符，且密码长度6为以上。
+－－－－－－－－－－－－－－－－－－－－
+修改用户信息
+	usermod
+	格式：usermod [option] username
+	[option]
+	-d:修改用户的家目录
+	-g:修改用户的属组
+	-G:修改附加组
+	-l:修改用户名
+	-s:修改shell
+	-u:修改用户id
+	-L:锁定用户
+	-U:解锁
+	锁定用户，其实就是密码失效，我们可以通过修改密码来达到是用户生效的目的，所以说。这种锁是不安全的锁。
+	更安全的是，我们可以修改用户的shell为/bin/nologin,这样就算更改密码，也是不允许登录的。
+－－－－－－－－－－－－－－－－－－－－－
+删除用户：
+	userdel 
+	格式：userdel [option] username
+	[option]
+	-r:表示连同相关的用户目录一块删除
+	例userdel tom
+	下次创建的时候不可以创建，提示用户目录以存在？
+	1）rm /home/tom -rf
+	   rm /var/spool/mail/tom -rf
+	2）userdel -r tom
+-----------------------------------------
+查看用户的id信息
+	id + username
+--------------------------------
+切换用户
+	su
+	格式 su [-] username
+	加-和不加的区别？
+	加-:表示的是完全切换
+		[tom@aa ~]$ echo $PATH
+		/usr/kerberos/bin:/usr/local/bin:/bin:/usr/bin:/home/tom/bin
+	不加：表示不全完切换
+		[tom@aa test]$ echo $PATH
+	/usr/kerberos/sbin:/usr/kerberos/bin:/usr/local/sbin:/usr/local/bin:/sbin:/bin:/usr/sbin:/usr/bin:/usr/X11R6/bin:/root/bin
+
+	root 切换到普通用户不需要密码验证
+	普通用户切换到root或者普通用户需要密码的验证
+	注意：在切换用户的过程中，若要返回上次的用户状态 exit;不需要再次切换，以免耗费cpu资源。
+－－－－－－－－－－－－－－－－－－－－－－－－
+创建组：
+	groupadd
+	格式：groupadd + groupname
+	如：groupadd TTT 表示创建TTT组
+－－－－－－－－－－－－－－
+删除一个组
+	groupdel
+	格式：groupdel + groupname
+	注意：假若一个用户为其属组，我们要删除的话，必须先把用户删除，保证该组不属于任何用户的主组。
+－－－－－－－－－－－－－－
+管理组
+	gpasswd
+	gpasswd groupname  设置组密码
+	
+	gpasswd -a username groupname	表示将用户添加到组中
+	gpasswd -d username groupname	表示将用户从组里删除
+	gpasswd -A username groupname	表示将用户设置为组的管理员
+
+练习：创建一个s组，然后为组添加三个用户s1,s2,s3,并且把s1作为组的管理员，然后验证是否操作成功。
+
+	groupadd s	创建s组
+
+	[root@aa test]# useradd s1
+	[root@aa test]# useradd s2
+	[root@aa test]# useradd s3    创建三个用户
+
+	[root@aa test]# tail /etc/passwd	验证用户是否创建成功
+
+	[root@aa test]# gpasswd -a s1 s
+	[root@aa test]# gpasswd -a s2 s
+	[root@aa test]# gpasswd -a s3 s		将三个用户添加到s组中
+
+	[root@aa test]# tail /etc/group		验证用户是否添加成功
+
+	[root@aa test]# gpasswd -A s1 s		设置s1为s组的管理员
+
+	[root@aa test]# tail /etc/gshadow	验证s1是否为管理员
+－－－－－－－－－－－－－－－－－－－－－－－－－－－
+修改组信息：
+	groupmod 
+	格式：groupmod [option] groupname
+	[option]
+	-g:修改组id
+	-n:修改组名
+	例：groupmod -g 4999 s ID不存在的时候可以修改成功。
+		groupmod -n ss s	表示将s组改为ss组
+---------------------------------------------------
+查看用户组的信息
+	groups
+	格式：groups + username
+	例：groups s1
+---------------------------------------------
+linux 的权限的管理
+	linux系统文件访问分类
+	u:	表示文件的属主（拥有者）
+	g:	表示文件的属组
+	o:	表示其他用户
+	a:	表示所用用户
+linux基本权限
+	r:	读		4
+	w:	写		2
+	x:	执行	1
+	001	-> --x
+	010 -> -w-
+	011 -> -wx
+	100 -> r--
+	101 -> r-x
+	111 -> rwx
+---------------------------------
+r:读权限
+	对文件：能不能读，就是看是否可以查看文件的内容（cat head mor）
+		[tom@aa test]$ cat a.txt
+		AAAAAAAAAAA
+		[tom@aa test]$ echo "BBBBBBBB" > a.txt
+		-bash: a.txt: 权限不够
+	对目录：能不能读，就是是否有查看目录列表的权限（ls）
+		[tom@aa test]$ ls aa
+		b.txt
+w:写权限
+	对文件：能不能写，就是是否可以修改文件内容
+			[tom@aa test]$ echo "BBBBB" > a.txt
+			[tom@aa test]$ cat a.txt
+			BBBBB
+	对目录：是否可以在起下面创建文件或者目录
+			[tom@aa test]$ ll
+			总计 12
+			drwxr-xr-x 2 root root 4096 11-28 15:53 aa
+			-rwxrw-rw- 1 root root    6 11-28 15:56 a.txt
+			drwxrwxrwx 2 root root 4096 11-28 15:58 bb
+			[tom@aa test]$ cd aa
+			[tom@aa aa]$ mkdir aa1
+			mkdir: 无法创建目录 “aa1”: 权限不够
+			[tom@aa aa]$ touch a.txt
+			touch: 无法触碰 “a.txt”: 权限不够
+			[tom@aa aa]$ cd ../bb
+			[tom@aa bb]$ mkdir bb1
+			[tom@aa bb]$ touch b.xtt
+			[tom@aa bb]$ ls
+			bb1  b.xtt
+x:执行的权限
+	对文件：看文件能不能运行
+对目录：看是否可以cd进去
+			[root@aa test]# ll
+			总计 12
+			drwxr--r-- 2 root root 4096 11-28 15:53 aa
+			-rwxrw-rw- 1 root root    6 11-28 15:56 a.txt
+			drwxrwxrwx 3 root root 4096 11-28 16:00 bb
+			-rw-r--r-- 1 root root    0 11-28 16:02 b.txt
+			[tom@aa test]$ cd aa
+			-bash: cd: aa: 权限不够
+			[tom@aa test]$ cd bb
+			[tom@aa bb]$ pwd
+			/test/bb
+	注意：文件能不能写，首先取决是否有写的权限，假若没有写的权限，我们也要对其修改，就要看他的上级目录是否有写的权限，如果上级目录有写的权限，我们可以通过强制修改文件的内容。
+文件能不能删除，取决于上级目录是否有写的权限。
+－－－－－－－－－－－－－－－－－－－－－－－－－－－－－
+设置文件的权限
+	格式：chmod  [option] 文件名或者目录名
+	[option]
+	-R:表示子目录或者子文件都得到相应的权限
+
+	授权的方式：
+	u=rwx,g=r,o=   例：chmod u=rw,g=r,o= a.txt 
+						chmod a=rw a.txt
+	u+x,g+x,o+w		例chmod u+x a.txt
+	u-x,g-w,o-x		
+
+	数字授权的方式：
+	例：chmod 755 a.txt
+----------------------------------------
+设置文件的属主和属组
+	格式：chown 属主:属组 文件或者目录
+
+	例将a.txt属主改为tom
+		chown tom a.txt
+	将a.txt属组改为tom
+		chown tom:tom a.txt
+		chown :tom a.txt
+-----------------------------------------
+高级权限（）
+SUID:
+	对文件：以属主的身份运行
+	对目录：不适用
+	设置：chmod u+s 文件名（二进制可执行文件）
+		  chmod 4xxx 文件名
+SGID:
+	对文件：以组的身份来运行
+	对目录：在该文件下创建文件或者目录时，他的属组不是用户的组，而是继承上级目录的的属组
+
+	设置：chmod g+s bb
+		  chmod 2xxx bb
+STICKY:
+	对文件：不适用
+	对目录：只能删除自己创建的目录
+	设置：chmod o+t 目录名
+		  chmod 1xxx 目录名
+－－－－－－－－－－－－－－－－－－－－－－－－－
+默认权限
+	默认取决于umask
+	计算默认权限的方法
+	对文件：666-umask=文件的权限(在创建文件的时候，默认没有执行权限)
+	对目录：777-umask=目录的权限
+	临时修改umask
+	#umask 222
+	永久修改,只对当前用户
+	vim ~/.bashrc
+	修改全局的uamsk
+	vim /etc/bashrc
+--------------------------- -------------
+作业：
+1 手动创建一个用户，并且可以登录成功。
+2 创建一个目录，让tom用户能读能写可执行，jim mary ken可读可执行，其他用户无法访问，设置好后，并且去验证。
+
+
+
+2012/11/29                星期四                     阴雨
+ 第四天
+=========================================================================
+一  linux的磁盘管理
+file :查看文件的类型
+	格式：file + filename
+
+uname:查看系统的基本信息
+	-r:内核版本
+	-s:uname:查看系统的基本信息
+	-r:内核版本
+	-s:什么内核
+	-o:操作系统
+	-n:显示主机名
+	-m:显示什么平台
+	-a：显示所有信息
+
+cal:日历
+	-perm:	按权限的查找
+	-user:	按属主的查找
+	-group:	按属组的查找
+	-type:	按类型的查找
+		f:普通文件
+		d:目录
+		c:字符设备文件
+		b:块文件
+		l:链接文件
+	例：find /test/ -type d -perm 755
+	-size:	按大小的查找
+		+n:表示大于n
+		-n:表示小于n
+		n:	表示等于n
+		例：查找所有的空文件
+		find / -size 0
+		例：查找大于2k小于8k的文件
+		find / -size +2k -size -8k
+	-exec 找到后，再将结果给执行的指令
+	格式：-exec comond {} \;
+		{}:表示find找到的一些文件
+		\:禁止转义
+		;:本行的指令执行结束
+
+	例：找出/test/目录下的所有空文件然后删除
+		find /test/ -size 0 -exec rm {} \;
+	-ok:作用跟exec是一样的，只是在处理的时候需要我们确认。
+
+	按时间查找：
+		find / -mtime +2  表示2个多小时以前修改的文件
+		find / -atime +2  表示2天以前修改的文件
+		find / -ctime +2  表示2分钟以前修改的文件
+－－－－－－－－－－－－－－－－－－－－－－
+sync:数据同步到磁盘
+－－－－－－－－－－
+linux的网络基本命令
+mii-tool:检查网卡的情况
+	link ok：表示网络连通
+	no link：表示网线不通
+	no-MII:	表示网卡与主板的链接松动或者没有插好，或者网卡驱动有问题。
+	ifconfig:表示查看所有网卡的信息
+	ifconfig eth0：查看第一张网卡
+	ifconfig eth0 down:关闭第一张网卡
+ifconfig eth0 up：开启网卡
+	ifconfig eth0 2.2.2.227
+	ifconfig eth0 2.2.2.227 netmask 255.255.255.0 设置网卡IP和子网掩码
+	
+	永久生效：
+	vim /etc/sysconfig/network-scripts/ifcfg-eth0
+	DEVICE=eth0  					:表示指定的设备号
+	BOOTPROTO=dhcp					：指定IP的分配方式
+		dhcp:动态分配
+		static：静态分配
+	IPADDR=2.2.2.127				:指定主机的IP
+	NETMASK=255.255.255.0			:子网掩码
+	HWADDR=54:04:a6:c1:7c:a9		：网卡的物理地址，也就是网卡的硬件地址
+	ONBOOT=yes						：是否启动网卡
+		yes:表示启动  no：表示不启动
+
+	修改好后，重启网络服务：service network restart
+
+	图形配置：
+		system-config-network
+
+	如何检测网络的连通性：ping
+	ping 2.2.2.1   ctrl+c
+	ping -c 5 2.2.2.1  指定主机的ping的次数
+
+	查看主机名：hostname
+		临时修改：hostname www.baidu.com
+		永久修改：
+vim  /etc/sysconfig/network
+HOSTNAME=aa.bb.com
+
+	如何绑定自己的主机名和ip?
+		vim /etc/hosts
+		添加一行：2.2.2.127    aa.bb.com
+	DNS：
+		vim /etc/resolv.conf
+		添加一行：nameserver 2.2.2.1
+
+	路由：
+		route add default gw 2.2.2.1
+-----------------------------------
+	scp:网络拷贝
+
+	格式：scp [option] src dest
+	[option]
+		-r：表示拷贝目录
+ 
+	把异机文件拷贝本机
+	scp 2.2.2.127:/etc/passwd /test/
+	把本机文件拷贝到异机
+	scp /ule/1st  2.2.2.127:/tmp
+	异机拷贝异机
+	scp 2.2.2.193:/etc/passwd  2.2.2.153:/mnt
+－－－－－－－－－－－－－－－－－
+	ssh:远程登录
+	前提条件：
+	1 对方的主机必须开启sshd服务
+		service sshd restart  重启sshd服务
+	2 对方的机器允许你登录
+		vim /etc/hosts.deny
+		sshd:2.2.2.193:deny（不允许）
+	3 必须知道对方的密码
+
+	查看谁登录你的电脑：who
+--------------------------------
+磁盘分区：
+	fdisk -l：查看磁盘分区
+
+	Disk /dev/sda: 500.1 GB, 500107862016 bytes
+ 			表示磁盘名和磁盘大小
+	255 heads, 63 sectors/track, 60801 cylinders（磁柱）
+	Units = cylinders of 16065 * 512 = 8225280 bytes
+
+	Device Boot      Start         End      Blocks   Id  System
+	/dev/sda1   *           1        3916    31455238+   7  HPFS/NTFS
+	/dev/sda2            3917       14115    81923467+   7  HPFS/NTFS
+	/dev/sda3           14116       14140      200812+  83  Linux
+	/dev/sda4           14141       60801   374804482+   5  Extended
+		extended：表示扩展分区
+	/dev/sda5           14141       19239    40957686   83  Linux
+	/dev/sda6           19240       19749     4096543+  82  Linux swap / Solaris
+	/dev/sda7           19750       23573    30716248+  83  Linux
+	/dev/sda8           23574       27398    30720000   83  Linux
+	/dev/sda9           27398       27641     1954365   83  Linux
+	/dev/sda10          27642       27885     1959898+  83  Linux
+
+	磁盘的表示方法：
+	hd:表示IDE硬盘
+	sd:表示SCSI：Small Computer System Interface（小型计算机系统接口）硬盘
+		a, b,c :表示第几块硬盘（一般的计算机只有一块硬盘）
+		数字1,2,3，…：表示的是硬盘第几块分区
+	第一步：创建分区
+		fdisk /dev/sda   对第一块硬盘
+Command (m for help): m
+Command action
+   a   toggle a bootable flag				表示创建引导分区
+   b   edit bsd disklabel
+   c   toggle the dos compatibility flag
+   d   delete a partition					删除分区
+   l   list known partition types			列出已知分区信息
+   m   print this menu
+   n   add a new partition					添加分区
+   o   create a new empty DOS partition table
+   p   print the partition table
+   q   quit without saving changes			不保存退出
+   s   create a new empty Sun disklabel
+   t   change a partition's system id
+   u   change display/entry units
+   v   verify the partition table
+   w   write table to disk and exit			保存退出
+   x   extra functionality (experts only)
+
+Command (m for help): n
+	按n 创建分区
+	First cylinder (27886-60801, default 27886):   表示创建分区的起始柱面
+	Last cylinder or +size or +sizeM or +sizeK (27886-60801, default 60801): +2G  指定分区的大小为2G
+
+	Command (m for help): p  查看分区表
+	Command (m for help): w   保存分区
+
+	第二步：ll /dev/sd* 查看设备文件有没有生成
+		partprobe  使分区生效 		5.5版本
+		必须重启电脑				6.2版本
+	第三步：格式化分区
+		mkfs -t ext3 /dev/sda11
+
+	第四步：使用分区
+		mkdir /disk11
+		mount -t ext3 /dev/sda11 /disk11
+
+	df -h :查看磁盘空间的使用情况
+	free:查看内存的使用情况
+
+	总结：分区 -> 格式化 -> 挂载
+－－－－－－－－－－－－－－－－－－－－－
+mount:
+	挂载
+	格式：mount [-t 文件系统的类型] [-o 参数] 设备名  挂载点
+
+	常见的文件系统：
+	ext3:	rhel5.5
+	ext4	rhel 6.0 都是linux下的文件系统类型
+
+	vfat
+	fat32
+	ntfs	windows下文件系统类型
+
+	nfs:	网络共享文件类型
+
+	iso9660:	光盘文件系统或者挂载镜像文件的系统类型
+
+	挂载参数：
+	ro:	只读
+	rw:	读写
+	sync:同步数据
+	loop:表示文件映射为设备（iso镜像文件）
+
+	挂载一个普通文件
+		mount -t ext3 /dev/sda11 /disk11
+	挂载NFS共享文件
+		mount -t nfs 2.2.2.127:/ule /mnt
+
+		查看nfs文件共享：
+		showmount -e 2.2.2.127
+	挂载ISO镜像文件
+mount -t iso9660 -o loop /tools/rhel55.iso  /mnt
+
+	reset:重启终端
+
+	挂载ntfs格式
+		mount -t ntfs-3g  /dev/sda1 /mnt
+	查看挂载是否成功：mount | df -h
+
+	卸载挂载：umount
+	格式：umount + 挂载点或者设备名
+	umount /mnt   表示卸载
+	umount -l /mnt 表示强制卸载
+	
+	自动挂载
+	方法一：
+	vim /etc/fstab
+	proc               /proc       proc    defaults        0 0
+	LABEL=SWAP-sda6    swap        swap    defaults        0 0
+挂载设备		  挂载点	文件类型	挂载参数	   验证
+
+	例：挂载nfs文件：
+	2.2.2.127:/ule      /mnt    nfs     defaults        0 0
+
+	例：自动挂载iso镜像文件
+	/tools/rhel55.iso   /mnt     iso9660 defaults,loop   0 0
+
+	验证是否挂载成功：
+		mount -a
+
+	方法二：
+		vim /etc/rc.d/rc.local
+		添加一行
+		mount -t iso9660 -o loop /tools/rhel55.iso  /mnt
+
+	虚拟机的安装：
+
+	第一步：安装虚拟机：
+		若没有执行的权限，需要指定权限，然后直接运行
+		 ./VMware_7.1
+		注意：查询安装的平台：
+			uname –m 
+            i686    32位
+            x86_64  64位
+	    注册：
+		help -> enter license key -> enter license key
+
+	第二步：创建虚拟机
+	file -> new -> virtaul machine -> custom -> next
+	-> I will install the opertion sysytem later
+	-> linux->next-> next ->use bridged networking
+	->next -> next -> scsi -> next ->next...
+
+	第三步，安装linux 
+		跟安装真机一模一样
+		鼠标跳出来ctrl + alt
+卸载虚拟机：
+		vmware-installer -u vmware-workstation
+

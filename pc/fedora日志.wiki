@@ -1,0 +1,89 @@
+= 2017年03月03日 =
+
+== 安装gvim ==
+1. sudo dnf install gvim
+
+2. git clone https://github.com/ruchee/vimrc.git
+
+3. 删除个人主目录下的 .vim 文件夹和 .vimrc 文件,并建立软链接指向下载文件
+    rm -rf ~/.vim ~/.vimrc
+    ln -s /home/ivan/.vim   /home/ivan/vimrc/vimfiles
+    ln -s /home/ivan/.vimrc /home/ivan/vimrc/_vimrc
+
+4. Monaco 字体和ctags
+    mv monaco.ttf ~/.fonts 将其丢到 ~/.fonts 目录即可
+    sudo dnf install ctags
+
+== fedora 修改home下的中文目录为英文目录 ==
+  export LANG=en_US
+  xdg-user-dirs-gtk-update
+  export LANG=zh_CN.UTF-8
+
+== 安装zsh ==
+各种补全：路径补全、命令补全，命令参数补全，插件内容补全等等。触发补全只需要按一下或两下 tab 键，补全项可以使用 ctrl+n/p/f/b上下左右切换。比如你想杀掉 Java 的进程，只需要输入 kill java + tab键，如果只有一个 java 进程，zsh 会自动替换为进程的 pid，如果有多个则会出现选择项供你选择。ssh + 空格 + 两个tab键，zsh会列出所有访问过的主机和用户名进行补全
+[[how-to-zsh]]
+
+1. 安装zsh
+$ sudo dnf install zsh
+
+设置默认shell为zsh
+$ chsh -s $(which zsh)
+如果要切换回去bash：
+
+chsh -s /bin/bash
+
+完成后可以使用下面这条命令检查是否设置成功
+$ echo $SHELL
+
+2. 配置文件oh-my-zsh
+sh -c "$(wget https://raw.github.com/robbyrussell/oh-my-zsh/master/tools/install.sh -O -)"
+
+3. 根据自己的喜好，设置主题风格
+   ~/.zshrc 文件中可以看到,ZSH_THEME="robbyrussel"
+
+可以随机设置ZSH_THEME="random"
+每次打开命令行窗口的时候，都会随机在默认主题中选择一个。这样我们如果觉得当前的主题比较喜欢，可以直接使用 echo 命令输出当前主题的名称
+$ echo $ZSH_THEME
+
+4. 启用插件
+Oh My Zsh 默认自带了一些默认主题，存放在~/.oh-my-zsh/plugins目录中
+
+plugins=(git)
+git: oh-my-zsh 默认开启的插件，提供了大量 git 的alias。
+
+web-search : 在命令行中使用搜索引擎进行搜索。比如 baidu swift 这个命令就可以使用 baidu 搜索 swift 关键字
+
+extract : 功能强大的解压插件，所有类型的文件解压一个命令x全搞定，再也不需要去记tar后面到底是哪几个参数了
+
+z : 强大的目录自动跳转命令，会记忆你曾经进入过的目录，用模糊匹配快速进入你想要的目录。
+
+wd 能够快速的切换到常用的目录
+
+比如一个常用的目录 /usr/nginx/www/html，首先进入到这个目录中，然后输入
+wd add web
+
+这个命令相当于给当前目录做了一个标识，标识名叫做 web ，我们下次如果再想进入这个目录，只需输入：
+wd web
+
+wd rm 命令删除已有的映射
+wd show 命令查看现有的映射。
+
+5. 更新oh-my-zsh
+
+设置自动更新oh-my-zsh
+
+默认情况下，当oh-my-zsh有更新时，都会给你提示。如果希望让oh-my-zsh自动更新，在~/.zshrc 中添加下面这句
+
+DISABLE_UPDATE_PROMPT=true
+
+要手动更新，可以执行
+
+$ upgrade_oh_my_zsh
+
+6. 卸载oh my zsh
+直接在终端中，运行uninstall_oh_my_zsh既可以卸载。
+
+= 2017年03月04日 =
+安装htop
+
+

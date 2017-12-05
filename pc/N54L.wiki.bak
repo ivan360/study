@@ -1,0 +1,22 @@
+== 刷破解BIOS（HP  MicroServer （n36l 40l 54l） ahci破解+dell slic2.2） ==
+    安装方法见http://www.gebi1.com/thread-234919-1-1.html
+
+操作步骤
+1、下载HP ProLiantMicroServer-20140304-Dell22-mod bios.zip，解压后运行SP64420.exe安装到任意目录。
+2、插入U盘，运行安装目录下的HPQUSB，选择插入的U盘后点start会完成自动刷写BIOS U盘的制作
+3、将HP ProLiantMicroServer-20140304-Dell22-mod bios目录下O41100113-mod-dellslic2.2.ROM文件更名为O41100113.ROM，替换BIOS U盘的同名文件。
+4、将制做好的U盘插入N54L，上电后会自动刷BIOS，过程持续约1~2分钟，当出现静止不动的C:\>提示符后，重启，再进BIOS看到有AHIC及eSATA即大功告成！
+5、开机进入BIOS设置
+    在主界面 ‘Chipset > Southbridge Configuration > SB SATA Configuration’ 按下面做设置：
+{{{
+    OnChip SATA Channel = Enabled
+    OnChip IDE Type = IDE
+    SATA IDE Combined Mode = Disabled
+    SATA EPS on all PORT = Enabled
+    SATA Power on all PORT = Enabled
+}}}
+    返回主界面，到 ‘Advanced > IDE Configuration’，确认按下面的设置
+Embedded SATA Link Rate = 3.0Gbps MAX
+
+这样就搞定了！保存设置启动电脑，磁盘现在是热插拔的啦（如果你使用软RAID的话，热插拔很有用）。另外，主板上的Sata接口现在可以用于连接硬盘了
+

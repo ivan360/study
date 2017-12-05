@@ -1,0 +1,203 @@
+Linux 入门基础
+3.2 使用fdisk进行磁盘管理
+
+fdisk基于MBR的分区工具，GPT无法用fdisk分区
+fdisk -l        -- 查看
+fdisk /dev/sdb  -- 进行分区
+partprobe       -- 更新分区表
+/pro/partitions -- 查看分区
+
+3.3 Linux文件系统
+
+文件系统区别：日志、支持分区大小、单个文件大小、性能
+linux支持的文件系统
+mke2fs -t ext4 /dev/sdb1
+常用参数
+-b -c -L -j
+dumpe2fs /dev/sda2 查看分区文件系统信息
+journal 日志，拥有较强的稳定性，在出错时可以进行恢复。
+e2label /dev/sdb1 标签
+fsck 修复损坏的文件系统
+
+3.4 Linux文件系统挂载管理
+
+mount /dev/sda3(要挂载的分区) /mnt(挂载点)
+mount -o remount,ro /dev/sda3 /mnt 重新挂载为只读
+umount
+fuser -m /mnt   :查看使用文件系统的进程
+lsof /mnt       :查看正在被使用的文件
+自动挂载
+配置文件/etc/fstab用来定义需要自动挂载的文件系统
+fstab中每一行代表一个挂载配置
+mount -a
+
+4. linux下获取帮助
+man
+info
+/usr/share/doc
+
+5. 用户及权限基础
+5.1 Linux用户基础
+#用户、组
+每个用户拥有一个UID，系统管理用户也是通过uid管理
+每个用户属于一个组，属于一个或多个附属组
+每个组拥有一个GID
+每个进程以一个用户身份运行，并受该用户访问的资源限制
+每个可登陆用户拥有一个指定的shell
+
+
+'id'
+显示当前用户的信息
+'passwd'
+修改用户密码
+/etc/passwd 用户信息
+/etc/shadow 用户密码
+/etc/group 组信息
+
+# 查看登陆的用户
+whoami
+who
+w
+# 创建一个用户
+useradd 用户名
+passwd 用户名
+
+# 修改用户信息
+usermod 参数
+
+# 删除用户
+userdel 用户名
+userdel -r 用户名 (同时删除用户家目录)
+# 组
+# 创建、修改、删除组
+groupadd 组名
+groupmod
+groupdel
+
+5.2 Linux权限机制
+
+5.3 Linux扩展权限
+默认权限、特殊权限
+umask
+
+6. Linux网络基本配置
+6.1 网络基础知识
+子网掩码，区分网络部分和主机部分
+同一网络主机之间通信
+    还需要MAC地址
+    通过ARP协议获取MAC地址
+不同网络之间通信
+    通过网关/路由器进行转发
+
+6.2 Linux网络基础配置
+    lspci
+    lsusb
+    ifconfig -a
+    lo：环回接口
+    ifup
+    ifdown
+setup 配置网络
+    网络相关配置文件
+    网卡配置文件
+/etc/sysconfig/network-scripts/ifcfg-eth0
+    DNS配置文件
+/etc/resolv.conf
+    主机名配置文件
+/etc/sysconfig/network
+hostname
+    网络测试
+ping
+host
+dig
+ip route
+traceroute 
+mtr
+    修改主机名
+
+7. Linux管道、重定向及文本处理
+
+7.1 Linux多命令协作：管道及重定向
+
+7.2 Linux命令行文本处理工具
+
+8. Linux系统启动详解
+
+9. Linux软件管理基础：RPM、YUM
+
+9.1 RPM软件包管理
+
+9.2 YUM软件管理
+
+1. 磁盘管理：LVM逻辑盘
+1.1 LVM_Basic
+PE (physical Extend):默认4m大小
+PV(physical volume)
+VG(volume group):
+LV(logical volume)
+
+1.2 LVM create
+    1.将物理磁盘设备初始化为物理卷
+    pvcreate /dev/sdb /dev/sdc
+    pvdisplay
+    pvs 查看
+    2.创建卷组，并将PV加入卷组中
+    vgcreate ivan /dev/sdb /dev/sdc
+    vgdisplay
+    vgs
+    3.基于卷组创建逻辑卷
+    lvcreate -n mylv -L 2G ivan
+    lvdisplay
+    lvs
+    4.为创建好的逻辑卷创建文件系统
+    mkfs.ext4 /dev/ivan/mylv
+    
+    5.将格式好的逻辑卷挂载使用
+    mount /dev/ivan/mylv /mnt
+删除LVM
+    1.删除LV
+    2.删除VG
+    3.删除PV
+
+1.3. LVM 拉伸 缩小
+    # 拉伸一个逻辑卷
+    1.保证VG中有足够的空闲空间
+    vgdisplay
+    2.扩充逻辑卷
+    lvextend -L +1G /dev/ivan/mylv
+    3.查看扩充后LV大小
+    lvdisplay
+    4.更新文件系统
+    resize2fs /dev/ivan/mylv
+    5.查看更新后文件系统
+    df -h
+    # 拉伸一个卷组
+    1.将要添加到VG的硬盘格式化为PV
+    pvcreate /dev/sdd
+    2.将新的PV添加到指定卷组中
+    vgextend ivan /dev/sdd
+    3.查看扩充后VG大小
+    vgdisplay
+    # 缩小一个逻辑卷
+    1.卸载已经挂载的逻辑卷
+    umount /dev/ivan/mylv
+    2.缩小文件系统
+    resize2fs /dev/ivan/mylv 1G(缩小到的容量)
+    3.缩小LV
+    lvreduce -L -1G /dev/ivan/mylv
+    4.查看缩小后的LV
+    lvdispaly
+    5.挂载
+    mount /dev/
+    # 缩小卷组
+    1.将一个PV从制定卷组中移除
+    vgreduce ivan /dev/sdd
+    2.查看缩小后的卷组大小
+    vgdisplay
+6. IPTable防火墙
+6.1 netfilter及iptables基础
+网络访问控制
+    通过netfilter模块实现
+IPTables
+6.2 iptable 配置管理
+
+vim:ft=txt:foldmethod=manual:

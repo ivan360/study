@@ -1,0 +1,15 @@
+系统安装方式的引导：
+系统启动直接进入GRUB2模式，在GRUB2命令中输入如下命令
+1.  grub>set root=(hd0,2)
+2.  grub>loopbadk loop /CentOS7/CentOS7.iso
+3.  grub>linux (loop)/isolinux/vmlinuz linux repo=hd:/dev/sdg2:/CentOS7
+4.  grub>initrd (loop)/isolinux/initrd.gz
+5.  grub>boot
+
+其中
+repo=hd:/dev/sdg2:/CentOS7参数中hd代表使用硬盘安装
+/dev/sdg2代表ISO镜像所在分区
+ /CentOS7代表ISO镜像所在目录
+ “:”应该是参数格式要求的分割符
+ 请用户按照自己ISO所在目录和分区进行修改
+ 关于分区问题需要说明下， /CentOS7安装程序启动后会将安装在计算机上的硬盘设置成为/dev/sda,我是使用移动硬盘进行启动程序加载CentOS7的，开始在hd:后 使用/dev/sdb2，但安装程序总是报无法找到ISO文件错误，因为安装时硬件环境中有RAID卡设备，后来查看引导日志发现安装程序启动后会将移动 硬盘修改为/dev/sdg，将hd:后的分区修改为/dev/sdg2果然就可以顺利进入CentOS7安装界面并顺利完成系统安装。

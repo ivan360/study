@@ -1,0 +1,32 @@
+-----------------
+= samba系统列表 =
+-----------------
+1. 安装及基本设置
+[[samba.install]]
+
+2. 主要命令
+[[samba.command]]
+
+3. 配置文件说明
+[[samba.conf]]
+
+4. 配置实例
+[[samba.example]]
+
+5. 其它技巧
+[[samba.other]]
+
+5. centos.2.samba
+[[centos.2.samba]]
+
+/usr/bin/smbstatus：伺服器功能，可以列出目前 Samba 的連線狀況， 包括每一條 Samba 連線的 PID, 分享的資源，使用的用戶來源等等，讓你輕鬆管理 Samba 啦；
+
+/usr/bin/testparm：伺服器功能，這個指令主要在檢驗設定檔 smb.conf 的語法正確與否，當你編輯過 smb.conf 時，請務必使用這個指令來檢查一次，避免因為打字錯誤引起的困擾啊！
+
+/sbin/mount.cifs：用戶端功能，在 Windows 上面我們可以設定『網路磁碟機』來連接到自己的主機上面。在 Linux 上面，我們則是透過 mount (mount.cifs) 來將遠端主機分享的檔案與目錄掛載到自己的 Linux 主機上面哪！
+
+/usr/bin/smbclient：用戶端功能，當你的 Linux 主機想要藉由『網路上的芳鄰』的功能來查看別台電腦所分享出來的目錄與裝置時，就可以使用 smbclient 來查看啦！這個指令也可以使用在自己的 SAMBA 主機上面，用來查看是否設定成功哩！
+
+/usr/bin/nmblookup：用戶端功能，有點類似 nslookup 啦！重點在查出 NetBIOS name 就是了。
+
+/usr/bin/smbtree：用戶端功能，這玩意就有點像 Windows 系統的網路上的芳鄰顯示的結果，可以顯示類似『靠近我的電腦』之類的資料， 能夠查到工作群組與電腦名稱的樹狀目錄分佈圖！

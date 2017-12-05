@@ -1,0 +1,248 @@
+= 9.1 配置网卡服务 =
+
+== 9.1.1 配置网卡参数 ==
+nmtui命令
+
+# vim /etc/sysconfig/network-scripts/ifcfg-eno16777736
+# systemctl restart network
+
+== 9.1.2 创建网络会话 ==
+默认使用着NetworkManager服务来提供网络服务,这是一种动态管理配置网络的守护进程服务
+nmcli的命令来管理NetworkManager服务
+
+# nmcli connection show
+
+可以使用nmcli命令将在公司上班时的网卡会话叫做company，而在家里的网卡会话叫做house，然后按照connection(会话),add(添加动作),con-name(会话名称),type(网卡类型),ifname(网卡名称)的格式来创建网卡会话就可以了
+
+# nmcli connection add con-name company ifname eno16777736 autoconnect no type ethernet ip4 192.168.10.10/24 gw4 192.168.10.1
+# nmcli connection add con-name house type ethernet ifname eno16777736
+
+# nmcli connection show
+
+# nmcli connection up house
+# ip addr show
+
+== 9.1.3 绑定两块网卡 ==
+使用网卡绑定技术不仅能够提高网卡带宽的传输速率，还能在其中一块网卡出现故障时，依然能够保证网络正常使用
+
+1. 第1步:保证两块网卡都处在同一个网卡模式下
+
+2. 第2步:通过vim文本编辑器来配置网卡设备的绑定参数
+# vim /etc/sysconfig/network-scripts/ifcfg-eno16777736
+TYPE=Ethernet
+BOOTPROTO=none
+ONBOOT=yes
+USERCTL=no
+DEVICE=eno16777736
+MASTER=bond0
+SLAVE=yes
+
+# vim /etc/sysconfig/network-scripts/ifcfg-eno33554968
+TYPE=Ethernet
+BOOTPROTO=none
+ONBOOT=yes
+USERCTL=no
+DEVICE=eno33554968
+MASTER=bond0
+SLAVE=yes
+
+# vim /etc/sysconfig/network-scripts/ifcfg-bond0
+TYPE=Ethernet
+BOOTPROTO=none
+ONBOOT=yes
+USERCTL=no
+DEVICE=bond0
+IPADDR=192.168.10.10
+PREFIX=24
+DNS=192.168.10.1
+NM_CONTROLLED=no
+
+3. 第3步:让内核支持网卡绑定驱动，常见的网卡绑定驱动模式有三种——mode0、mode1和mode6
+    mode0平衡负载模式:平时两块网卡均工作，且自动备援，采用交换机设备支援。
+    mode1自动备援模式:平时只有一块网卡工作，故障后自动替换为另外的网卡。
+    mode6平衡负载模式:平时两块网卡均工作，且自动备援，无须交换机设备支援。
+
+创建一个网卡绑定内核驱动文件，使得bond0网卡设备能够支持绑定技术（bonding），同时定义为mode6平衡负载模式，且自动切换时间为100毫秒：
+# vim /etc/modprobe.d/bond.conf
+alias bond0 bonding
+options bond0 miimon=100 mode=6
+
+4. 第4步:重启网络服务后网卡绑定操作即可顺利成功，正常情况下只有bond0网卡才会有IP地址等信息：
+# systemctl restart network
+
+# ifconfig
+bond0: flags=5187<UP,BROADCAST,RUNNING,MASTER,MULTICAST> mtu 1500
+inet 192.168.10.10 netmask 255.255.255.0 broadcast 192.168.10.255
+inet6 fe80::20c:29ff:fe9c:637d prefixlen 64 scopeid 0x20<link>
+ether 00:0c:29:9c:63:7d txqueuelen 0 (Ethernet)
+
+= 9.2 远程控制服务 =
+== 9.2.1 配置sshd服务 ==
+sshd是基于SSH协议开发的一款远程管理服务程序
+提供两种安全验证的方法
+基于口令的安全验证，指的就是咱们一般使用帐号和密码验证登陆
+基于密钥的安全验证, 则是需要在本地生成密钥对，然后将公钥传送至服务端主机进行的公共密钥比较的验证方式，更加安全。
+
+sshd服务的配置信息保存在/etc/ssh/sshd_config
+
+#Port 22                           -  - 默认的sshd服务端口。
+#ListenAddress 0.0.0.0             -  - 设定sshd服务端监听的IP地址。
+#Protocol 2                        -  - SSH协议的版本号。
+#HostKey /etc/ssh/ssh_host_key     -  - SSH协议版本为1时，私钥存放的位置。
+HostKey /etc/ssh/ssh_host_rsa_key  -  - SSH协议版本为2时，RSA私钥存放的位置。
+#HostKey /etc/ssh/ssh_host_dsa_key -  - SSH协议版本为2时，DSA私钥存放的位置。
+#PermitRootLogin yes               -  - 设定是否允许root用户直接登录。
+#StrictModes yes                   -  - 当远程用户私钥改变时则直接拒绝连接。
+#MaxAuthTries 6                    -  - 最大密码尝试次数
+#MaxSessions 10                    -  - 最大终端数
+#PasswordAuthentication yes        -  - 是否允许密码验证
+#PermitEmptyPasswords no           -  - 是否允许空密码登陆（很不安全）
+
+格式为“ssh [参数] 主机IP地址”，退出登陆则可执行exit命令：
+# ssh 192.168.10.20
+
+`#PermitRootLogin no参数前的#号去掉，并将yes改成no，不再允许root用户远程登陆`
+
+重启服务配置生效
+# systemctl restart sshd
+# systemctl enable sshd
+
+== 9.2.2 安全密钥验证 ==
+1. 第1步:在本地主机中生成“密钥对”并将公钥传送到远程服务器中：
+# ssh-keygen
+
+Generating public/private rsa key pair.
+Enter file in which to save the key (/root/.ssh/id_rsa) : 直接敲击回车或设置密钥的存储路径
+Created directory '/root/.ssh'.
+Enter passphrase (empty for no passphrase)              : 直接敲击回车或设置密钥的密码
+Enter same passphrase again                             : 再次敲击回车或设置密钥的密码
+
+2. 第2步:将生成好的私钥文件传送至远程主机：
+# ssh-copy-id 192.168.10.20
+
+The authenticity of host '192.168.10.20 (192.168.10.20)' can't be established.
+ECDSA key fingerprint is 4f:a7:91:9e:8d:6f:b9:48:02:32:61:95:48:ed:1e:3f.
+Are you sure you want to continue connecting (yes/no)? yes
+/usr/bin/ssh-copy-id: INFO: attempting to log in with the new key(s), to filter out any that are already installed
+/usr/bin/ssh-copy-id: INFO: 1 key(s) remain to be installed -- if you are prompted now it is to install the new keys
+root@192.168.10.20's password:`此处输入远程服务器主机密码`
+Number of key(s) added: 1
+Now try logging into the machine, with: "ssh '192.168.10.20'"
+and check to make sure that only the key(s) you wanted were added.
+
+3. 第3步:设置服务器主机只允许密钥验证，拒绝传统口令验证方式，记得修改配置文件后保存并重启sshd服务程序哦~：
+# vim /etc/ssh/sshd_config 
+ 78 `PasswordAuthentication no`
+
+# systemctl restart sshd
+
+4. 第4步:在客户端主机尝试登陆到服务端主机，此时无需输入密码口令也可直接验证登陆成功：
+
+== 9.2.3 远程传输命令 ==
+Scp安全传输服务(Secure copy)是一种基于ssh协议的网络传输命令
+`scp命令用于在网络中安全的传输文件，格式为：“scp [参数] 本地文件 远程帐户@远程IP地址:远程目录”`
+-v   显示详细的连接进度
+-P   指定远程主机的sshd端口号
+-r   传送文件夹时请加此参数
+-6   使用ipv6协议
+
+使用scp命令把文件从本地复制到远程主机
+以绝对路径的形式写清本地文件，要传送整个目录还需要添加-r参数
+然后写上远程主机IP地址，如果想使用其他用户的身份，可使用用户名@主机地址的参数格式
+最后需要在远程主机IP地址后以:（冒号）远程主机的目录
+
+# echo "Welcome to LinuxProbe.Com" > readme.txt
+# scp /root/readme.txt 192.168.10.20:/home
+root@192.168.10.20's password:此处输入远程主机中root用户的密码
+
+scp命令还能够将远程主机的文件下载到本地主机
+scp [参数] 远程用户@远程IP地址:远程文件 本地目录
+
+# scp 192.168.10.20:/etc/redhat-release /root
+root@192.168.10.20's password:此处输入远程主机中root用户的密码
+
+= 9.3 不间断会话服务 =
+Screen是一款多视窗远程控制管理服务，为了网络异常中断或同时控制多个远程窗口而设计的程序
+
+会话恢复 -- 即便网络中断，也可让会话随时恢复，用户不会失去对命令终端的控制
+多窗口   -- 每个会话都是独立运行的，拥有各自独立的编码、输入输出和窗口缓存
+会话共享 -- 可以使多个用户从不同终端使用同一个会话，也可让他们看到完全相同的输出信息的
+
+[[screen多窗口]]
+# yum install screen
+
+== 9.3.1 管理远程会话 ==
+screen -S yourname    -> 新建一个叫yourname的session
+screen -ls            -> 列出当前所有的session
+screen -r yourname    -> 回到yourname这个session
+screen -d yourname    -> 远程detach某个session
+screen -d -r yourname -> 结束当前session并回到yourname这个session
+
+创建一个名称为backup的会话窗口
+# screen -S backup
+
+查看到当前的会话正在工作中：
+# screen -ls
+
+想要退出一个会话也十分简单
+# exit
+
+可以直接screen命令执行命令，在命令中的一切操作会被记录下来，当执行结束后screen会话也会自动结束
+# screen vim memo.txt
+
+演示screen不间断会话服务的强大之处
+先创建一个名为backup的会话，然后强行关闭窗口（与远程控制时突然断网效果相同）
+
+# screen -S linux
+
+# tail -f /var/log/messages 
+
+强行关闭窗口
+
+# screen -ls
+
+# screen -r linux
+
+ tail -f /var/log/messages
+
+== 9.3.2 会话共享功能 ==
+screen命令还具有会话共享、分屏切割、会话锁定等等实用的功能
+会话共享功能，当多个用户同时用某个用户远程控制主机的时候，便可以将屏幕内容共享出来
+
+1. 先通过客户终端A远程ssh连接到服务器主机端，并创建一个会话窗口
+[root@client A ~]# ssh 192.168.10.10
+
+[root@client A ~]# screen -S linuxprobe
+
+2. 然后开启第二台客户终端B远程ssh连接到服务器主机端，执行获取远程会话的命令
+[root@client B ~]# ssh 192.168.10.10
+
+[root@client B ~]# screen -x 
+
+
+C-a ? -> 显示所有键绑定信息 
+C-a c -> 创建一个新的运行shell的窗口并切换到该窗口 
+C-a n -> Next，切换到下一个 window 
+C-a p -> Previous，切换到前一个 window 
+C-a 0..9 -> 切换到第 0..9 个 window 
+Ctrl+a [Space] -> 由视窗0循序切换到视窗9 
+C-a C-a -> 在两个最近使用的 window 间切换 
+C-a x -> 锁住当前的 window，需用用户密码解锁 
+C-a d -> detach，暂时离开当前session，将目前的 screen session (可能含有多个 windows) 丢到后台执行，并会回到还没进 screen 时的状态，此时在 screen session 里，每个 window 内运行的 process (无论是前台/后台)都在继续执行，即使 logout 也不影响。 
+C-a z -> 把当前session放到后台执行，用 shell 的 fg 命令则可回去。 
+C-a w -> 显示所有窗口列表 
+C-a t -> time，显示当前时间，和系统的 load 
+C-a k -> kill window，强行关闭当前的 window 
+C-a [ -> 进入 copy mode，在 copy mode 下可以回滚、搜索、复制就像用使用 vi 一样 
+    C-b Backward，PageUp 
+    C-f Forward，PageDown 
+    H(大写) High，将光标移至左上角 
+    L Low，将光标移至左下角 
+    0 移到行首 
+    $ 行末 
+    w forward one word，以字为单位往前移 
+    b backward one word，以字为单位往后移 
+    Space 第一次按为标记区起点，第二次按为终点 
+    Esc 结束 copy mode 
+C-a ] -> paste，把刚刚在 copy mode 选定的内容贴上
+

@@ -1,0 +1,75 @@
+
+14. Linux账号管理与ACL权限配置
+
+    Linux 操作系统上面，关于账号与群组，其实记录的是 UID/GID 的数字而已；
+    使用者的账号/群组与 UID/GID 的对应，参考 /etc/passwd 及 /etc/group 两个文件
+    /etc/passwd 文件结构以冒号隔开，共分为七个字段，分别是『账号名称、口令、UID、GID、全名、家目录、shell』
+    UID 只有 0 与非为 0 两种，非为 0 则为一般账号。一般账号又分为系统账号 (1~499) 即可登陆者账号 (大于 500)
+    账号的口令已经移动到 /etc/shadow 文件中，该文件权限为仅有 root 可以更动。该文件分为九个字段，内容为『 账号名称、加密口令、口令更动日期、口令最小可变动日期、口令最大需变动日期、口令过期前警告日数、口令失效天数、 账号失效日、保留未使用』
+    使用者可以支持多个群组，其中在新建文件时会影响新文件群组者，为有效群组。而写入 /etc/passwd 的第四个字段者， 称为初始群组。
+    与使用者创建、更改参数、删除有关的命令为：useradd, usermod, userdel等，口令创建则为 passwd；
+    与群组创建、修改、删除有关的命令为：groupadd, groupmod, groupdel 等；
+    群组的观察与有效群组的切换分别为：groups 及 newgrp 命令；
+    useradd 命令作用参考的文件有： /etc/default/useradd, /etc/login.defs, /etc/skel/ 等等
+    观察用户详细的口令参数，可以使用『 chage -l 账号 』来处理；
+    用户自行修改参数的命令有： chsh, chfn 等，观察命令则有： id, finger 等
+    ACL 可进行单一个人或群组的权限管理，但 ACL 的启动需要有文件系统的支持；
+    ACL 的配置可使用 setfacl ，查阅则使用 getfacl ；
+    身份切换可使用 su ，亦可使用 sudo ，但使用 sudo 者，必须先以 visudo 配置可使用的命令；
+    PAM 模块可进行某些程序的验证程序！与 PAM 模块有关的配置文件位于 /etc/pam.d/* 及 /etc/security/*
+    系统上面账号登陆情况的查询，可使用 w, who, last, lastlog 等；
+    在线与使用者交谈可使用 write, wall，脱机状态下可使用 mail 传送邮件！
+
+15. 磁碟配额与进阶文件系统管理
+
+    Quota 可公平的分配系统上面的磁碟容量给使用者；分配的资源可以是磁碟容量(block)或可创建文件数量(inode)；
+    Quota 的限制可以有 soft/hard/grace time 等重要项目；
+    Quota 仅能针对整个 filesystem 进行限制，不是针对目录喔！
+    Quota 的使用必须要核心与文件系统均支持。文件系统的参数必须含有 usrquota, grpquota
+    Quota 实作的命令有 quotacheck, quotaon, edquota, repquota 等命令；
+    磁盘阵列 (RAID) 有硬件与软件之分，Linux 操作系统可支持软件磁盘阵列，透过 mdadm 套件来达成；
+    磁盘阵列建置的考量依据为『容量』、『效能』、『数据可靠性』等；
+    磁盘阵列所建置的等级常见有的 raid0, raid1, raid0+1, raid5 及 raid6
+    硬件磁盘阵列的装置档名与 SCSI 相同，至於 software RAID 则为 /dev/md[0-9]
+    软件磁盘阵列的状态可藉由 /proc/mdstat 文件来了解；
+    LVM 强调的是『弹性的变化文件系统的容量』；
+    与 LVM 有关的组件有： PV/VG/PE/LV 等组件，可以被格式化者为 LV
+    LVM 拥有快照功能，快照可以记录 LV 的数据内容，并与原有的 LV 共享未更动的数据，备份与还原就变的很简单；
+    Ext3 透过 resize2fs 命令，可以弹性的调整文件系统的大小
+
+16. 例行性工作排程
+
+    系统可以透过 at 这个命令来排程单一工作的任务！『at TIME』为命令下达的方法，当 at 进入排程后， 系统运行该排程工作时，会到下达时的目录进行任务；
+    at 的运行必须要有 atd 服务的支持，且 /etc/at.deny 为控制是否能够运行的使用者帐号；
+    透过 atq, atrm 可以查询与删除 at 的工作排程；
+    batch 与 at 相同，不过 batch 可在 CPU 工作负载小於 0.8 时才进行后续的工作排程；
+    系统的循环例行性工作排程使用 cron 这个服务，同时利用 crontab -e 及 /etc/crontab 进行排程的安排；
+    crontab -e 配置项目分为六栏，『分、时、日、月、周、命令』为其配置依据；
+    /etc/crontab 配置分为七栏，『分、时、日、月、周、运行者、命令』为其配置依据；
+    anacron 配合 /etc/anacrontab 的配置，可以唤醒停机期间系统未进行的 crontab 任务！
+
+17. 程序管理与SELinux初探
+
+    程序 (program)：通常为 binary program ，放置在储存媒体中 (如硬盘、光盘、软盘、磁带等)，为实体文件的型态存在；
+    程序 (process)：程序被触发后，运行者的权限与属性、程序的程序码与所需数据等都会被加载内存中， 操作系统并给予这个内存内的单元一个识别码 (PID)，可以说，程序就是一个正在运行中的程序。
+    程序彼此之间是有相关性的，故有父程序与子程序之分。而 Linux 系统所有程序的父程序就是 init 这个 PID 为 1 号的程序。
+    在 Linux 的程序呼叫通常称为 fork-and-exec 的流程！程序都会藉由父程序以复制 (fork) 的方式产生一个一模一样的子程序， 然后被复制出来的子程序再以 exec 的方式来运行实际要进行的程序，最终就成为一个子程序的存在。
+    常驻在内存当中的程序通常都是负责一些系统所提供的功能以服务使用者各项任务，因此这些常驻程序就会被我们称为：服务 (daemon)。
+    在工作管理 (job control) 中，可以出现提示字节让你操作的环境就称为前景 (foreground)，至於其他工作就可以让你放入背景 (background) 去暂停或运行。
+    与 job control 有关的按键与关键字有： &, [ctrl]-z, jobs, fg, bg, kill %n 等；
+    程序管理的观察命令有： ps, top, pstree 等等；
+    程序之间是可以互相控制的，传递的信息 (signal) 主要透过 kill 这个命令在处理；
+    程序是有优先顺序的，该项目为 Priority，但 PRI 是核心动态调整的，使用者只能使用 nice 值去微调 PRI
+    nice 的给予可以有： nice, renice, top 等命令；
+    vmstat 为相当好用的系统资源使用情况观察命令；
+    SELinux 当初的设计是为了避免使用者资源的误用，而 SELinux 使用的是 MAC 委任式存取配置；
+    SELinux 的运行中，重点在於主体程序 (Subject) 能否存取目标文件资源 (Object) ，这中间牵涉到政策 (Policy) 内的守则， 以及实际的安全性本文类别 (type)；
+    安全性本文的一般配置为：『Identify:role:type』其中又以 type 最重要；
+    SELinux 的模式有： enforcing, permissive, disabled 三种，而启动的政策 (Policy) 主要是 targeted
+    SELinux 启动与关闭的配置档在： /etc/selinux/config
+    SELinux 的启动与观察： getenforce, sestatus 等命令
+    重设 SELinux 的安全性本文可使用 restorecon 与 chcon
+    在 SELinux 有启动时，必备的服务至少要启动 setroubleshoot 这个！
+    若要管理默认的 SELinux 布林值，可使用 getsebool, setsebool 来管理！
+    
+vim:ft=txt:

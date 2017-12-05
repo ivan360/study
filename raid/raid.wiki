@@ -1,0 +1,29 @@
+查看系统使用的什么RAID卡，可以使用以下命令：
+# dmesg |grep -i raid
+# cat /proc/scsi/scsi
+# lspci
+
+
+== 硬件raid：查看raid的厂商，型号，级别 ==
+$ cat /proc/scsi/scsi 
+Attached devices:
+Host: scsi0 Channel: 00 Id: 09 Lun: 00
+  Vendor: ATA      Model: MB0500EBNCR      Rev: HPG2
+  Type:   Direct-Access                    ANSI  SCSI revision: 05
+Host: scsi0 Channel: 02 Id: 00 Lun: 00
+  `Vendor: LSI      Model: MR9240-8i        Rev: 2.13`
+  Type:   Direct-Access                    ANSI  SCSI revision: 05
+Host: scsi6 Channel: 00 Id: 00 Lun: 00
+  Vendor: HL-DT-ST Model: DVDROM DH50N     Rev: 1.02
+  Type:   CD-ROM        
+
+`显示所有逻辑磁盘组信息`
+ ./MegaCli -LDInfo -LALL -aAll
+
+`显示Raid卡型号，Raid设置，Disk相关信息`
+./MegaCli -cfgdsply -aALL
+
+
+`查看RAID卡的型号`
+$ lspci | grep -i raid
+05:00.0 RAID bus controller: LSI Logic / Symbios Logic MegaRAID SAS 2008 [Falcon] (rev 03)

@@ -1,0 +1,306 @@
+= 8.1 防火墙管理工具 =
+主要功能都是依据策略对外部请求进行过滤
+防火墙技术能够做到监控每一个数据包并判断是否有相应的匹配策略规则，直到匹配到其中一条策略规则或执行默认策略为止
+防火墙策略可以基于来源地址、请求动作或协议等信息来定制，最终仅让合法的用户请求流入到内网中，其余的均被丢弃。
+
+在红帽RHEL7系统中Firewalld服务取代了Iptables服务,只是防火墙的规则策略管理工具换了而已
+
+Iptables服务与Firewalld服务都不是真正的防火墙,只是用来定义防火墙策略功能的“防火墙管理工具”而已
+最终真正的数据过滤功能是由系统内核中netfilter网络过滤器来实现的
+
+= 8.2 Iptables =
+== 8.2.1 策略与规则链 ==
+防火墙会从上至下来读取规则策略，一旦匹配到了合适的就会去执行，并立即结束匹配工作，但也有转了一圈之后发现没有匹配到合适规则的时候，那么就会去执行默认的策略
+防火墙策略的设置无非有两种,一种是“通”，一种是“堵”——当防火墙的默认策略是拒绝的，咱们就要设置允许规则，否则谁都进不来了，而如果防火墙的默认策略是允许的，咱们就要设置拒绝规则，否则谁都能进来了，起不到防范的作用。
+
+iptables命令把对数据进行过滤或处理数据包的策略叫做规则
+将多条规则又存放到一个规则链中，规则链是依据处理数据包位置的不同而进行的分类
+包括有：在进行路由选择前处理数据包（PREROUTING）、处理流入的数据包（INPUT）、处理流出的数据包（OUTPUT）、处理转发的数据包（FORWARD）、在进行路由选择后处理数据包（POSTROUTING）
+从内网向外网发送的数据一般都是可控且良性的，因此显而易见我们使用最多的就是INPUT数据链，这个链中定义的规则起到了保证咱们私网设施不受外网骇客侵犯的作用。
+
+iptables命令术语中是ACCEPT（允许流量通过）、LOG（记录日志信息）、REJECT（拒绝流量通过）、DROP（拒绝流量通过）
+DROP是直接将数据包抛弃不响应，而REJECT会拒绝后再回复一条“您的信息我已收到，但被扔掉了”，让对方清晰的看到数据被拒绝的响应。
+
+`将Linux系统设置成REJECT拒绝动作策略后，对方会看到本机的端口不可达的响应`
+# ping -c 4 192.168.10.10
+--- 192.168.10.10 ping statistics ---
+4 packets transmitted, 0 received, +4 errors, 100% packet loss, time 3002ms
+
+`将Linux系统设置成DROP拒绝动作策略后，对方会看到本机响应超时的提醒，无法判断流量是被拒绝，还是对方主机当前不在线：`
+# ping -c 4 192.168.10.10
+--- 192.168.10.10 ping statistics ---
+4 packets transmitted, 0 received, 100% packet loss, time 3000ms
+
+== 8.2.2 基本的命令参数 ==
+-P            设置默认策略:iptables -P INPUT(DROP|ACCEPT)
+-F            清空规则链
+-L            查看规则链
+-A            在规则链的末尾加入新规则
+-I num        在规则链的头部加入新规则
+-D num        删除某一条规则
+-s            匹配来源地址IP/MASK，加叹号"!"表示除这个IP外。
+-d            匹配目标地址
+-i 网卡名称   匹配从这块网卡流入的数据
+-o 网卡名称   匹配从这块网卡流出的数据
+-p            匹配协议,如tcp,udp,icmp
+--dport num   匹配目标端口号
+--sport num   匹配来源端口号
+-j ACTION     指定如何进行处理
+
+`使用iptables命令-L参数查看已有的防火墙策略：`
+# iptables -L
+
+`使用iptables命令-F参数清空已有的防火墙策略：`
+# iptables -F
+# iptables -L
+
+`将INPUT链的默认策略设置为拒绝：`
+当我们将INPUT链设置为默认拒绝后，咱们就要往里面写入允许策略了
+否则所有流入的数据包都会被默认拒绝掉，规则链的默认策略拒绝动作只能是DROP，而不能是REJECT。
+
+# iptables -P INPUT DROP
+# iptables -L
+Chain INPUT (policy DROP)
+
+`向INPUT链中添加允许imcp数据包流入的允许策略：`
+在日常运维工作中经常会使用到ping命令来检查对方主机是否在线
+向防火墙INPUT链中添加一条允许imcp协议数据包流入的策略就是默认允许了这种ping命令检测行为。
+
+# ping -c 4 192.168.10.10
+4 packets transmitted, 0 received, 100% packet loss, time 3000ms
+
+# iptables -I INPUT -p icmp -j ACCEPT
+# ping -c 4192.168.10.10
+4 packets transmitted, 4 received, 0% packet loss, time 2999ms
+
+`删除INPUT链中的那条策略，并将默认策略还原为允许：`
+# iptables -D INPUT 1
+# iptables -P INPUT ACCEPT
+# iptables -L
+
+`设置INPUT链只允许指定网段访问本机的22端口，拒绝其他所有主机的数据请求流量：`
+防火墙策略是按照从上至下顺序匹配的，一定要将允许动作放到拒绝动作上面，否则所有的流量就先被拒绝掉了
+22端口是ssh服务做占用的资源
+
+# iptables -I INPUT -s 192.168.10.0/24 -p tcp --dport 22 -j ACCEPT
+# iptables -A INPUT -p tcp --dport 22 -j REJECT
+# iptables -L
+Chain INPUT (policy ACCEPT)
+ACCEPT tcp -- 192.168.10.0/24 anywhere tcp dpt:ssh
+REJECT tcp -- anywhere anywhere tcp dpt:ssh reject-with icmp-port-unreachable
+
+使用IP地址在192.168.10.0/24网段内的主机访问服务器的22端口：
+# ssh 192.168.10.10
+
+使用IP地址在192.168.20.0/24网段外的主机访问服务器的22端口：
+# ssh 192.168.10.10
+Could not connect to '192.168.10.20' (port 22): Connection failed.
+
+`向INPUT链中添加拒绝所有人访问本机12345端口的防火墙策略：`
+# iptables -I INPUT -p tcp --dport 12345 -j REJECT
+# iptables -I INPUT -p udp --dport 12345 -j REJECT
+
+# iptables -L
+Chain INPUT (policy ACCEPT)
+REJECT udp -- anywhere anywhere udp dpt:italk reject-with icmp-port-unreachable
+REJECT tcp -- anywhere anywhere tcp dpt:italk reject-with icmp-port-unreachable
+
+`向INPUT链中添加拒绝来自于指定192.168.10.5主机访问本机80端口（web服务）的防火墙策略：`
+# iptables -I INPUT -p tcp -s 192.168.10.5 --dport 80 -j REJECT
+
+# iptables -L
+Chain INPUT (policy ACCEPT)
+REJECT tcp -- 192.168.10.5 anywhere tcp dpt:http reject-with icmp-port-unreachable
+
+`向INPUT链中添加拒绝所有主机不能访问本机888端口和1000至1024端口的防火墙策略：`
+# iptables -A INPUT -p tcp --dport 1000:1024 -j REJECT
+# iptables -A INPUT -p udp --dport 1000:1024 -j REJECT
+
+# iptables -L
+Chain INPUT (policy ACCEPT)
+REJECT tcp -- anywhere anywhere tcp dpts:cadlock2:1024 reject-with icmp-port-unreachable
+REJECT udp -- anywhere anywhere udp dpts:cadlock2:1024 reject-with icmp-port-unreachable
+
+`iptables命令配置的防火墙规则默认会在下一次重启时失效`
+让配置的防火墙策略永久的生效下去，还要执行一下保存命令：
+# service iptables save
+iptables: Saving firewall rules to /etc/sysconfig/iptables: [ OK ]
+
+= 8.3 Firewalld =
+RHEL7是多款防火墙管理工具并存的系统，Firewalld动态防火墙管理器服务（Dynamic Firewall Manager of Linux systems）是目前默认的防火墙管理工具，同时拥有命令行终端和图形化界面的配置工具
+
+支持动态更新技术，且加入了“zone区域”的概念
+预先准备了几套防火墙策略集合（策略模板），可以根据生产场景的不同而选择合适的策略集合，实现了防火墙策略之间的快速切换
+
+常见的zone区域名称及应用可见下表（默认为public）：
+区域       默认规则策略
+trusted    允许所有的数据包。
+home       拒绝流入的数据包，除非与输出流量数据包相关或是ssh,mdns,ipp-client,samba-client与dhcpv6-client服务则允许。
+internal   等同于home区域
+work       拒绝流入的数据包，除非与输出流量数据包相关或是ssh,ipp-client与dhcpv6-client服务则允许。
+public     拒绝流入的数据包，除非与输出流量数据包相关或是ssh,dhcpv6-client服务则允许。
+external   拒绝流入的数据包，除非与输出流量数据包相关或是ssh服务则允许。
+dmz        拒绝流入的数据包，除非与输出流量数据包相关或是ssh服务则允许。
+block      拒绝流入的数据包，除非与输出流量数据包相关。
+drop       拒绝流入的数据包，除非与输出流量数据包相关。
+
+== 8.3.1 终端管理工具 ==
+firewall-cmd命令是Firewalld动态防火墙管理器服务的命令行终端
+
+参数                            作用
+--get-default-zone              查询默认的区域名称。
+--set-default-zone=<区域名称>   设置默认的区域，永久生效。
+--get-zones                     显示可用的区域。
+--get-services                  显示预先定义的服务。
+--get-active-zones              显示当前正在使用的区域与网卡名称。
+--add-source=                   将来源于此IP或子网的流量导向指定的区域。
+--remove-source=                不再将此IP或子网的流量导向某个指定区域。
+--add-interface=<网卡名称>      将来自于该网卡的所有流量都导向某个指定区域。
+--change-interface=<网卡名称>   将某个网卡与区域做关联。
+--list-all                      显示当前区域的网卡配置参数，资源，端口以及服务等信息。
+--list-all-zones                显示所有区域的网卡配置参数，资源，端口以及服务等信息。
+--add-service=<服务名>          设置默认区域允许该服务的流量。
+--add-port=<端口号/协议>        允许默认区域允许该端口的流量。
+--remove-service=<服务名>       设置默认区域不再允许该服务的流量。
+--remove-port=<端口号/协议>     允许默认区域不再允许该端口的流量。
+--reload                        让“永久生效”的配置规则立即生效，覆盖当前的。
+
+Firewalld服务对防火墙策略的配置默认是当前生效模式（RunTime），配置信息会随着计算机重启而失效
+要让配置的策略一直存在，方法就是在正常的命令中加入--permanent参数
+永久生效模式（Permanent）,需要重启后才能自动生效，如果想让配置的策略立即生效的话需要手动执行一下--reload参数
+
+`查看Firewalld服务当前所使用的zone区域：`
+# firewall-cmd --get-default-zone
+public
+
+`查询eno16777728网卡在Firewalld服务中的zone区域：`
+# firewall-cmd --get-zone-of-interface=eno16777728
+public
+
+`将Firewalld防火墙服务中eno16777728网卡的默认区域修改为external，重启后再生效：`
+# firewall-cmd --permanent --zone=external --change-interface=eno16777728
+success
+# firewall-cmd --get-zone-of-interface=eno16777728
+public
+# firewall-cmd --permanent --get-zone-of-interface=eno16777728
+external
+
+`将Firewalld防火墙服务的当前默认zone区域设置为dmz：`
+# firewall-cmd --set-default-zone=public
+success
+# firewall-cmd --get-default-zone 
+public
+
+`启动/关闭Firewalld防火墙服务的应急状况模式，阻断一切网络连接（当远程控制服务器时请慎用。）：`
+# firewall-cmd --panic-on
+success
+# firewall-cmd --panic-off
+success
+
+`查询在public区域中的ssh与https服务请求流量是否被允许：`
+# firewall-cmd --zone=public --query-service=ssh
+yes
+# firewall-cmd --zone=public --query-service=https
+no
+
+`将Firewalld防火墙服务中https服务的请求流量设置为永久允许，并当前立即生效：`
+# firewall-cmd --zone=public --add-service=https
+success
+# firewall-cmd --permanent --zone=public --add-service=https
+success
+# firewall-cmd --reload
+success
+
+`将Firewalld防火墙服务中http服务的请求流量设置为永久拒绝，并当前立即生效：`
+# firewall-cmd --permanent --zone=public --remove-service=http 
+success
+# firewall-cmd --reload 
+success
+
+`将Firewalld防火墙服务中8080和8081的请求流量允许放行，但仅限当前生效：`
+# firewall-cmd --zone=public --add-port=8080-8081/tcp
+success
+# firewall-cmd --zone=public --list-ports 
+8080-8081/tcp
+
+`将原本访问本机888端口号的请求流量转发到22端口号，要求当前和长期均有效：`
+firewall-cmd --permanent --zone=<区域> --add-forward-port=port=<源端口号>:proto=<协议>:toport=<目标端口号>:toaddr=<目标IP地址>
+
+# firewall-cmd --permanent --zone=public --add-forward-port=port=888:proto=tcp:toport=22:toaddr=192.168.10.10
+success
+# firewall-cmd --reload
+success
+
+在客户机使用ssh命令尝试访问192.168.10.10主机的888端口：
+[root@client A ~]# ssh -p 888 192.168.10.10
+The authenticity (真实性)of host '[192.168.10.10]:888 ([192.168.10.10]:888)' can't be established (确定的)
+Are you sure you want to continue connecting (yes/no)? yes
+Warning: Permanently added '[192.168.10.10]:888' (ECDSA) to the list of known hosts.
+
+`在Firewalld防火墙服务中配置一条富规则，拒绝所有来自于192.168.10.0/24网段的用户访问本机ssh服务（22端口）：`
+# firewall-cmd --permanent --zone=public --add-rich-rule="rule family="ipv4" source address="192.168.10.0/24" service name="ssh" reject"
+success
+# firewall-cmd --reload
+success
+
+`在客户机使用ssh命令尝试访问192.168.10.10主机的ssh服务（22端口）：`
+# ssh 192.168.10.10
+Connecting to 192.168.10.10:22...
+Could not connect to '192.168.10.10' (port 22): Connection failed.
+
+== 8.3.2 图形管理工具 ==
+firewall-config命令是管理Firewalld防火墙策略的图形化工具
+
+`伪装`
+SNAT源地址转换协议是为了解决IP地址资源匮乏问题而设计的技术协议
+SNAT技术能够使得多个内网用户通过一个外网IP地址上网。
+
+在Firewalld中的“富规则”代表着更细致、更详细的策略配置方法
+针对某个系统服务、端口号、来源地址、目的地址等诸多元素进行有针对性的策略配置
+富规则策略的优先级是在策略中最高的
+
+= 8.4 服务的访问控制列表 =
+Tcp_wrappers是红帽RHEL7系统中默认已经启用的一款流量监控程序,它能够根据来访主机地址与本机目标服务程序做允许或拒绝操作
+
+Linux系统中其实有两个层面的防火墙
+第一种是前面讲到的基于TCP/IP协议的流量过滤防护工具
+而Tcp_wrappers服务则是能够对系统服务进行允许和禁止的防火墙，从而在更高层面保护了Linux系统的安全运行
+
+控制列表文件修改后会立即生效
+系统将会先检查允许策略规则文件（/etc/hosts.allow）,如果匹配到相应的允许策略则直接放行请求
+如果没有匹配则会去进一步匹配拒绝策略规则文件（/etc/hosts.deny）的内容，有匹配到相应的拒绝策略就会直接拒绝该请求流量
+如果两个文件全都没有匹配到的话也会默认放行这次的请求流量
+
+
+客户端类型       示例                         满足示例的客户端列表
+单一主机         192.168.10.10                IP地址为192.168.10.10的主机。
+指定网段         192.168.10.                  IP段为192.168.10.0/24的主机。
+指定网段         192.168.10.0/255.255.255.0   IP段为192.168.10.0/24的主机。
+指定DNS后缀      .linuxprobe.com              所有DNS后缀为.linuxprobe.com的主机
+指定主机名称     www.linuxprobe.com           主机名称为www.linuxprobe.com的主机。
+指定所有客户端   ALL                          所有主机全部包括在内。
+
+在正式配置Tcp_wrappers服务前有两点原则必须要提前讲清楚
+第一，在写禁止项目的时候一定要写上的是服务名称，而不是某种协议的名称
+第二，推荐先来编写拒绝规则，这样可以比较直观的看到相应的效果
+
+服务列表 : 主机列表 : 选项
+
+*例如咱们先来通过拒绝策略文件禁止下所有访问本机sshd服务的请求数据吧（无需修改原有的注释信息）：*
+# vim /etc/hosts.deny
+sshd:*
+
+# ssh 192.168.10.10
+ssh_exchange_identification: read: Connection reset by peer
+
+*接下来在允许策略文件中添加放行所有来自于192.168.10.0/24这个网段访问本机sshd服务请求的策略*
+咱们的服务器马上就允许了访问sshd服务的请求，效果非常直观：
+
+# vim /etc/hosts.allow
+sshd:192.168.10.
+
+# ssh 192.168.10.10
+Are you sure you want to continue connecting (yes/no)? yes
+root@192.168.10.10's password: 
+Last login: Wed May 4 07:56:29 2016
+[root@linuxprobe ~]# 

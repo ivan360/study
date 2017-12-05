@@ -1,0 +1,30 @@
+smbclient : 访问所有共享资源
+smbstatus : 列出当前所有的samba连接状态
+smbpasswd : 修改samba用户口令、增加samba用户。
+Nmblookup : 用于查询主机的NetBIOS名，并将其映射为IP地址
+Testparam : 用于检查配置文件中的参数设置是否正确
+
+== smbclient ==
+命令                                    说明
+
+?或help [command]             -- 提供关于帮助或某个命令的帮助
+![shell command]              -- 执行所用的SHELL命令，或让用户进入 SHELL提示符
+cd [目录]                     -- 切换到服务器端的指定目录，如未指定，则 smbclient 返回当前本地目录
+lcd [目录]                    -- 切换到客户端指定的目录；
+dir 或ls                      -- 列出当前目录下的文件；
+exit 或quit                   -- 退出smbclient
+get file1  file2              -- 从服务器上下载file1，并以文件名file2存在本地机上；如果不想改名，可以把file2省略
+mget file1 file2 file3  filen -- 从服务器上下载多个文件；
+md或mkdir 目录                -- 在服务器上创建目录
+rd或rmdir    目录             -- 删除服务器上的目录
+put file1 [file2]             -- 向服务器上传一个文件file1,传到服务器上改名为file2；
+mput file1 file2 filen        -- 向服务器上传多个文件
+
+== pdbedit ==
+pdbedit –a username          : 新建Samba账户。
+pdbedit –x username          : 删除Samba账户。
+pdbedit –L                   : 列出Samba用户列表，读取passdb.tdb数据库文件。
+pdbedit –Lv                  : 列出Samba用户列表的详细信息。
+pdbedit –c “[D]” –u username : 暂停该Samba用户的账号。
+pdbedit –c “[]” –u username  : 恢复该Samba用户的账号。
+

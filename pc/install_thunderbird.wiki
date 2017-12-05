@@ -1,0 +1,21 @@
+1. Install Remi and EPEL Repositories
+## Install Remi repository for RHEL/CentOS 6.3/6.2/6.1/6.0 ##
+# wget http://rpms.famillecollet.com/enterprise/remi-release-6.rpm
+# # rpm -Uvh remi-release-6.rpm
+#
+# ## Install EPEL repository for RHEL/CentOS 6.3/6.2/6.1/6.0 ##
+# # wget http://download.fedoraproject.org/pub/epel/6/i386/epel-release-6-8.noarch.rpm
+# # rpm -Uvh epel-release-6-8.noarch.rpm
+
+2. Check Availability of Thunderbird
+yum --enablerepo=remi list thunderbird
+
+3. Installing or Updating Thunderbird 
+# yum --enablerepo=remi install thunderbird
+# OR
+# # yum --enablerepo=remi update thunderbird
+
+4. Starting Thunderbird 
+## Start Thunderbird 17 in RHEL/CentOS 6.3/6.2/6.1/6.0 and Fedora 17/16/15/14 ##
+# thunderbird
+#

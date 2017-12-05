@@ -1,0 +1,38 @@
+== linux相关 ==
+1. 部门samba和centos设置
+[[setup-setup-server]]
+2. samba学习
+[[samba]]
+3. linux学习
+[[git_study]]
+[[linux]]
+[[linux.命令]]
+[[linux.color256]]
+[[linux.lvm]]
+
+[[screen]]
+[[samba]]
+[[fedora学习]]
+[[fedora日志]]
+[[/raid/raid]]
+[[ssh]]
+[[在CentOS系统上配置自动安全更新]]
+== window相关 ==
+
+[[dos.bat]] dos脚本
+
+== 服务器、路由器与启动 ==
+[[N54L]]        -- 改装
+[[u_boot]]          -- 启动盘
+[[newifi]]
+[[联想路由器]]
+
+== sugarcrm配置 ==
+1. 下载安装crm
+git clone https://github.com/ivan360/sugarcrm_dev.git
+cp sugarcrm_dev /var/www/html/crm
+
+1. 安装配置php\mariadb\apache环境
+
+== 黑苹果 ==
+[[mac]]

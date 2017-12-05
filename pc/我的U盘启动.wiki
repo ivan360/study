@@ -1,0 +1,6 @@
+U盘启动盘
+支持BIOS和UEFI，网络启动
+1. grub2
+2. Wifislax 4.10 无线破解
+3. Parted Magic 分区魔术师(轻量的Linux发布版)
+4. 

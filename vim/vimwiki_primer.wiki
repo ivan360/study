@@ -1,0 +1,34 @@
+﻿%title Vimwiki使用入门
+
+
+===常用命令===
+
+# `:VimWiki2HTML`：将当前页面编译成HTML文件
+# `:VimWikiAll2HTML`：将本`wiki`所有源文件都编译成HTML文件（如果文件很多，将花费较长时间）
+# `:VimWikiGoTo`：转到指定的`wiki`页面
+# `:VimWikiIndex`：转到`wiki`首页
+# `:VimWikiSearch /Ruchee/`：搜索指定关键字，`:cnext`跳到下一个，`:cprevious`跳到上一个
+# `:VimWikiTable 3 2`：插入一个`2`行`3`列的表格。注意，列数在前，行数在后
+# `:VimWikiDeleteLink`：删除当前页面
+
+更多命令使用方法请参考`Vimwiki`自带的帮助文件，使用命令：`:help VimWiki`
+
+===更多配置===
+
+# `html_header`：指定编译时使用的头部模板
+# `html_footer`：指定编译时使用的尾部模板
+# `nested_syntaxes`：指定在使用三个大括号书写程序代码时需要语法高亮的编程语言
+# `let g:vimwiki_valid_html_tags=`：声明可以在 `wiki`源文件中书写的HTML标签
+
+更多帮助请参考`Vimwiki`文档（借助`Google`可以很轻易地找到其文档的中文翻译稿，需要的自己动手找吧，自己动手，丰衣足食啊）
+----
+===我的配置===
+
+下面提供我的相关配置文件，包括以下内容：
+
+* 本页面的`wiki`源文件
+* 本博客的模板
+* 我`Vim`的自定义配置文件夹以及配置文件
+* 两份`Vim`手册 + 数张`Vim`图解 + 一份`Vimwiki`参考
+
+下载地址：[[../../../download/Vim_Ruchee.zip|http://www.ruchee.com/download/Vim_Ruchee.zip]]（`2012-10-07`更新，`Linux`下解压或将乱码）

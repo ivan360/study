@@ -1,0 +1,44 @@
+#!/bin/bash
+
+# filename:userdel.sh
+# 2014/12/16 13:08:46
+
+# 账号和用户组删除脚本
+
+export PATH=/bin:/sbin:/usr/bin:/usr/sbin
+
+#提取username.txt中的账号列(第一列)
+usernames=$(./check_and_extract.sh "u")
+
+#确认是否要进行删除
+read -p  "请确认是否要删除系统中的账号和用户组（YES or NO）: " yesno #获取输入变量
+
+echo "您的回答是 $yesno "
+
+if [ "$yesno" != "YES" ]; then
+  echo "用户数据不可再生，想好了再确认删除！"
+  exit 1
+else
+    for username in $usernames
+    do
+      # 删除samba用户
+      pdbedit -x $username
+      # 删除系统用户，同时删除用户家目录
+      userdel -r $username
+      # 提示账号已删除信息
+      echo $username "user has been del!"
+    done
+
+    #提取username.txt中的用户组列(第二列)
+    mygroups=$(./check_and_extract.sh "g")
+
+    for mygroup in $mygroups
+    do
+      # 删除用户组
+      groupdel $mygroup
+      # 提示用户组已删除信息
+      echo $mygroup "group has been del!"
+    done
+fi
+
+# vim:set ft=sh:

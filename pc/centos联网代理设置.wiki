@@ -1,0 +1,43 @@
+centos中代理的设置
+
+1.全局http代理
+
+　　所有用户（最简单最直接的配置方式，如果你按照这个配置了，后面的就不用看了）
+
+　　　　编辑/etc/profile添加
+
+http_proxy===
+
+　　　　用户名和密码如果不需要的话可以不填写，只写IP地址和端口就可以了，像http://123.123.123.123:8000就可以了
+
+
+　　　　网上的只几乎都只是把http的那条写上了，运行命令的时候经常就连不上网了，尤其是一些github上的开源项目，地址都是https的，所以必须要加上https的条目哦，顺手把ftp的也加上吧，有备无患嘛。
+
+export http_proxy="http://lizhx:--%40---@10.242.8.12:8080"
+export https_proxy="http://lizhx:--%40---@10.242.8.12:8080"
+
+ 　　单一用户
+
+　　　　编辑~/.bash_profile添加和上面一样的内容
+
+http_proxy===
+
+ 
+
+2.yum代理 （yum是centos里面下载软件的命令，和ubuntu里的apt-get相似，只配置这个就可以安装大部分常用软件了）
+
+　　编辑/etc/yum.conf添加
+
+proxy=http:
+
+　　同样用户名和密码如果不需要的话可以不填写
+
+ 
+
+3.wget代理 （wget是下载文件的，后面跟一个url就可以下载对应的文件了）
+
+　　编辑/etc/wgetrc添加
+
+https_proxy = http:
+http_proxy = http:
+ftp_proxy = http:

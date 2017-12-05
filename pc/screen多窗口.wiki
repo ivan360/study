@@ -1,0 +1,57 @@
+开始使用 Screen
+
+1. # ssh 192.168.1.110
+Last login: Sun Dec 21 17:23:16 2008 from local.example.com
+Remote $ hostname
+remote.example.com
+2. Remote $ screen
+3. A $ top
+
+一个 Screen 会话正在运行（尽管看不到），窗口 A 处于活动状态，它正在运行系统监视器 top
+
+4. 临时断开,Ctrl-a，d（小写的字母 D，代表 “detach”）
+
+5. $ screen -list
+There is a screen on:
+21020.pts-2.remote  (Detached)
+1 Socket in /tmp/screens/S-strike.
+
+screen -list 显示所有可用的 Screen 会话
+编号为 21020 的会话已经断开连接并相应地加上了标志
+
+6. 因为只有一个 Screen 会话，screen -r 重新连接它
+
+7. 重新连接当前会话，然后按 Ctrl-a， c（小写的字母 C，代表 “create”）创建一个新窗口
+
+接下来，按 Ctrl-a， c。现在，Screen 会话管理三个窗口。
+
+8. 按 Ctrl-a，双引号键（"），就可以看到会话中可用窗口的列表：
+
+Num  Name           Flags
+ 0   bash           $
+ 1   bash           $
+ 2   bash           $
+
+在默认情况下，窗口的名称取自它启动的第一个命令（通常是一个 shell）
+用箭头键在窗口列表中上下移动；只需按回车即可选择窗口。
+
+9. 终止当前窗口的方法是，输入 exit，或者 Ctrl-a， k（小写的字母 K，代表 “kill”）
+
+== 更智能化的屏幕 ==
+指定窗口名称的方法是
+激活窗口, 按 Ctrl-a A（大写的字母 A，代表 “Annotate”），根据需要按 Backspace 删除现有的名称，然后在提示上输入一个有意义的名称
+
+== Screen 的高级用法 ==
+使用 screen -S label 给新会话分配标签。
+
+共享Screen 会话
+
+    选择一台工作计算机并登录。
+    输入 screen -S sharing -t one 创建一个名为 sharing 的 Screen 会话和一个名为 one 的新窗口。
+    用 screen -t two 创建另一个窗口。
+    如果愿意，检查一下目前的状态：按 Ctrl-a，然后按 d，然后输入 screen -list 和 screen -r sharing，然后按 Ctrl-a，然后按 "。
+    在 one 窗口中输入 echo，在此窗口中产生一些输出。
+    在同一台计算机上，打开第二个登录窗口。
+    在此窗口中，输入 screen -x -r sharing -p one。
+
+    -x 选项指定多用户模式；-p one 直接连接到 one 窗口。应该会马上看到与另一个登录会话相同的输出

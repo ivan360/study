@@ -1,0 +1,36 @@
+
+设置/导出 Linux系统密码有特殊字符HTTP_PROXY
+时间:2013-10-30 16:12来源:未知 作者:admin 点击:203次
+我的代理服务器的密码有特殊字符，例如，@，依此类推。我怎么设置和导出的变量称为HTTP_PROXY或HTTP_PROXY密码具有特殊字符时，在Unix操作系统一样吗？
+
+我的代理服务器的密码有特殊字符，例如，@，依此类推。我怎么设置和导出的变量称为HTTP_PROXY或HTTP_PROXY密码具有特殊字符时，在Unix操作系统一样吗？
+
+If your password is F@o:o!B#ar$ and set http_proxy as follows:
+
+export http_proxy="http://user:F@oo!B#ar$@server1.cyberciti.biz:3128/"
+
+You may get the error due to special characters. The solution is to use unicode characters in hexadecimal. You can use command line tool such as unum or gnome-character-map to convert special characters into hexadecimal unicode.
+Example
+
+Convert @:!#$ into equivalent hexadecimal unicode using unum command:
+$ unum '@:!#$'
+Sample outputs:
+
+   Octal  Decimal      Hex        HTML    Character   Unicode
+    0100       64     0x40       @    "@"         COMMERCIAL AT
+     072       58     0x3A       :    ":"         COLON
+     041       33     0x21       !    "!"         EXCLAMATION MARK
+     043       35     0x23       #    "#"         NUMBER SIGN
+     044       36     0x24       $    "$"         DOLLAR SIGN
+
+In this example @ becomes %40, : becomes %3A, and so on. Find and replace all special characters with unicode hexs. Find:
+F@o:o!B#ar$
+Replace with:
+F%40o%3Ao%21B%23ar%24
+Finally, set and export http_proxy, HTTP_PROXY in the following format:
+
+export http_proxy="http://user:F%40o%3Ao%21B%23ar%24@server1.cyberciti.biz:3128/"
+
+Test it:
+$ curl -I www.cyberciti.biz
+$ wget http://www.cyberciti.biz/

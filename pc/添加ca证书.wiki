@@ -1,0 +1,20 @@
+centos 添加CA 证书
+转载 2015年01月07日 15:22:16
+
+ centos
+---
+Install the ca-certificates package:
+
+yum install ca-certificates
+
+Enable the dynamic CA configuration feature:
+
+update-ca-trust enable
+
+Add it as a new file to /etc/pki/ca-trust/source/anchors/:
+
+cp foo.crt /etc/pki/ca-trust/source/anchors/
+
+Use command:
+
+update-ca-trust extract 

@@ -1,0 +1,647 @@
+
+最佳vim技巧
+----------------------------------------
+# 信息来源
+----------------------------------------
+www.vim.org         : 官方站点
+comp.editors        : 新闻组
+http://www.newriders.com/books/opl/ebooks/0735710015.html : Vim书籍
+http://vimdoc.sourceforge.net/cgi-bin/vim2html2.pl : 关于vim的可查询文档
+http://vimdoc.sourceforge.net/vimfaq.html          : VIM FAQ
+----------------------------------------
+# 基础
+----------------------------------------
+* # g* g#           : 寻找光标处的狭义单词(<cword>) (前向/后向)
+%                   : 括号配对寻找 {}[]()
+matchit.vim         : 使得 % 能够配对标记 <tr><td><script> <?php 等等
+<C-N><C-P>          : 插入模式下的单词自动完成
+<C-X><C-L>          : 行自动完成(超级有用)
+/<C-R><C-W>         : 把狭义单词 <cword> 写到 搜索命令 行
+/<C-R><C-A>         : 把广义单词 <cWORD> 写到 搜索命令 行
+:set ignorecase     : 搜索时忽略大小写
+:syntax on          : 在 Perl,HTML,PHP 等中进行语法着色
+:h regexp<C-D>      : 按下 control-D 键即可得到包含有 regexp 的帮助主题的列表
+                    : (使用TAB可以实现帮助的自动补齐)
+----------------------------------------
+# 使更新 _vimrc 更容易
+:nmap ,s :source $VIM/_vimrc # 译释：nmap 是绑定一个在normal模式下的快捷键
+:nmap ,v :e $VIM/_vimrc
+# 译释：在normal模式下，先后按下 ,s 两个键执行_vimrc，而 ,v 则是编辑_vimrc
+----------------------------------------
+# visual 模式 (例子是：轻松添加其他的 HTML Tags)
+:vmap sb \"zdi<b><C-R>z</b><ESC>  :在visual模式下选中的文字前后分别加上<b>和</b>
+# 译释：vmap 是绑定一个在visual模式下的快捷键
+# 译释：原理：在visual模式下，# 译释：原理：在visual模式下，\"zd 把一个选中的区域命名为z 然后删除，
+# i 进入插入模式，输入<b>，<C-R>z 撤销刚才的删除,然后再写入</b>，
+# 最后<ESC>返回normal模式
+# 译释：\"z 命令创建一个选中的区域为register，并把它命名为z<CR># 译释：更令人开心的有：在visual模式下选中几行，然后输入 2> ,
+#       则选中的行会全部缩进两个tab
+#       555,偶一开始还是用 :xx,xx s/^/\\t\\t/，好傻啊！
+:vmap st \"zdi<?= <C-R>z ?><ESC>  :在visual模式下选中的文字前后分别加上<?= 和 ?>
+----------------------------------------
+# 文件浏览
+:Ex                             : 开启目录浏览器，注意首字母E是大写的
+:Sex                            : 在一个分割的窗口中开启目录浏览器
+:ls                             : 显示当前buffer的情况
+:cd ..                          : 进入父目录
+:args                           : 显示目前打开的文件
+:lcd %:p:h                      : 更改到当前文件所在的目录
+# 译释：lcd是紧紧改变当前窗口的工作路径，% 是代表当前文件的文件名,
+# 加上 :p扩展成全名（就是带了路径），加上 :h析取出路径
+:autocmd BufEnter * lcd %:p:h   : 自动更改到当前文件所在的目录
+# 译释：autocmd指定一个自动命令，BufEnter指定一个事件，* 指定事件的对象，
+# lcd %:p:h 指定一个动作
+# hehe,好像和写记叙文差不多
+----------------------------------------
+# 缓冲区(buffer)浏览器 (第三方的一个最流行的脚本)
+# 需要下载 bufexplorer.vim ，http://www.vim.org/script.php?script_id=42 上就有
+\\be                             : 在缓冲区浏览器中打开缓冲区列表
+\\bs                             : 以分割窗口的形式打开缓冲区浏览器
+----------------------------------------
+# 大小写转换
+guu                             : 行小写
+gUU                             : 行大写
+g~~                             : 行翻转（当然指大小写啦）
+# 译释： g 是大小写转换命令(greate)，u/U/~是三种转换形式(小写/大写/翻转)，
+# 最后一个重复则表示该转换是对于一行而言的
+guw                             : 字大写(狭义字) 译注：建议对比iw
+gUw                             : 字小写(狭义字)
+g~w                             : 字翻转(狭义字)
+# 译释：最后一个w 表示该转换是对于一个字而言的，由于是在normal模式下，
+# 所以这个w 表示一个狭义字<cword>
+vEU                             : 字大写(广义字)
+vE~                             : 字翻转(广义字)
+# 译释：vE 这个指令组合会进入visual模式，然后选择一个广义字<CWORD>
+ggguG                           : 把整个文章全部小写（ft!bt!）
+gf                              : 取当前光标处的广义字作为文件名，然后试图打开它！
+# 译释：为什么是广义字呢？因为这样可以方便的取到路径啊，像/var/www/html/index.htm
+ga                              : 显示光标处字符的ascii,hex,oct,...晕菜的一堆转换
+ggVGg?                          : 用rot13编码整个文件（晕！）
+# 译释：gg到文件首行首字符，V进入Visual-Line模式，G到文件末行首字符，
+#       这样就选中了整篇文章，然后g?就是用rot13编码整个文件啦
+#
+# 【关于rot13——谁让英文是偶数个字母啊】
+# ROT13 是一种简单的编码，它把字母分成前后两组，每组13个，编码和解码
+# 的算法相同，仅仅交换字母的这两个部分，即：[a..m] --> [n..z] 和 [n..z]
+# --> [a..m] 。 ROT13 用简易的手段使得信件不能直接被识别和阅
+# 读，也不会被搜索匹配程序用通常的方法直接找到。经常用于 USENET 中发表一
+# 些攻击性或令人不快的言论或有简单保密需要的文章。
+# 由于 ROT13 是自逆算法，所以，解码和编码是同一个过程。
+<C-A>,<C-X>                     : 增加,减少 光标处的狭义字所表示的数字
+                                :（,仅仅是分割了这两个命令，不是命令的一部分）
+                                : Win32的用户可能需要重新定义一下Ctrl-A，呵呵
+# 译注：good guy, 令人不得不想到perl的数字串
+<C-R>=5*5                       : 插入25 (这是一个迷你计算器耶！)
+----------------------------------------
+# 好玩的东东
+:h 42            : 也可以访问 http://www.google.com/search?q=42
+                 : 第一个结果就是 News. Douglas Adams 1952 - 2001.
+                 : Floor 42 extends its deepest sympathies to
+                 : the family, friends, and fans of Douglas Adams.
+:h holy-grail
+:h!
+----------------------------------------
+# 标记和移动
+\'.               : 跳到最后修改的那一行 (超级有用)(ft,怎么又是这个评价)
+`.               : 不仅跳到最后修改的那一行，还要定位到修改点
+<C-O>            : 依次沿着你的跳转记录向回跳 (从最近的一次开始)
+<C-I>            : 依次沿着你的跳转记录向前跳
+:ju(mps)         : 列出你跳转的足迹
+:help jump-motions
+:history         : 列出历史命令记录
+:his c           : 命令行命令历史
+:his s           : 搜索命令历史
+q/               : 搜索命令历史的窗口
+q:               : 命令行命令历史的窗口
+:<C-F>           : 历史命令记录的窗口
+----------------------------------------
+# 缩写和键盘映射(原文中文件举例都用了c:/aaa/x，偶全给他改成/path/file了，哼唧)
+:map   <f7>   :\'a,\'bw! /path/file
+# 译释：map是映射一个normal模式下的键
+# 这里是把F7键映射成把标记a到标记b中间的内容另存为一个文件/path/file
+# 标记(mark)的方法：把光标移动到需要标记的地方，输入m，然后输入标记名，例如a
+# 引用标记的方法：\'a ，即：单引号加标记名<CR>:map   <f8>   :r /path/file # 译释：把F8键映射成在当前位置插入文件/path/file的内容
+:map   <f11>  :.w! /path/file2
+
+# 译释：.（点号）表示当前行
+# 所以F11就是把当前行存为/path/file2
+# 最后的
+表示一个回车
+:map   <f12>  :r /path/file2<CR>
+:ab php          : 列出php表示的缩写
+# 译释：定义一个缩写使用：:iab hm hmisty
+# 一个有趣的现象是，它列出的会是php和它的前子串开头的缩写
+# 例如，有这么几个缩写：
+# h => hmisty1 , hm => hmisty2 , hmi => hmisty3, m => hmisty4
+# 那么使用 :ab hm会显示这么几个缩写：hm 和 h
+# 而不是你想象中的 hm 和 hmi
+:map ,           : 列出以逗号开始的键盘映射
+# 译释：一般而言，我们称这些逗号开始的组合键为“逗号命令”
+# 不过hmisty更喜欢用;构成“分号命令”
+# 而且不是用map,而是用imap
+# 因为偶懒么，懒得按<Esc>,所以直接在insert模式下就执行命令了
+# 为什么用分号呢？因为我最常用它写程序啊
+# perl/C/C++/object pascal/java，都是用分号结束一个语句
+# 我们一般很少在分号后面连续写其他字符
+# 所以用“分号＋其他键”就很少会在输入的时候造成冲突
+# 在键盘映射中常用的表示
+<CR>             : 回车
+<ESC>            : Esc
+<LEADER>         : 转义符号 \\
+<BAR>            : 管道符号 |
+----------------------------------------
+# 列出寄存器(Registers)
+:reg             : 显示所有当前的registers
+\"1p              : \"表示引用register，1表示一个名字叫做1的register，
+                 : p就是粘贴（paste）命令
+# 译释：\"也用来定义register
+# 先输入 \",表示定义register
+# 然后输入名字，如0~9,a~z
+# 然后执行删除或复制命令，如dd或y，
+#         或者是visual模式下的d(删除选中的部分)或y(复制选中的部分)
+# 则被删除或复制的部分就被存入了这个命名的register
+#
+# 观察：一个特殊的register, \"\" ，里面存储了一个匿名的删除/复制
+# 在你执行dd或y的时候，被作用的部分被存到了\"\"中
+# 这些和perl是多么像啊
+----------------------------------------
+# Useful trick
+\"ayy@a           : 把当前行作为一个Vim命令来执行
+# 译释：\"ayy 是定义当前行到register a，然后@a是执行register a中存储的指令
+# yy: 复制一行
+# 10yy: 复制从此向下的10行
+yy@\"             : 用上面所提到的那个匿名register
+----------------------------------------
+# 从其他程序获取输出 (需要外部程序)
+:r!ls.exe        : 读取ls的输出到当前位置
+!!date           : 读取date的输出 (但是会替换当前行的内容)
+# 译释：其实你输入了!!后，vim就自动转换到 :.! 等待你继续输入
+# 使用外部程序sort进行排序(sort是Unix标准命令，ls,date也是)
+:%!sort -u       : 使用sort程序排序整个文件（用结果重写文件）
+# 译释：%表示整个文件的所有行
+# !sort表示执行外部命令sort
+# -u是sort的参数，man sort看看，这个参数的意义是合并相同的行
+# u就是unique,如果两行内容相同，则结果中只保留一行的说
+:\'a,\'b!sort -u   : 对mark a 到mark b中间的内容进行排序
+!1} sort -u      : 排序当前段落 (只能在normal模式下使用!!)
+# 译释：!表示使用filter，1}表示filter的对象是从当前行开始向后数一段
+# 段落指到空行处结束，不包括空行
+# 其实你一旦输入 !1}，vim就自动计算当前段落应该到那一行(eg.+5)，然后生成
+# :.,.+5! 等待之后输入sort -u，回车，完成操作
+# .表示当前行，.+5当然就是当前行向后数5行
+----------------------------------------
+# 多文档操作 (基础)
+# 译注：用 :ls! 可以显示出当前所有的buffer
+:bn              : 跳转到下一个buffer
+:bp              : 跳转到上一个buffer
+:wn              : 存盘当前文件并跳转到下一个(又是“超级……”,ft!)
+:wp              : 存盘当前文件并跳转到上一个
+:bd              : 把这个文件从buffer列表中做掉
+:bun             : 卸掉buffer (关闭这个buffer的窗口但是不把它从列表中做掉)
+:badd file.c     : 把文件file.c添加到buffer列表
+:b 3             : 跳到第3个buffer
+:b main          : 跳到一个名字中包含main的buffer,例如main.c               : (ultra，这个怎么翻译？:()
+:sav php.html    : 把当前文件存为php.html并打开php.html
+:sav! %<.bak     : 换一个后缀保存
+:e!              : 返回到修改之前的文件(修改之后没有存盘)
+:w /path/%       : 把文件存到一个地儿
+:e #             : 编辑标记为#的buffer(这个buffer必须含有一个可编辑的文件)
+                 : 用ls命令就能看到哪一个buffer有#
+                 : %a表示当前正在编辑的buffer
+                 : u 表示不能编辑或者已经被做掉的buffer
+:e #3            : 编辑编号为3的buffer(这个buffer必须含有一个可编辑的文件)
+:rew             : 回到第一个可编辑的文件
+:brew            : 回到第一个buffer
+:sp fred.txt     : 在一个水平分割的窗口中打开文件fred.txt # 译注：vs fred.txt可以实现垂直分割
+:sball           : 把当前所有含有可编辑文件的buffer显示到一个分割窗口中              : (偶该考虑把super翻译成 高级指令 了,ft)
+:map   <F5> :ls
+:e # : 在normal模式下按F5键，则会显示所有含有一个<CR>                 : 可编辑文件的buffer，然后提示你输入buffer的序号，
+                 : 输入后回车，则编辑这个buffer
+# 译注：这是一个键盘绑定
+:set hidden      : 允许不保存buffer而切换buffer (w/o=without)
+----------------------------------------
+# 在分割窗口中快速切换
+:map <C-J> <C-W>j<C-W>_
+# 译注：原文此处有误，前面应该加上冒号
+# 这是一个键盘绑定，把Ctrl-J定义成切换到下一个窗口并最大化
+:map <C-K> <C-W>k<C-W>_
+----------------------------------------
+# 命令录制 (最佳技巧，ft)
+qq  #录制到q
+.. #输入一系列复杂的指令
+q   #再次按q停止录制
+@q  #执行q中存储的指令
+@@  #重复执行
+# 编辑register/录制
+\"ap #把register a中的内容贴到当前位置
+.. #现在你可以修改它了
+\"add#删除之，重新存入register a
+@a  #执行register a中的指令
+----------------------------------------
+# _vimrc基础
+:set incsearch                        : 实时匹配你输入的内容
+:set wildignore=*.o,*.obj,*.bak,*.exe : tab键的自动完成现在会忽略这些
+:set shiftwidth=4                     : 现在自动缩进将是4个字符
+# 译注：一个tab位通常是8个字符
+# 所以，我们还要设定 :set tabstop=4，这样，所有的缩进都是4字符了
+# emacs默认就是4字符缩进吧？
+:set vb t_vb=\".                        : 沉默方式(不要叫beep！)
+----------------------------------------
+# 加载windows iexplorer来浏览(我想这只有在windows下用gvim才能用到)
+:nmap ,f :update
+:silent !start c:\\progra~1\\intern~1\\iexplore.exe file://%:p
+# 译释：nmap是做一个normal模式下的键盘绑定
+# 这里绑定了一个逗号命令 ,f
+# :update是写这个文件，与:w不同，它只有当文件被修改了的时候才写
+# :silent别让弹出窗口报告执行结果
+# !...后面就是执行windows命令了。呵呵，去问bill gates什么意思吧。
+# 不过偶用gvim 6.1试过了，好用！
+:nmap ,i :update<CR>: !start c:\\progra~1\\intern~1\\iexplore.exe <cWORD><CR>
+----------------------------------------
+# 用VIM编辑ftp文件
+:cmap ,r  :Nread ftp://209.51.134.122/public_html/index.html
+:cmap ,w  :Nwrite ftp://209.51.134.122/public_html/index.html
+# 译注：原文丢失了开头的冒号
+# cmap是命令(command)模式绑定
+gvim ftp://209.51.134.122/public_html/index.html
+# 这一句就是开始编辑一个ftp远端的文件，ft
+----------------------------------------
+# 附加到一个register (就是用大写的register名字啦！)
+\"a5yy #复制5行到a中
+10j   #下移10行
+\"A5yy #再添加5行到a中
+----------------------------------------
+[I     : 显示光标处的狭义字可以匹配的行(高级指令)
+# 译注：# 可以全文查找与光标处的狭义字相匹配的字，
+# 这在查找函数原型和实现，或者变量使用的时候很有用
+----------------------------------------
+# 常规缩进
+:\'a,\'b>>
+# 译释：把mark a到mark b之间的内容进行两次缩进
+# 在visual模式下缩进 (无限可重复)
+:vnoremap < <gv
+# 译释：:vnoremap 重定义了visual模式下 < 符号的含义
+# 把它定义成 <gv
+# 即：先<向外缩进，然后gv重新选择上一次选择了的区域
+# 这样在visual模式下就可以实现连续按<而连续缩进了
+:vnoremap > >gv
+# 同里，内缩
+----------------------------------------
+# 查找（译注：建议先学习正则表达式）
+# 译注：查找命令不用进入:命令模式，直接按/就可以了
+# 如果没有修饰，可以不要右边的/
+# 和smth bbs差不多啦，呵呵
+/joe/e                      : 光标停留在匹配单词最后一个字母处
+/joe/e+1                    : 光标停留在匹配单词最后一个字母的下一个字母处
+/joe/s                      : 光标停留在匹配单词第一个字母处
+/^joe.*fred.*bill/          : ft,标准正则表达式
+/^[A-J]\\+/                  : 找一个以A~J中一个字母重复两次或以上开头的行
+/forum\\(\\_.\\)*pent          : 多行匹配
+/fred\\_s*joe/i              : 中间可以有任何空白，包括换行符\\n
+# 译注：这个和perl不太一样的哦
+/fred\\|joe                  : 匹配FRED或JOE
+/\\<fred\\>/i                 : 匹配fred,fred必须是一个独立的单词，而不是子串
+# 译注：这和perl也不太一样，perl是用\\b做单词定界符的
+/\\<\\d\\d\\d\\d\\>               : 匹配4个数字
+\\<\\d\\{4}\\>                  : 也是匹配4个数字
+# 在visual模式下查找
+:vmap g/ y/<C-R>\"
+       : 匹配选中的高亮文字
+# 译释：vmap是在visual模式下的键盘映射
+# 映射了g/这个命令组合
+# y 把选中的高亮文字写入匿名register \"
+# / 打开搜索模式
+# <C-R> 准备粘贴register
+# \" 粘贴了\"\"中的内容
+# <CR> 回车，执行<CR>:vmap <silent> g/    y/<C-R>=escape(@\", \'\\\\/.*$^~[]\')<CR><CR> : with spec chars
+# 译释：@#$&^*@#%&*#$@!
+# 跨行匹配，\\_ 表示允许匹配换行符，或者说，允许匹配新行
+# 译注：小心，和perl不一样
+/<!--\\_p\\{-}-->                   : 匹配多行注释
+/fred\\_s*joe/i                    : 似乎上面有了，ft
+/bugs\\(\\_.\\)*bunny                : 中间可以有无数东西
+:h \\_                             : 看看关于 \\_ 的帮助
+# 查找当前光标位置所在子例程/函数(subroutine/function)的声明
+:nmap gx yiw/^\\(sub\\<bar>function\\)\\s\\+<C-R>\"
+
+# 译释：nmap 做一个normal模式下的键盘绑定
+# y 进入复制状态，后面需要一个motion
+# 接着就用 iw 指出了这个motion,是inner word
+# inner word也是狭义字<cword>，但是和 w 不同
+# w 是从光标位置开始向后看
+# 而inner word总是把光标移到第一个字母，从而总能得到一个完整的狭义字
+# 试一试 gUw 和 gUiw 就知道区别了，呵呵。
+# 在多个文档中搜索
+:bufdo /searchstr
+:argdo /searchstr
+----------------------------------------
+# 替换
+# 译注：替换命令需要先进入:命令模式
+:%s/fred/joe/igc            : 一个常见的替换命令，修饰符igc和perl中一样意思
+:%s/\\r//g                   : 删除DOS方式的回车^M
+:%s=  *$==                  : 删除行尾空白
+:\'a,\'bg/fred/s/dick/joe/igc : 非常有用！（ft,又来了！）
+# 译释：\'a,\'b指定一个范围：mark a ~ mark b
+# g//用一个正则表达式指出了进行操作的行必须可以被fred匹配
+# 看后面，g//是一个全局显示命令
+# s/dick/joe/igc则对于这些满足条件的行进行替换
+# 列复制
+# 译注：@#%&^#*^%#$!
+:%s= [^ ]\\+$=&&=            : 复制最后一列
+:%s= \\f\\+$=&&=              : 一样的功能
+:%s= \\S\\+$=&&               : ft,还是一样 # 反向引用，或称记忆
+:s/\\(.*\\):\\(.*\\)/\\2 :  \\1/  : 颠倒用:分割的两个字段
+:%s/^\\(.*\\)\\n\\1/\\1$/        : 删除重复行 # 非贪婪匹配，\\{-}
+:%s/^.\\{-}pdf/new.pdf/      : 只是删除第一个pdf # 跨越可能的多行
+:%s/<!--\\_.\\{-}-->//        : 又是删除多行注释（咦？为什么要说“又”呢？）
+:help /\\{-}                 : 看看关于 非贪婪数量符 的帮助
+:s/fred/<c-r>a/g            : 替换fred成register a中的内容，呵呵 # 写在一行里的复杂命令
+:%s/\\f\\+\\.gif\\>/\\r&\\r/g | v/\\.gif$/d | %s/gif/jpg/
+# 译注：就是用 | 管道啦
+# 或者
+:%s/suck\\|buck/loopy/gc     : 或者(或者需要\\，ft！，|不是或者)
+# ft, \\不就是转义了么！这个和perl真是不同了！
+# 调用VIM函数
+:s/__date__/\\=strftime(\"%c\")/ : 插入时间串
+# 处理列，替换所有在第三列中的str1
+:%s:\\(\\(\\w\\+\\s\\+\\)\\{2}\\)str1:\\1str2:
+# 交换第一列和最后一列 (共4列)
+:%s:\\(\\w\\+\\)\\(.*\\s\\+\\)\\(\\w\\+\\)$:\\3\\2\\1:
+# filter all form elements into paste register
+# 把所有的form元素（就是html里面的form啦）放到register里？
+# ft, 头疼，不解释了
+:redir @*|sil exec \'g#<\\(input\\|select\\|textarea\\|/\\=form\\)\\>#p\'|redir END
+:nmap ,z :redir @*<Bar>sil exec select\\textarea\\/\\=fo\">\'g@<\\(input\\<Bar>select\\<Bar>textarea\\<Bar>/\\=fo
+# 上面这一行不能完全显示，最好Copy Article下去看
+----------------------------------------
+# 全局(global)显示命令，就是用 :g＋正则表达式
+# 译释： :g/{pattern}/{cmd} 就是全局找到匹配的行
+# 然后对这些行执行命令{cmd}
+:g/\\<fred\\>/                : 显示所有能够为单词fred所匹配的行
+:g/<pattern>/z#.5           : 显示内容，还有行号，呵呵
+:g/<pattern>/z#.5|echo \"==========\"  : 漂亮的显示，ft!
+# 全局命令 (其他)
+:g/^\\s*$/d                  : 删除所有空行
+:g!/^dd/d                   : 删除不含字串\'dd\'的行
+:v/^dd/d                    : 同上 # 译释：v == g!，就是不匹配！
+:g/fred/,/joe/d             : not line based (very powerfull)
+:v/./.,/./-1join            : 压缩空行
+:g/^$/,/./-j                : 压缩空行
+:g/<input\\|<form/p          : 或者 要用\\|
+:g/^/pu _                   : 把文中空行扩增一倍 (pu = put)                         : 即：原来两行间有一个空行，现在变成2个
+:g/^/m0                     : 按行翻转文章 (m = move)
+:g/fred/t$                  : 拷贝行，从fred到文件末尾(EOF)
+:%norm jdd                  : 隔行删除
+# 译释：% 指明是对所有行进行操作
+# norm指出后面是normal模式的指令
+# j是下移一行，dd是删除行
+# incrementing numbers
+:.,$g/^\\d/exe \"norm! \\<c-a>\" : 增加在BOL(beginning of line)处的数字
+# 译注：.,$ 指明命令从当前行执行到最后一行
+# 如果没有 .,$ 限定范围，那么g//就会对整个文件进行操作
+# exe 是执行后面的命令组合
+:.,$g/^\\d/exe \"norm \\<c-p>\"  : Win32下必须重定义Ctrl-A<CR># 保存全局命令的结果 (注意必须使用添加模式)
+:g/fred/y A                 : 添加所有为fred所匹配的行到register a
+:\'a,\'b g/^Error/ . w >> errors.txt
+# 复制每一行，然后在复制出来的每一行两侧加上一个 print \'复制出来的内容\'
+:g/./yank|put|-1s/\'/\"/g|s/.*/Print \'&\'/
+----------------------------------------
+# 全局命令和替换命令联姻 (强大的编辑能力)
+:\'a,\'bg/fred/s/joe/susan/gic : 可以使用反向引用来匹配
+:g/fred/,/joe/s/fred/joe/gic :  non-line based (ultra)
+----------------------------------------
+# 先找fred，然后找joe，然后#$^$%^#$%^@%^%&%^*!
+:/fred/;/joe/-2,/sid/+3s/sally/alley/gIC
+----------------------------------------
+# 重定向到register * 和 粘贴register *
+:redir @*                    : 重定向命令的输出结果（最下方命令行上的结果）                          : 到register * (ft,* 代表0~1,a~z,..)
+:redir END                   : 结束重定向
+# 处理粘贴
+\"*yy                         : 上面讲过了，就是复制到register *中
+\"*p                          : 然后贴出来
+----------------------------------------
+:redir >> out.txt            : 重定向到一个文件
+----------------------------------------
+# 重新格式化文本
+gq<CR>
+gqap  (a是motion p是段落(visual模式))
+ggVGgq  重新格式化整个文章
+----------------------------------------
+# 对多个文档实施命令
+:argdo %s/foo/bar/           : 对所有:args列表中的文档执行命令
+:bufdo %s/foo/bar/
+:windo %s/foo/bar/
+:argdo exe \'%!sort\'|w!       : 使用外部命令
+----------------------------------------
+# 命令行的一些好玩的东东
+gvim -h                    : 启动的时候启动帮助(Win32)
+vi -h 或 vim -h            : 这个是unix下用
+ls | gvim -                : 编辑一个数据流！
+gvim -o file1 file2        : 以分割窗口打开两个文件<CR># 指出打开之后执行的命令
+gvim.exe -c \"/main\" joe.c  : 打开joe.c，然后跳转到\'main\'
+# 对一个文件执行多个命令
+vim -c \"%s/ABC/DEF/ge | update\" file1.c
+# 对一组文件执行多个命令
+vim -c \"argdo %s/ABC/DEF/ge | update\" *.c
+# 自动编辑文件 (编辑命令序列Ex commands已经包含在convert.vim中了)
+vim -s \"convert.vim\" file.c
+# 不要加载.vimrc和任何plugins (启动一个干净的VIM)
+gvim -u NONE -U NONE -N
+----------------------------------------
+# GVIM 不同的地方
+gvim -d file1 file2        : vimdiff (比较不同)
+dp                         : 把光标处的不同放到另一个文件
+do                         : 在光标处从另一个文件取得不同
+----------------------------------------
+# Vim陷阱
+# 在vim的正则表达式中， + 和 | 都必须加转义符 \\
+# 小心，这和perl不一样！
+/fred\\+/      : 匹配fred或freddy但是不匹配free
+----------------------------------------
+# \\v ，或叫做very magic (通常都是这么叫)可以取消转义符
+/codes\\(\\n\\|\\s\\)*where  : 普通的正则表达式
+/\\vcodes(\\n|\\s)*where   : very magic，| 不用加 \\ 了！
+----------------------------------------
+# 把东西送到命令行/搜索行 (SUPER:偶不再翻译这种叹词了)
+<C-R><C-W>              : 送一个狭义词
+<C-R><C-A>              : 送一个广义词
+<C-R>-                  : 送一个小型删除寄存器register
+<C-R>[0-9a-z]           : 送一个命名寄存器register
+<C-R>%                  : 送文件名过去 (#也行)
+----------------------------------------
+# 操作寄存器
+:let @a=@_              : 清除register a
+:let @*=@a              : 寄存器赋值
+:map   <f11> \"qyy:let @q=@q.\"zzz\"
+# 译注：猜猜这个无聊的绑定是什么意思？
+----------------------------------------
+# 关于帮助的帮助
+:h quickref             : 翻到VIM Quick Reference页(有用！)
+:h tips                 : Vim自己的tips
+:h visual<C-D><tab>     : 得到一个关于visual关键字的帮助列表                     : 然后用tab键去选择
+:h ctrl<C-D>            : 显示所有关于Ctrl的帮助
+:h :r                   : :ex冒号命令
+:h CTRL-R               : 普通模式命令
+:h \\r                   : \\r在正则表达式中是什么意思呢？
+:h i_CTRL-R             : insert模式下的Ctrl-R
+:h c_CTRL-R             : 命令行(command-line)模式下的Ctrl-R
+:h v_CTRL-V             : visual模式下的Ctrl-V
+:h tutor                : VIM 指南
+gvim -h                 : 关于 VIM 命令的帮助
+vi/vim -h
+<C-S>T                  : Control Shift T go backwards in help
+                        : 偶不清楚有什么用:(
+----------------------------------------
+# 选项设置在哪里？
+:scriptnames            : 列出所有加载的 plugins, _vimrcs
+:verbose set history    : 显示history的值并指出设置文件的位置
+----------------------------------------
+# 制作你自己的VIM帮助
+:helptags /vim/vim61/doc  : 重建 /doc 中所有的 *.txt 帮助文件
+:help add-local-help
+----------------------------------------
+# 用外部程序来运行程序 (例如 perl :)
+map   <f2>   :w
+:!perl -c %<CR>
+# 译释：:w
+写文件
+# :!perl -c %
+用perl来运行当前文件
+# 当前文件必须有文件名！
+----------------------------------------
+# 插入DOS换行符
+:%s/nubian/<C-V><C-M>&/g          :  Ctrl-V是一种转义，它说要解释<C-M>
+:%s/nubian/<C-Q><C-M>&/g          :  对于Win32应该这样
+:%s/nubian/^M&/g                  :  你看到的^M是一个字符
+:%s/nubian/\\r&/g                  :  更好的形式
+----------------------------------------
+# 把最后一个命令贴到当前位置
+i<c-r>:
+# 把最后一个搜索指令贴到当前位置
+i<c-r>/
+# 译释：i是进入insert模式，
+# Ctrl-r是开启插入模式下register的引用
+# :和/分别引用了两个register的内容
+----------------------------------------
+# 更多的完成功能
+<C-X><C-F>                        :插入当前目录下的一个文件名到当前位置
+# 在insert模式下使用
+# 然后用 Ctrl-P/Ctrl-N 翻页
+----------------------------------------
+# 替换一个visual区域
+# 选择一个区域，然后输入 :s/Emacs/Vim/ 等等，vim会自动进入:模式
+:\'<,\'>s/Emacs/Vim/g               : 前面的\'<,\'>是vim自动添加的
+----------------------------------------
+# 在文件中插入行号(不是显示行号，是插入！)
+:g/^/exec \"s/^/\".strpart(line(\".\").\"    \", 0, 4)
+----------------------------------------
+# 用VIM的方式来编号行
+:set number                       :显示行号
+:set nonu                         :取消显示
+:%s/^/\\=strpart(line(\'.\').\"        \",0,&ts)
+#从任意行开始编号(需要perl，嘿嘿)
+:\'a,\'b!perl -pne \'BEGIN{$a=223} substr($_,2,0)=$a++\'
+#似乎有点小问题，你试试看:)
+qqmnYP`n^Aq                       : 记录到q 然后用 @q 重复
+#似乎不能工作，你试试看:)
+# 递增已存在数字到文件末
+:.,$g/^\\d/exe \"normal! \\<c-a>\"
+# 高级递增，看：
+http://vim.sourceforge.net/tip_view.php?tip_id=150
+----------------------------------------
+# 高级递增 (\"真的很有用\"，ft)
+\" 把下面几句放到 _vimrc #vimrc脚本用 \" 做行注释符
+let g:I=0
+function! INC(increment)
+let g:I =g:I + a:increment
+return g:I
+endfunction
+\" 例如从mark a 到mark b 递增，从223开始，步长为5
+:let I=223
+:\'a,\'bs/$/\\=INC(5)/
+\" (原文：create a map for INC)
+\" 但是cab是清楚命令行缩写啊？怎么回事？
+cab viminc :let I=223 \\| \'a,\'bs/$/\\=INC(5)/
+----------------------------------------
+# 加密(小心使用，不要忘了密码)
+:X                                : 然后vim会提示你输入密码
+:h :X
+----------------------------------------
+# modeline (make a file readonly etc) must be in first/last 5 lines
+# 不会用，不翻了
+// vim:noai:ts=2:sw=4:readonly:
+:h modeline
+----------------------------------------
+# Creating your own GUI Toolbar entry
+# 对于text模式下的vim没用，不翻了
+amenu  Modeline.Insert\\ a\\ VIM\\ modeline <Esc><Esc>ggOvim:ff=unix ts=4 ss=4
+v
+----------------------------------------
+# 一个保存当前光标下的狭义字到一个文件的函数
+function! SaveWord()  \"这里用!是强制覆盖以前的定义
+   normal yiw
+   exe \':!echo \'.@0.\' >> word.txt\'
+endfunction
+map ,p :call SaveWord() #使用该函数的一个例子
+----------------------------------------
+# 删除重复行的函数
+function! Del()
+ if getline(\".\") == getline(line(\".\") - 1)
+   norm dd
+ endif
+endfunction
+:g/^/ call Del() #使用该函数的一个例子
+----------------------------------------
+# 双字节编码 (non alpha-numerics)
+:digraphs                         : 显示编码表
+:h dig                            : 帮助
+i<C-K>e\'                          : 输入 é
+i<C-V>233                         : 输入 é (Unix)
+i<C-Q>233                         : 输入 é (Win32)
+ga                                : 查看字符的hex值
+----------------------------------------
+# 文件名自动完成 (例如 main_c.c)
+:e main_<tab>                     : tab 键完成
+gf                                : 打开光标处广义字命名的文件 (normal模式)
+main_<C-X><C-F>                   : 文件名自动完成(insert模式)
+----------------------------------------
+# Vim复杂使用
+# 交换两个单词
+:%s/\\<\\(on\\|off\\)\\>/\\=strpart(\"offon\", 3 * (\"off\" == submatch(0)), 3)/g
+----------------------------------------
+# 把text文件转换成html文件(oh,ft)
+:runtime! syntax/2html.vim        : 转换 txt 成 html
+:h 2html                          : 看看帮助
+----------------------------------------
+# VIM 有一个内部自带的 grep 命令
+:grep some_keyword *.c            : 得到一个包含some_keyword的c文件名列表
+:cn                               : 去下一个出现的位置
+----------------------------------------
+# 强制无后缀文件的语法着色方式 .pl
+:set syntax=perl # 取消语法着色
+:set syntax off # 改变色彩主题 (在~vim/vim??/colors中的任何文件)
+:colorscheme blue ----------------------------------------
+:set noma (non modifiable)        : 防止修改
+:set ro (Read Only)               : 只读保护
+----------------------------------------
+# Sessions (打开一系列文件)
+gvim file1.c file2.c lib/lib.h lib/lib2.h :在\"session\"中加载一系列文件
+:mksession                        : 生成一个Session文件 (默认是Session.vim)
+:q
+gvim -S Session.vim               : 重新读取一个session，也就读取了所有文件,ft
+----------------------------------------
+# 标记(tags) (跳转到subroutines/functions)
+taglist.vim                       : 最流行的插件
+:Tlist                            : 显示Tags (functions的列表)
+<C-]>                             : 跳转到光标处的function
+                                  : 这个键 Ctrl-] 和vim帮助中是一样的
+----------------------------------------
+# Just Another Vim Hacker JAVH
+# Juat Another Perl Hacker JAPH，嘿嘿
+vim -c \":%s/^/WhfgTNabgureRIvzSUnpxre/|:%s/[R-T]/ /Ig|:normal ggVGg?\"
+# 译释：呵呵，谁来解释一下吧！
+# 其实不过是在启动vim的时候执行了一个命令
+# 先写入了 Just Another Vim Hacker 的rot13编码
+# 然后再解码
+----------------------------------------
+终于翻完了，呵呵。好累啊！

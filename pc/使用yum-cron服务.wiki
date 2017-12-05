@@ -1,0 +1,18 @@
+方法二： 使用yum-cron服务
+
+vim /etc/yum/yum-cron.conf
+vim /etc/cron.daily/0yum-daily.cron 
+systemctl status yum-cron
+
+
+yum-cron会在/etc/cron.daily 目录下生成一个0yum.cron文件,缺省情况下会每天自动更新你的系统。你也可以通过修改/etc/sysconfig/yum-cron来设定自动更新的选项。 这个方法其实和方法一并没有本质的差别。
+缺省情况下，yum-cron一般并没有安装，需要先安装，然后启动服务
+
+yum install yum-cron
+chkconfig --level 345 yum-cron on
+service yum-cron start
+
+你可以修改/etc/sysconfig/yum-cron中的一些设置，
+CHECK_ONLY=no  (如果改成yes，表明只是检查是否有新的更新，并不实际安装）
+DOWNLOAD_ONLY=no  (如果改成yes, 表明检查更新并下载，但并不安装）
+MAILTO= youremailaddress (这个地方要改成你自己的email)

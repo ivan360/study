@@ -1,0 +1,76 @@
+======================================================================
+= samba安装及设置 =
+======================================================================
+== 1. samba安装 ==
+yum -y install samba samba-client
+systemctl list-unit-files | grep smb
+    
+查看文件装载位置
+rpm -ql samba
+rpm -qc samba
+
+== 2. 设置开机自动启动 ==
+chkconfig --level 35 smb on 
+            --- (使smb服务在3、5启动级别时随着系统启动而自动启动)
+chkconfig --level 35 nmb on
+            --- (使nmb服务在3、5启动级别时随着系统启动而自动启动)
+== 3. 防火墙与安全 ==
+[[selinux.and.firewall.set]]
+[[selinux.study]]
+[[samba_selinux]]
+
+#/usr/sbin/setsebool -P allow_smbd_anon_write=1
+#chcon -t public_content_rw_t -R /smbhome/sales
+
+查看目录的selinux策略信息
+# ls -Z -d /smbhome/sales/
+drwxr-xr-x+ root root system_u:object_r:`public_content_rw_t`:s0 /smbhome/sales/
+
+查看一下由samba自动创建的文件的策略信息
+# ls -Z /etc/samba/smb.conf 
+-rw-r--r--. root root system_u:object_r:`samba_etc_t`:s0 /etc/samba/smb.conf
+
+把/home/share_user目录的策略,改变成samba_etc_t..
+# chcon --reference=/etc/samba/smb.conf -R /smbhome/sales/
+
+# ls -Z -d /smbhome/sales/
+drwxr-xr-x+ root root system_u:object_r:`samba_etc_t`:s0 /smbhome/sales/
+
+# ls -Z -d /smbhome/homes/
+drwxr-xr-x. root root system_u:object_r:`samba_etc_t`:s0 /smbhome/homes/
+
+3.1. 关闭防火墙与安全检查
+systemctl stop firewalld.service
+getenforce
+    - Enforcing
+setenforce 0
+
+vim /etc/selinux/config
+    - SELINUX=disabled
+    * 关闭 /boot/grub/menu.lst文件中的SELinux设置
+   
+3.2. 或者添加安全规则
+firewall-cmd --permanent --zone=public --add-service=samba
+chcon -t samba_share_t /myhome          ##/myhome 为目录
+firewall-cmd --reload
+
+== 4.配置smb与启动服务 ==
+4.1. 配置smb.conf
+vim /etc/samba/smb.conf
+    配置文件内容：[[smb.conf]]
+
+4.2. 启动samba服务
+systemctl start smb.service
+systemctl start nmb.service
+
+== 5.验证配置正确与否 ==
+5.1. 验证配置文件
+testparm
+
+5.2. 列出samba所提供的共享文件夹
+smbclient -L 198.168.0.1 -U username%password
+smbclient //192.168.0.1/tmp  -U username%password
+
+5.3. 查看samba用户
+pdbedit -L
+

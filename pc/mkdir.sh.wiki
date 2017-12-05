@@ -1,0 +1,28 @@
+#!/bin/bash
+
+# filename:mkdir.sh
+# 2014/12/22 11:20:31
+
+# 这支程序用来创建新增samba共享目录，功能有：
+# 创建usrname.txt用户组目录，并增加共享目录shares；
+# 修改目录权限
+
+export PATH=/bin:/sbin:/usr/bin:/usr/sbin
+
+#提取用户组名称
+mydirs=$(./check_and_extract.sh "g")
+#mydirs="backs managers offices sales_hf sales_hg services"
+for mydir in $mydirs
+do
+    #创建相应的目录
+    mkdir -p /myhome/{$mydir,shares/$mydir}
+    #修改目录所属用户和组
+    chgrp -R $mydir /myhome/{$mydir,shares/$mydir}
+    #修改目录权限
+    chmod -R 1770 /myhome/$mydir
+    chmod -R 1775 /myhome/shares/$mydir
+    # 显示创建目录
+    ls -dl /myhome/{$mydir,shares/$mydir}
+done
+
+# vim:set ft=sh:

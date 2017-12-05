@@ -1,0 +1,218 @@
+= vim =
+windows7 右键菜单添加用vim编辑
+reg.exe ADD HKEY_CLASSES_ROOT\*\shell\用Vim编辑\Command -d "D:\\Program Files\\Vim\\vim74\\gvim.exe \"%1\""
+D:\\Program Files\\Vim\\vim74\\gvim.exe
+
+[[modeline]]   -- 模式行
+[[foldmethod]] -- 折叠
+[[script]]     -- 脚本
+[[registers]]  -- 寄存器
+[[color]]      -- 高亮
+[[shell]]      -- 外部程序
+[[VimQ1]]      -- 常用命令
+[[vimjq]]      -- 最佳技巧
+每行数字加一
+:%s/\d\+/\=submatch(0)+1/
+:s/替换字符串/、=函数式
+在函数式中可以使用 submatch(1)、submatch(2) 等来引用 /1、/2 等的内容，而submatch(0)可以引用匹配的整个内容。
+[[让vim替代你的手]]
+
+== pathogen.vim 与 vimball ==
+用Vim打开vba文件，然后执行命令：
+`:so %`
+`:RmVimball pluginname`   --卸载vba格式的插件。
+
+  用pathogen来管理vba格式的插件
+`:edit name.vba`
+`:!mkdir $VIM\vimfiles\bundle\name`
+`:UseVimball $VIM\vimfiles\bundle\name`
+    这样，name插件的文件就都被解压到$VIM\vimfiles\bundle\name 目录下，且自动执行了helptags命令。
+
+== 提取小说章节 ==
+`:redir @a`
+`:echo "目录："`
+`:g/^第.\{1,3}章 /echo getline(".") . "\t\t\t" . line(".")`
+`:redir END`
+== 保存VIM的命令输出打印到缓冲区 ==
+    在命令模式下输入
+`:redir @a>`        -- 可以保存接下来的命令输出到寄存器a
+`:redir > filename` -- 可以保存接下来的命令输出到文件filename
+`:redir END`        -- 当打算退出重定向时，可以在命令模式下输入
+    
+    在命令模式下输入
+    :redir @a>
+    可以保存接下来的命令输出到寄存器a
+    :redir > filename
+    可以保存接下来的命令输出到文件filename
+    当打算推出重定向时，可以在命令模式下输入
+    :redir END
+== totalcmd中调用vim打开文件和对比文件 ==
+    1、TC中F4（选项→编辑/查看→设F4调用的程序）为： C:\..\vim\vim73\gvim.exe --remote-silent
+    2、 用vim来增强TC的文件对比 　　｜命令：C:\..\vim\vim73\gvim.exe ｜参数：-d %P%N %T%M 
+
+=== 跳转命令 ===
+:jumps
+--------------------------------
+``
+CTRL + O  -- 向旧的跳转，到上一层
+CTRL + I  -- 向新的跳转，到下一层
+:list     -- 列出当前的调用栈。
+'         -- 跳转前的光标位置
+"         -- 最后编辑的光标位置
+[         -- 最后修改的开始位置
+]         -- 最后修改的结束位置
+m[a-zA-Z] -- 做好标记
+`[a-zA-Z] -- 跳到标记处
+    A-Z   -- 可以在不同文件中设置
+    a-z   -- 只在本文件有效
+    0-9   -- 全局有效，且保存在.viminfo，下次进入vim还能用，不可以手动设定
+          -- 0表示上一次退出时所编辑的文件，1表示上上次。
+          -- 打开vim想快速到上次所编辑的文件里可以通过"0就能“恢复现场”了。
+:marks    -- 取得所有的标记的列表
+ms        -- 标记
+`s        -- 跳转行列
+'s        -- 跳转行
+:map
+--------------------------------
+== 缓冲区跳转 ==
+    在 buffers 中，减号 `-` 表示这个 buffer 并未载入，加号 `+` 表示这个 buffer 已经修改过了。
+    :ls 来显示缓冲区中的文件，或者:buffers
+    `#`代表是前一个文件，可以通过`:e#`来进入，`%a`代表是当前文件，
+    什么也没有的可以通过`:bn`来进入，这里的`n`代表文件编号。
+    可以通过N，Ctrl-^，转到N编号文件
+    在 :ls 中就会出示各文件的编号，这个编号在未离开 vim 前是不会变的。当然 :e#编号 也是可以的，这样的用法则是所有 vi clone 都通用了。
+    :b[p n f l]   []中字母表示previou next first last
+    :e# 或 Ctrl-^   编辑前一个档案，用于两文件互相编辑时相当好用。
+    :n   编辑下一个文件。
+    :2n 编辑下二个文件。
+    :N   编辑前一个文件。注意，这种用法只能用于 argument list 的情形。
+    :rew 回到首文件
+    :args 查看当前编辑缓冲文件状态
+
+* 开启vim时快捷载入上次文本`'0`
+* 重返某文件
+    :oldfiles 显示列表，:e #<2 或者:split #<3 打开文件
+    :browse oldfiles 你可以得到和 |:oldfiles| 相同的文件。如果要编辑 "resume.txt"，先按 "q" 停止列，再输入数字
+* 用vim打开文本乱码问题，主要是文本保持编码格式不一样造成的。
+    解决方式：另存为936格式
+== 3.3 多窗口编辑 ==
+分割窗口
+    水平分割
+       :sp //当前编辑的文件分割一个窗口再打开
+       :spfilename //分割一个窗口出来，打开文件filename
+       :split
+       :new
+    垂直分割
+       :vsplit
+       :vnew
+切换窗口
+    Ctrl-w 上下左右键
+    Ctrl-w h,j,k,l     //h左，j下，k上，l右  //Ctrl按下，按w松开，Ctrl松开，按h
+移动窗口
+    Ctrl-W H,J,K,L     //H左，J下，K上，L右  //锁定CapsLock就可以得到大写
+改变窗口大小
+    水平最大化当前窗口    Ctrl-w Ctrl-- //这个是特殊的：Ctrl按下，按w松开，再按-松开，最后松开Ctrl
+    等分窗口    Ctrl-w =
+    调整窗口大小    Ctrl-w +增加窗口大小一行，Ctrl-w -减少窗口大小一行
+显示命令历史窗口
+    q:或q/，退出:q
+让当前文件占据整个窗口
+    Ctrl-w o
+关闭其中一个(当前)窗口
+    Ctrl-w c  //其实文件还在buffers中
+让用缓冲区的文件来到分割窗口
+    Ctrl-w Ctrl-^  //保持Ctrl按下
+
+[[vim会话]]
+如果在vim中已经打开了好多窗口，想要保持这个环境，等下次编辑浏览时再载入。
+:help mksession         查看mksession的帮助
+:mksession!             保存当前的vim状态，在当前目录会产生一个会话文件Session.vim。
+$ vim -S                vim会自动载入当前目录的会话文件Session.vim，之前:mksession! 保持的状态又回来啦。
+:mksession! work.vim    保存当前的vim状态到会话文件work.vim
+$ vim -S work.vim       vim载入会话文件work.vim，之前:mksession! work.vim保持的状态又回来啦。
+
+也可在vim中手动载入会话:
+:source Session.vim     载入Session.vim保持的状态。
+:source work.vim        载入work.vim保持的状态。
+
+配置自动保存和载入会话
+
+这个配置好后，第一次在要自动保持会话的目录下进入vim，用命令:mksession! project.vim。以后使用直接在当前目录$vim即可。
+
+如果想打开和关闭vim时自动保存和载入会话，可以在配置文件~/.vimrc中加入：
+
+" auto save and load session
+let g:AutoSessionFile="project.vim"
+let g:OrigPWD=getcwd()
+if filereadable(g:AutoSessionFile)
+        if argc()==0
+                au VimEnter * call EnterHandler()
+                au VimLeave * call LeaveHandler()
+        endif
+endif
+function! LeaveHandler()
+        exec "mks! ".g:OrigPWD."/".g:AutoSessionFile
+endfunction
+function! EnterHandler()
+        exe "source ".g:AutoSessionFile
+endfunction
+参考vim中session自动保存及加载
+
+[[Vim技巧]]
+
+[[程序员的Vim]]
+
+== 二、常用编辑命令 ==
+清除空行
+　　v/./d 或者 g/^\s\{0,}$\normal dd
+　　j合并行，合并之后可能要:%s/ //gc
+　　:%s/>\s\{1,6}//gc
+　然后，行首缩进（或tab，或全角2空格）：
+　　贴到bbs或forum之前往往要:%s/^\t/　　/gc
+　　ctrl+q再n个j选中了n行，i两个全角空格esc也较常用
+　　时常要ctrl+s。
+　　输入长单词ctrl-p或ctrl-n。查找/，返回ctrl-o，或用mark。
+　　再打开一个文件，我通常是:vnew, :e 路径可以用tab补全，其实很方便，还可以:e后↑↓。
+　　对于特常用的文件，比如vim-note.ztx，先mn（n代表notes嘛），然后在其他文件中`n就过来了。
+
+== 显示当前文件所在目录或绝对路径? ==
+1        -- 先按下数字 1
+CTRL + G -- 然后按下组合键 CTRL + G
+== 如何快速从正文复制一段字符到Vim命令行 ==
+.从vim中拷贝字符串到:命令行：
+先yank字符串
+然后在:命令行ctrl-r"
+
+2.从其它窗体中拷贝字符串到:命令行：
+先拷贝字符串到系统剪贴板
+然后在:命令行ctrl-r+或者ctrl-r*
+
+3.利用<CTRL-R><CTRL-W>在:命令行补齐：
+先把光标定位到关键词
+然后切换到:命令行按<CTRL-R><CTRL-W>
+
+4.鼠标中键
+拷贝字符串到:命令行，主要是用于执行替换操作（查找有#和*）
+
+== vim缓冲区 ==
+使用:buffers或:ls查看其他位于缓冲区内的文件列表
+:ls 列出所有buff,有4个组成部分：缓冲区编号、文件状态标识、文件名和行号。
+
+切换缓冲区文件有几种方式：
+    通过:buf X（缓冲区编号）切换到对应的文件
+    通过:e #X（缓冲区编号）切换
+    通过:buf filename的方式切换，如果输入文件名，Vim会为你找到最佳匹配。 
+
+:bnext 查看下一个tab
+:sbnext 把上一个buff用新的window打开
+:sbp 把上一个tab的内容用新的window打开
+
+
+% -- 占据当前window的缓冲区（光标焦点所在的缓冲区）。
+a -- 激活了的缓冲区。同时出现在当前window的缓冲区都被标识为a。
+# -- 候选缓冲区。当你用Ctrl-^或:e #时就会切换到它头上
+h -- 隐藏了的缓冲区。
+- -- 不可修改的缓冲区
+= -- 只读缓冲区
++ -- 一个被修改过的缓冲区（还没保存在磁盘）
+x -- 有读错误的缓冲区

@@ -1,0 +1,35 @@
+#!/bin/bash
+# filename:check_and_extract.sh
+#2014/12/24 16:30:50
+# 这支程序用来检查 usernamefile 是否存在，并抽取账号列和用户组列，功能有：
+# 1. 检查usernamefile是否存在；
+# 2. 抽取账号列和用户组列；
+# 3. 判断函数参数；
+
+export PATH=/bin:/sbin:/usr/bin:/usr/sbin
+
+usernamefile="../username.txt"
+# 检查 username.txt 是否存在
+if [ ! -f $usernamefile ]; then
+  echo "所需要的账号文件不存在，请创建 $usernamefile ，每行一个账号名称和组名称,中间空格"
+  exit 1
+fi
+
+case "$1" in
+  "g")
+    grep -v '^$' $usernamefile|tr -d '\r'|expand -t 1|cut -d ' ' -f2|sort|uniq
+    ;;
+  "u")
+    grep -v '^$' $usernamefile|tr -d '\r'|expand -t 1|cut -d ' ' -f1
+    ;;
+  "d")
+    grep -v '^$' $usernamefile|tr -d '\r'|expand -t 1|cut -d ' ' -f2
+    ;;
+  *)
+    exit 1
+    ;;
+esac
+
+exit 0
+
+# vim:set ft=sh:

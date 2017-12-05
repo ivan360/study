@@ -1,0 +1,98 @@
+1，复制模块文件等
+su --输入管理员密码
+
+cp -a /usr/lib/grub/ ./ 制作文件夹到当前目录
+
+mv grub grub2 改名为grub2
+
+grub2/grub.cfg这个是配置文件，可以根据需要更改，最好是改一下
+
+2,制作一个bootcfg的文件
+
+可用vi bootcfg
+
+search -f -n --set=root /grub2/grub.cfg
+
+configfile /grub2/grub.cfg
+
+set color_normal=light-gray/black
+
+set pager=1
+
+按ESC
+
+:wq
+
+也可用gedit bootcfg，最后记得保存就行了
+
+3,定制启动内核
+
+grub-mkimage -d /usr/lib/grub/i386-pc/ -p /grub2/ -c bootcfg -o core.img -O i386-pc biosdisk iso9660 search configfile part_msdos fat ntfs ext2 
+
+-d 指定定制内核时的要用的目录
+
+-p 指定在引导时要用到的目录，包含模块点
+
+-c 指定一些简单配置的文件
+
+-o 输出路径及文件名
+
+-O 指定格式i386-pc biosdisk iso9660指光盘文件系统一定要
+
+4,制作光盘引导文件
+
+cat /usr/lib/grub/i386-pc/cdboot.img core.img >g2ldr
+
+5,制作可启动的iso镜像文件
+
+mkisofs -R -J -v -l -no-emul-boot -boot-info-talbe -boot-load-size 4 -b g2ldr -o ../grub2cd.iso ./
+
+-b 启动文件，它是以后的引导文件，所以前面什么都不用加，不管是什么路径
+
+-o 输入路径及文件名../是上一级目录./是当前目录
+
+注意这里一定要加-no-emul-boot -boot-info-table -boot-load-size 4
+
+grub2可以加载jpg图片为背景,比g4d要漂亮一些,还增加了模块设计,可以加载缷载,还有中文字体
+
+一般配置菜单为grub.cfg
+
+再用buntu1204的版本为例,制作一个可引导启动的iso镜像文件
+
+1，复制模块文件等
+
+su
+
+输入管理员密码
+
+cp -a /usr/lib/grub/ ./ 制作文件夹到当前目录
+
+mv grub grub2
+
+2,制作一个bootcfg的文件
+
+可用vi bootcfg
+
+search -f -n --set=root /grub2/grub.cfg
+
+configfile /grub2/grub.cfg
+
+set color_normal=light-gray/black
+
+set pager=1
+
+按ESC
+
+:wq
+
+3,定制启动内核
+
+grub-mkimage -d /boot/grub/ -p /grub2/ -c bootcfg -o core.img -O i386-pc biosdisk iso9660 search configfile part_msdos fat ntfs ext2 改名为grub2
+
+4,制作光盘引导文件
+
+cat /boot/grub/cdboot.img core.img >g2ldr
+
+5,制作可启动的ISO镜像文件
+
+mkisofs -R -J -l -v -no-emul-boot -boot-info-table -boot-load-size 4 -b g2ldr -o ../grub2cd.iso ./

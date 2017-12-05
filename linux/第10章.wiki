@@ -1,0 +1,436 @@
+= 10.1 网站服务程序 =
+HTTP(超文本传输协议)或HTTPS（超文本安全传输协议）
+
+目前能够提供WEB网络服务的程序有Apache、Nginx或IIS等等
+IIS互联网信息服务(Internet Information Services)，一款图形化的网站管理工具，提供Web网站服务，FTP、NMTP、SMTP等服务功能，只能在Windows系统中使用
+Nginx程序作为一款轻量级的网站服务软件，因其稳定性和丰富的功能而快速占领服务器市场，但最最最被认可的还当属是低系统资源、占用内存少且并发能力强
+
+Apache程序是目前拥有很高市场占有率的Web服务程序之一，其跨平台和安全性广泛被认可且拥有快速、可靠、简单的API扩展
+Apache服务程序可以运行在Linux系统、Unix系统甚至是Windows系统中，支持基于IP、域名及端口号的虚拟主机功能、支持多种HTTP认证方式、集成有代理服务器模块、安全Socket层(SSL)、能够实时监视服务状态与定制日志消息，并有着各类丰富的模块支持。
+
+apache服务的软件包名称叫做httpd
+# yum install httpd
+# systemctl start httpd
+# systemctl enable httpd
+
+= 10.2 配置服务文件参数 =
+
+服务目录       /etc/httpd
+主配置文件     /etc/httpd/conf/httpd.conf
+网站数据目录   /var/www/html
+访问日志       /var/log/httpd/access_log
+错误日志       /var/log/httpd/error_log
+
+httpd服务程序的配置文件内容大致可以分为三个类型：“注释行信息”，“全局配置”，“区域配置”。
+
+ServerRoot       服务目录
+ServerAdmin      管理员邮箱
+User             运行服务的用户
+Group            运行服务的用户组
+ServerName       网站服务器的域名
+`DocumentRoot     网站数据目录`
+Listen           监听的IP地址与端口号
+DirectoryIndex   默认的索引页页面
+ErrorLog         错误日志文件
+CustomLog        访问日志文件
+Timeout          网页超时时间,默认为300秒.
+Include          需要加载的其他文件
+
+DocumentRoot正是用于定义网站数据保存路径的参数
+默认值是将网站数据存放到了/var/www/html目录中，首页名称index.html
+
+# echo "Welcome To LinuxProbe.Com" > /var/www/html/index.html
+
+== 将网站数据目录修改定义为/home/wwwroot目录 ==
+
+1. 第1步:建立网站数据保存目录，并创建网页首页文件：
+
+# mkdir /home/wwwroot
+# echo "The New Web Directory" > /home/wwwroot/index.html
+
+2. 第2步:打开httpd服务程序的主配置文件，修改后记得保存：
+
+# vim /etc/httpd/conf/httpd.conf 
+
+119 DocumentRoot "/home/wwwroot"
+
+124 <Directory "/home/wwwroot">
+125 AllowOverride None
+126 # Allow open access:
+127 Require all granted
+128 </Directory>
+
+3. 第3步:重新启动httpd服务程序后便可验证效果啦
+进一步访问到http://127.0.0.1/index.html 发现
+“Forbidden,You don't have permission to access /index.html on this server.”
+咱们的操作是没有被允许的，而这正是SELinux在“捣乱”
+
+# systemctl restart httpd
+# firefox
+
+= 10.3 SELinux安全子系统 =
+SELinux全称为Security-Enhanced Linux是美国国家安全局在Linux开源社区帮助下开发的一个MAC强制访问控制的安全子系统
+
+对服务进程进行功能限制，SELinux域限制技术让服务程序做不了出格的事情，其次对文件进行资源限制，SELinux安全上下文让文件只能被所属于的服务程序所获取到。
+
+SELinux服务有三种模式分别为
+enforcing  - 安全策略强制启用模式，将会拦截服务的不合法请求
+permissive - 遇到服务越权访问只会发出警告而不强制拦截
+disabled   - 对于越权的行为不警告，也不拦截
+
+# vim /etc/selinux/config
+SELINUX=enforcing
+SELINUXTYPE=targeted
+
+SELinux服务的主配置文件定义的是默认运行状态，系统重启后的状态，并不是当前立即生效的
+获得当前运行模式getenforce命令：
+# getenforce 
+Enforcing
+
+用setenforce [0|1]命令来修改下当前服务的运行模式（0为禁用，1为启用），但这种修改只是临时的，重启后就会失效
+# setenforce 0
+# getenforce
+Permissive
+
+先把SELinux服务恢复到强制启用模式，然后查看原始网站数据目录与当前网站数据目录在SELinux安全上下文值上是否有不同
+
+# setenforce 1
+# ls -Zd /var/www/html
+drwxr-xr-x. root root system_u:object_r:httpd_sys_content_t:s0 /var/www/html
+# ls -Zd /home/wwwroot
+drwxrwxrwx. root root unconfined_u:object_r:home_root_t:s0 /home/wwwroot
+
+SELinux安全上下文是由用户段、角色段以及类型段等等多个信息项目共同组成的
+用户段中system_u代表系统进程身份
+角色段object_r代表文件目录角色
+类型段httpd_sys_content_t代表是网站服务系统文件
+
+`semanage命令用于查询与修改SELinux的安全上下文，格式为：“semanage [选项] [文件]”`
+semanage命令不仅能够像传统chcon命令一样对文件、目录进行策略设置，而且还能够对网络端口、消息接口等等进行管理
+
+# yum -y install policycoreutils-python
+
+比如-l参数用于查询、-a参数用于添加、-m参数用于修改、-d参数用于删除等等
+向新的网站数据目录中新增加一条SELinux安全上下文，让这个目录以及里面的所有文件能够被httpd服务程序所获取到
+
+# semanage fcontext -a -t httpd_sys_content_t /home/wwwroot
+# semanage fcontext -a -t httpd_sys_content_t /home/wwwroot/*
+
+不过仅仅是这样设置完还不能让网站立即恢复访问
+`使用restorecon命令来让刚刚设置的SELinux安全上下文立即生效`
+可以加上-Rv参数指定进行对目录的递归操作以及显示SELinux安全上下文的修改过程
+
+# restorecon -Rv /home/wwwroot/
+
+= 10.4 个人用户主页功能 =
+如果您只是想为每位用户建立独立的网站，不妨试试httpd服务程序提供的个人用户主机功能
+这项功能可以让系统内所有的用户在自己的家目录中管理个人的网站，访问起来也非常容易
+
+1. 第1步:httpd服务程序中的个人用户主页功能默认是没有被开启的，咱们需要编辑下面的配置文件
+# vim /etc/httpd/conf.d/userdir.conf 
+
+第17行左右的UserDir disabled参数前面加上#（井号），开启个人用户主页功能
+23行左右的UserDir public_html参数前面的#（井号）去掉，该参数代表网站数据在用户家目录中的保存目录名称(即public_html目录)
+
+2. 第2步:在用户家目录中建立目录及首页文件，将家目录的权限修改为755，保证其他人可以有权限读取里面的网页内容
+
+# su - linuxprobe
+$ mkdir public_html
+$ echo "This is linuxprobe's website" > public_html/index.html
+$ chmod -Rf 755 /home/linuxprobe
+
+3. 第3步:重新启动httpd服务程序，浏览器中输入网址后加上~用户名，报错页面一定是SELinux“捣鬼”
+
+4. 第4步:httpd服务程序提供个人用户主页功能的网站数据目录本身，对于SELinux安全上下文是不需要修改
+但除此之外还有个Linux域，这个是负责管理让服务程序不能做违规的动作
+用getsebool命令来查询并过滤出所有跟http服务相关的安全策略
+off为禁止状态，on为允许状态：
+
+# getsebool -a | grep http
+httpd_enable_homedirs --> off
+
+用到的SELinux策略应该是httpd_enable_homedirs吧？用setsebool命令来修改SELinux策略中各项规则的布尔值了
+一定要加上-P参数让修改过后的SELinux布尔值策略项目永久生效
+
+# setsebool -P httpd_enable_homedirs=on
+
+== 只想让部分读者看到里面的内容,可以加上口令验证功能，给网页内容增加一道安全防护。 ==
+
+第1步咱们需要先用htpasswd命令来生成密码数据库
+-c参数代表第一次生成的意思，后面再分别追加上要生成到那个文件中，以及验证要用到的用户名称即可（该用户不必是系统中已有的帐户）
+
+# htpasswd -c /etc/httpd/passwd linuxprobe
+
+第2步:编辑一下个人用户主页功能的配置文件
+# vim /etc/httpd/conf.d/userdir.conf
+
+<Directory "/home/*/public_html">
+ AllowOverride all
+#刚刚生成出来的密码验证文件保存路径
+ authuserfile "/etc/httpd/passwd"
+#当用户尝试访问个人用户网站时的提示信息
+ authname "My privately website"
+ authtype basic
+#用户进行帐号口令登陆时需要验证的用户名称
+ require user linuxprobe
+</Directory>
+
+# systemctl restart httpd
+
+此时用户再想访问某个用户的个人网站时，就必须输入密码
+另外验证时候的帐号和密码是用htpasswd命令生成的专门用于网站登陆的口令密码
+而不是咱们系统中的用户密码
+
+= 10.5 虚拟网站主机功能 =
+虚拟主机就是将一台运行着的物理服务器上面分割出多个“虚拟的服务器”
+但这项技术不能够实现目前云主机技术的硬件资源隔离，而是让这些网站共同使用服务器的硬件资源
+Apache的虚拟主机功能是服务器基于用户请求的不同IP地址、主机域名或端口号实现提供多个网站同时为外部提供访问服务的技术
+
+== 10.5.1 基于IP地址 ==
+先配置三个IP地址，并保证均可正常访问
+
+1. 第1步:分别在/home/wwwroot中创建三个用于保存不同网站数据的目录，并分别写入网站的首页文件
+
+# mkdir -p /home/wwwroot/10
+# mkdir -p /home/wwwroot/20
+# mkdir -p /home/wwwroot/30
+# echo "IP:192.168.10.10" > /home/wwwroot/10/index.html
+# echo "IP:192.168.10.20" > /home/wwwroot/20/index.html
+# echo "IP:192.168.10.30" > /home/wwwroot/30/index.html
+
+2. 第2步:在httpd服务的配置文件中大约113行处
+分别追加写入三个基于IP地址的虚拟主机网站参数，保存退出文件后重启httpd服务
+
+# vim /etc/httpd/conf/httpd.conf
+
+<VirtualHost 192.168.10.10>
+DocumentRoot /home/wwwroot/10
+ServerName www.linuxprobe.com
+<Directory /home/wwwroot/10 >
+AllowOverride None
+Require all granted
+</Directory>
+</VirtualHost>
+
+<VirtualHost 192.168.10.20>
+DocumentRoot /home/wwwroot/20
+ServerName bbs.linuxprobe.com
+<Directory /home/wwwroot/20 >
+AllowOverride None
+Require all granted
+</Directory>
+</VirtualHost>
+
+<VirtualHost 192.168.10.30>
+DocumentRoot /home/wwwroot/30
+ServerName tech.linuxprobe.com
+<Directory /home/wwwroot/30 >
+AllowOverride None
+Require all granted
+</Directory>
+</VirtualHost>
+
+# systemctl restart httpd
+
+3. 第3步:此时同学们尝试访问网站会看到默认页面，那么思考一下很快就会反应过来还是SELinux在“捣乱”吧
+由于当前的/home/wwwroot目录及里面的网站数据目录的SELinux安全上下文与网站服务不吻合
+手动将新的网站数据目录的SELinux安全上下文设置好，最后使用restorecon命令让新设置立即生效
+
+# semanage fcontext -a -t httpd_sys_content_t /home/wwwroot
+# semanage fcontext -a -t httpd_sys_content_t /home/wwwroot/10
+# semanage fcontext -a -t httpd_sys_content_t /home/wwwroot/10/*
+# semanage fcontext -a -t httpd_sys_content_t /home/wwwroot/20
+# semanage fcontext -a -t httpd_sys_content_t /home/wwwroot/20/*
+# semanage fcontext -a -t httpd_sys_content_t /home/wwwroot/30
+# semanage fcontext -a -t httpd_sys_content_t /home/wwwroot/30/*
+# restorecon -Rv /home/wwwroot
+
+== 10.5.2 基于主机域名 ==
+当前还没有学习过配置DNS解析服务，通过手工定义下IP地址与域名的对应关系
+/etc/hosts文件是Linux系统的配置文件，它用于强制将某个主机域名解析到指定的IP地址上面
+简单来说，只要咱们配置了这个文件，即便网卡参数中没有DNS参数信息也依然能够将域名网址解析到某个IP地址上面
+
+
+1. 第1步:手工定义IP地址与域名网址的对应关系文件，保存退出后会立即生效
+
+# vim /etc/hosts
+192.168.10.10 www.linuxprobe.com bbs.linuxprobe.com tech.linuxprobe.com
+
+# ping -c 4 www.linuxprobe.com
+
+2. 第2步:分别在/home/wwwroot中创建三个用于保存不同网站数据的目录
+并向其中分别写入网站的首页文件，每个首页文件中应有明确区分不同网站内容的字样信息
+
+# mkdir -p /home/wwwroot/www
+# mkdir -p /home/wwwroot/bbs
+# mkdir -p /home/wwwroot/tech
+
+# echo "WWW.linuxprobe.com" > /home/wwwroot/www/index.html
+# echo "BBS.linuxprobe.com" > /home/wwwroot/bbs/index.html
+# echo "TECH.linuxprobe.com" > /home/wwwroot/tech/index.html
+
+
+3. 第3步:在httpd服务的配置文件中大约113行处
+分别追加写入三个基于IP地址的虚拟主机网站参数，保存退出文件后记得要重启httpd服务
+
+# vim /etc/httpd/conf/httpd.conf
+
+<VirtualHost 192.168.10.10>
+DocumentRoot "/home/wwwroot/www"
+ServerName "www.linuxprobe.com"
+<Directory "/home/wwwroot/www">
+AllowOverride None
+Require all granted
+</directory>
+
+</VirtualHost>
+<VirtualHost 192.168.10.10>
+DocumentRoot "/home/wwwroot/bbs"
+ServerName "bbs.linuxprobe.com"
+<Directory "/home/wwwroot/bbs">
+AllowOverride None
+Require all granted
+</Directory>
+
+</VirtualHost>
+<VirtualHost 192.168.10.10>
+DocumentRoot "/home/wwwroot/tech"
+ServerName "tech.linuxprobe.com"
+<Directory "/home/wwwroot/tech">
+AllowOverride None
+Require all granted
+</directory>
+</VirtualHost>
+
+4. 第4步:因为咱们当前的网站数据目录还是在/home/wwwroot中，因此还是必须要把网站数据目录文件上面的SELinux安全上下文设置好
+让文件上面的SELinux安全上下文与网站服务功能相吻合
+最后用restorecon命令让新配置的SELinux安全上下文立即生效
+
+# semanage fcontext -a -t httpd_sys_content_t /home/wwwroot
+# semanage fcontext -a -t httpd_sys_content_t /home/wwwroot/www
+# semanage fcontext -a -t httpd_sys_content_t /home/wwwroot/www/*
+# semanage fcontext -a -t httpd_sys_content_t /home/wwwroot/bbs
+# semanage fcontext -a -t httpd_sys_content_t /home/wwwroot/bbs/*
+# semanage fcontext -a -t httpd_sys_content_t /home/wwwroot/tech
+# semanage fcontext -a -t httpd_sys_content_t /home/wwwroot/tech/*
+# restorecon -Rv /home/wwwroot
+
+== 10.5.3 基于端口号 ==
+
+基于端口号的虚拟主机功能可以让用户通过访问服务器上面指定的端口号来找到想要访问的网站资源
+而用apache配置虚拟主机功能中最复杂的也莫过于是基于端口号的了
+因为不光考虑httpd服务程序的配置因素，还需考虑SELinux服务对于新开设端口号的监控
+占用服务器中80、443、8080类似的端口号是网站服务比较合理的请求，但再去占用其他的端口号就会遭受到SELinux服务的限制了
+因此咱们接下来的实验中既要考虑到文件上面SELinux安全上下文的限制，还要考虑到SELinux域对httpd网站服务程序功能的管控。
+
+
+1. 第1步:分别在/home/wwwroot中创建两个用于保存不同网站数据的目录
+并向其中分别写入网站的首页文件，每个首页文件中应有明确区分不同网站内容的字样信息
+
+# mkdir -p /home/wwwroot/6111
+# mkdir -p /home/wwwroot/6222
+# echo "port:6111" > /home/wwwroot/6111/index.html
+# echo "port:6222" > /home/wwwroot/6222/index.html
+
+2. 第2步:在httpd服务的配置文件中大约43行后追加上监听6111和6222端口号的参数：
+
+# vim /etc/httpd/conf/httpd.conf 
+ 42 Listen 80
+ 43 Listen 6111
+ 44 Listen 6222
+
+3. 第3步:在httpd服务的配置文件中大约114行处
+分别追加写入三个基于IP地址的虚拟主机网站参数，保存退出文件后记得要重启httpd服务
+
+# vim /etc/httpd/conf/httpd.conf
+
+<VirtualHost 192.168.10.10:6111>
+DocumentRoot "/home/wwwroot/6111"
+ServerName www.linuxprobe.com
+<Directory "/home/wwwroot/6111">
+AllowOverride None
+Require all granted
+</Directory>
+</VirtualHost>
+
+<VirtualHost 192.168.10.10:6222>
+DocumentRoot "/home/wwwroot/6222"
+ServerName bbs.linuxprobe.com
+<Directory "/home/wwwroot/6222">
+AllowOverride None
+Require all granted
+</Directory>
+</VirtualHost>
+
+4. 第4步:还是因为咱们将网站数据目录存放在了/home/wwwroot中，因此还是必须要把网站数据目录文件上面的SELinux安全上下文设置好
+让文件上面的SELinux安全上下文与网站服务功能相吻合，最后用restorecon命令让新配置的SELinux安全上下文立即生效
+
+# semanage fcontext -a -t httpd_user_content_t /home/wwwroot
+# semanage fcontext -a -t httpd_user_content_t /home/wwwroot/6111
+# semanage fcontext -a -t httpd_user_content_t /home/wwwroot/6111/*
+# semanage fcontext -a -t httpd_user_content_t /home/wwwroot/6222
+# semanage fcontext -a -t httpd_user_content_t /home/wwwroot/6222/*
+# restorecon -Rv /home/wwwroot/
+
+
+重启服务为什么会竟然出现报错信息呢
+这是因为SELinux服务检测到6111和6222端口原本不属于apache的服务资源
+用semanage命令查询并过滤出所有与http协议相关的端口号SElinux允许列表：
+
+# semanage port -l| grep http
+http_cache_port_t tcp 8080, 8118, 8123, 10001-10010
+http_cache_port_t udp 3130
+http_port_t tcp 80, 81, 443, 488, 8008, 8009, 8443, 9000
+pegasus_http_port_t tcp 5988
+pegasus_https_port_t tcp 5989
+
+
+5. 第5步:SELinux允许http协议使用的端口号中默认没有包含咱们的6111和6222
+需要手动的添加，操作会立即生效，且重启过后依然有效，设置后再重启一下httpd服务程序就可
+
+# semanage port -a -t http_port_t -p tcp 6111
+# semanage port -a -t http_port_t -p tcp 6222
+# semanage port -l| grep http
+http_port_t tcp  6222, 6111, 80, 81, 443, 488, 8008, 8009, 8443, 9000
+
+# systemctl restart httpd
+
+= 10.6 Apache的访问控制 =
+网站访问控制是可以基于来源主机名、IP地址或客户端浏览器特征等信息元素进行的网页资源控制
+通过Allow或Deny指令实现允许或禁止某个主机访问咱们的服务器网站资源
+其中Order指令用于定义Allow或Deny指令起作用的顺序，匹配原则是按顺序匹配规则并执行
+若为匹配成功则执行后面的默认指令，比如说Order Allow,Deny代表先将客户端与允许规则进行对比，若匹配成功则允许请求，否则拒绝访问请求
+
+1. 第1步:例如咱们可以先在服务端网站数据目录中新建一个子目录，并向目录中写入一段内容的网页文件：
+
+# mkdir /var/www/html/server
+# echo "Successful" > /var/www/html/server/index.html
+
+2. 第2步:打开httpd服务程序的配置文件找到大约第129行左右
+追加以下限制客户端访问的规则，含义是匹配所有浏览器为火狐（Firefox）的主机并允许他们访问
+而除此之外的所有用户请求都将被拒绝
+
+# vim /etc/httpd/conf/httpd.conf
+
+<Directory "/var/www/html/server">
+ SetEnvIf User-Agent "Firefox" ff=1
+ Order allow,deny
+ Allow from env=ff
+ </Directory>
+
+# systemctl restart httpd
+
+除了匹配客户端的浏览器标识，咱们还可以通过匹配客户端的来源IP地址进行访问控制
+例如咱们想只允许来自于192.168.10.20的主机访问咱们的网站资源
+将刚刚的参数修改成如下，重启httpd服务程序后再用本机（服务端IP地址为192.168.10.10）来访问会提示访问被拒绝
+
+# vim /etc/httpd/conf/httpd.conf
+
+<Directory "/var/www/html/server">
+ Order allow,deny  
+ Allow from 192.168.10.20
+ Order allow,deny
+ Allow from env=ie
+</Directory>
+
+# systemctl restart httpd

@@ -1,0 +1,73 @@
+
+
+开启搜索小窗口
+
+:se wildmenu
+
+效果如下图。可以在键入文件时提示包含输入字符的文件，通过Tab或左右键选择文件。
+vim wildmenu
+
+转义HTML字符（注意用\&gt，而不是&gt）：
+
+:s/>/\&gt;/g
+
+删除HTML标签
+
+:%s/<[^>]*>//g
+
+删除空白行
+
+:g/^$/d
+
+删除每行结尾的所有空格
+
+:%s/\ *$//g
+
+Linux下删除^M（^M的输入方式是Ctrl-v Ctrl-m）
+
+:%s/^M//g
+
+Windows下删除^M
+
+:%s/\r/\r/g
+
+删除^@
+
+:%s/\%x00//g
+
+替换字符串使用 :s/old/new 的方法，但如果字符串中有 / ，就需要对其进行转义，如 :s/\/old/\/new 。但可以重定义 :s 的界定符，来简化输入，例如把 /docs/2.2 修改为 /docs/2.3 ：
+
+:%s#/docs/2.2#/docs/2.3#
+
+合并两行用J，但会有一个空格，要消除合并后的空格，用gJ。
+
+使用gg=G格式化代码。
+
+使用跳转到上一个函数开始处，使用跳转到下一个函数开始处。
+paste
+
+粘贴代码到Vim中，会出现混乱的缩进，可以开启粘贴模式：
+
+:se paste
+
+粘贴模式一开，Vim的自动换行缩进功能就会失效，这时需要用
+
+:se nopaste
+:se ai
+
+关闭粘贴模式，并开启自动缩进。
+history
+
+查看命令历史的几种方法
+
+:history
+q:          # 在底部打开一个小窗口显示Vim的命令历史
+
+session
+
+保存和加载工作环境。在Vim中有所谓session，其实是Vim脚本，用:mks保存当前session，用:so sessionfile加载session，还原工作环境。如果不指定session名，则在当前路径下保存一个名为Session.vim的脚本。如果session文件存在，:mks会报错，因此需要用:mks!
+
+:mks!
+:so Session.vim
+
+对应session的加载，可以在命令直接启用vim -S Session.vim。更简便的是可以用vim -S，Vim会搜索当前路径下的Session.vim并加载（找不到则会报错）。

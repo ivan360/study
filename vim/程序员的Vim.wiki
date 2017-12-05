@@ -1,0 +1,34 @@
+
+通用技巧
+
+在最近访问的两个文件间跳转：Ctrl-^ （所谓的Ctrl-6）。
+
+通过 gf 打开一个文件。例如：
+#include <file.h>
+
+将光标移动到file.h，输入 gf ，即可打开file.h。
+PHP程序
+
+我的一个PHP项目部署：
+
++ project
+    + htdocs
+        - x.php
+    + templates
+        - x.tpl
+
+使用了Smarty，一个.php对应一个.tpl，经常需要在两者之间跳转。在~/.vimrc配置：
+
+nmap ,t :find ./templates/%:t:r.tpl
+nmap ,p :find ./htdocs/%:t:r.php
+
+在Normal状态输入,t跳转到.tpl文件，输入,p跳转到.php文件。注意，我总是在./project路径下启动Vim，因此~/.vimrc中使用了相对路径。
+写文档，加行号
+
+用Vim写技术文档，有时需要附加代码，并为代码加行号（如果输出是HTML，可以利用JavaScript动态添加行号）。
+
+方法1：添加行号
+
+:%s/^/\=printf('%3d  ', line('.'))
+
+^匹配每行的开始。\=是表达式的运算结果（这里即printf的输出）。line('.')即当前行自身。

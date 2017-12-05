@@ -1,0 +1,4 @@
+1 建立连接
+mkdir /home/ivan/mysmb/lizx 
+mount.cifs //10.200.55.25/lizx /home/ivan/mysmb/lizx/ -o username=lizx,password=lizhx123
+mount.cifs //10.200.55.25/部门共享 /home/ivan/mysmb/nongh/ -o username=lizx,password=lizhx123

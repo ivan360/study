@@ -1,0 +1,32 @@
+
+ctags是一个用来产生代码索引文件的插件，支持很多语言。
+
+可以用Ctrl-]命令跳转到函数的定义处，也可以用命令来搜索函数的定义，非常好用。
+
+安装ctags
+    如果没有安装ctags，fedora的shell下可以用 # yum -y install ctags安装。
+
+创建tags文件
+   shell下，在需要创建tags文件的目录下用 $ ctags -R，那么整个目录下的函数，宏，变量，类，结构等都加上了tags。
+
+使用ctags
+   按键跳转Ctrl-],Ctrl-t,Ctrl-o
+      在创建tags文件的目录下，用vim打开的文件中，光标移到一个被调用的函数名上，按Ctrl-]就会自动跳转到该函数的定义处，Ctrl-t返回。
+
+   命令跳转 :tags  functionname
+      在用vim打开的文件中，用命令:tags  functionname。:ta functionname
+
+   打开时搜索并跳转
+      vim -t functionname
+
+   多个匹配tags时跳转
+
+
+ctags简易的使用说明，这儿以Windows下的MinGW为例
+
+首先确保系统能够找到 ctags，也就是 ctags 添加到了系统环境变量
+以 MinGW 为例，到编译器安装目录的 include 目录上（譬如 D:\MinGW\include ）执行命令 ctags -R --languages=c,c++
+在 _vimrc 文件中添加两行 set tags+=D:/MinGW/include/tags、set path+=D:/MinGW/include
+以后编辑 C/C++ 源文件时，键入一小部分字符，然后按 Ctrl+P 即可拥有 C/C++ 的代码补全
+将光标移到某个函数名上，按 Ctrl+]，Vim 将自动跳转到该函数的定义，按 Ctrl+T 可返回跳转之前的位置
+

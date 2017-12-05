@@ -1,0 +1,6 @@
+[[pc/pc.study]]
+[[linux/linux就该这么学]]
+[[grub/grub]]
+[[wiki/wiki]]
+[[高效演讲]]
+[[正念的奇迹]]

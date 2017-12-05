@@ -1,0 +1,117 @@
+
+3. 映射 vimwiki-mappings
+
+下面是 vimwiki 的全局和局部映射。
+
+------------------------------------------------------------------------------
+
+3.1. 全局映射 vimwiki-global-mappings
+
+                              -- 从|g:vimwiki_list|
+[count]<Leader>ww             -- 打开第 [count] 个 wiki 索引文件                 -- <Plug>VimwikiIndex
+[count]<Leader>wt             -- 在新标签页中打开第 [count] 个 wiki 索引文件     -- <Plug>VimwikiTabIndex
+<Leader>ws                    -- 列出可选择的 wiki 列表                          -- <Plug>VimwikiUISelect
+[count]<Leader>w<Leader>w     -- 打开今天第 [count] 个 wiki 日记文件             -- <Plug>VimwikiMakeDiaryNote
+[count]<Leader>w<Leader>t     -- 在新标签页中打开今天第 [count] 个 wiki 日记文件 -- <Plug>VimwikiTabMakeDiaryNote
+\wi                           -- 跳转到diary.wiki页面下.
+\w\i                          -- 根据目前的日记情况,自动重新生成diary.wiki文件.
+
+
+------------------------------------------------------------------------------
+3.2. 局部映射（本地映射）
+
+NORMAL MODE vimwiki-local-mappings (普通模式)
+
+<CR>        -- 打开/创建 Wiki 词条，              -- <Plug>VimwikiFollowLink
+<S-CR>      -- 横向分栏窗口中打开/创建 Wiki 词条  -- <Plug>VimwikiSplitLink
+<C-CR>      -- 纵向分栏窗口中打开/创建 Wiki 词条  -- <Plug>VimwikiVSplitLink
+<Backspace> -- 回到上一个 Wiki 词条               -- <Plug>VimwikiGoBackLink
+<Tab>       -- 寻找并将光标定位到下一个 Wiki 词条 -- <Plug>VimwikiNextLink
+<S-Tab>     -- 寻找并将光标定位到上一个 Wiki 词条 -- <Plug>VimwikiPrevLink
+<Leader>wd  -- 删除光标所在的 Wiki 词条           -- <Plug>VimwikiDeleteLink
+<Leader>wr  -- 重命名光标所在的 Wiki 词条         -- <Plug>VimwikiRenameLink
+<C-Space>   -- 切换列表项的开关（选中/反选）      -- <Plug>VimwikiToggleListItem
+
+=           -- 增加标题级别，如果需要则创建标题   -- vimwiki_=
+-           -- 降低标题级别                       -- vimwiki_-
+gqq         -- 格式化表格                         -- vimwiki_gqq vimwiki_gww
+<A-Left>    -- 向左移动表格的当前列               -- vimwiki_<A-Left>
+<A-Right>   -- 向右移动表格当前列                 -- vimwiki_<A-Right>
+<C-Up>      -- 如果可以，打开上一个日记词条       -- vimwiki_<C-Up>
+<C-Down>    -- 如果可以，打开下一个日记词条       -- vimwiki_<C-Down>
+
+
+仅在 |g:vimwiki_use_mouse| 设置为 1 的情况下有效。
+<2-LeftMouse>           -- 双击鼠标打开/创建 Wiki 词条。
+<S-2-LeftMouse>         -- 横向分栏窗口中打开/创建 Wiki 词条。
+<C-2-LeftMouse>         -- 纵向分栏窗口中打开/创建 Wiki 词条。
+<RightMouse><LeftMouse> -- 返回到上一个 Wiki 词条。
+Note: <2-LeftMouse> 即仅双击左键。
+
+
+INSERT MODE vimwiki-table-mappings (插入模式)
+<CR>   -- 转到表格单元格的下一行，如果在最后一行则创建一行       -- vimwiki_i_<CR>
+<Tab>  -- 转到下一个表格单元格，如果在最后一个单元格，则创建一行 -- vimwiki_i_<Tab>
+<S-CR> -- 插入 <br /> 并回车换行                                 -- vimwiki_i_<S-CR>
+
+
+------------------------------------------------------------------------------
+3.3. 文本对象 vimwiki-text-objects
+
+ah  -- 一个包含前置空行的标题。
+ih  -- 一个不包含前置空行的标题内部。
+vah -- 选择
+dah -- 删除
+yah -- 复制
+cah -- 修改
+a\  -- 表格中的一整个单元格（包括单元格边框）。
+i\  -- 表格单元格内部。
+ac  -- 表格的一列（包括单元格边框）。
+ic  -- 表格单元格内部。
+
+==============================================================================
+4. 命令 vimwiki-commands
+
+------------------------------------------------------------------------------
+4.1. 全局命令 vimwiki-global-commands
+
+:VimwikiIndex            -- 打开当前 wiki 的索引文件。
+:VimwikiTabIndex         -- 在新标签页中打开当前 wiki 的索引文件。
+:VimwikiUISelect         -- 打开所选择的 wiki 索引文件。
+:VimwikiMakeDiaryNote    -- 打开当前 wiki 中今天的 wiki 日记文件。
+:VimwikiTabMakeDiaryNote -- 在新标签页中打开当前 wiki 中今天的 wiki 日志文件。
+
+------------------------------------------------------------------------------
+4.2. 局部命令 vimwiki-local-commands
+
+:VimwikiFollowLink           -- 打开/创建 Wiki 词条。
+:VimwikiGoBackLink           -- 返回到跳转过来的上一个 Wiki 词条。
+:VimwikiSplitLink            -- 在纵向分栏窗口中打开/创建 Wiki 词条。
+:VimwikiVSplitLink           -- 在横向分栏窗口中打开/创建 Wiki 词条。
+:VimwikiNextLink             -- 寻找并将光标定位到下一个 Wiki 词条。
+:VimwikiPrevLink             -- 寻找并将光标定位到上一个 Wiki 词条。
+:VimwikiGoto                 -- 跳转到指定词条
+:VimwikiDeleteLink           -- 删除当前所在的 Wiki 词条。
+:VimwikiRenameLink           -- 重命名当前所在的 Wiki 词条。
+:Vimwiki2HTML                -- 将当前所在的 wiki 页面转换成 HTML 页面。
+:VimwikiAll2HTML             -- 将所有的 wiki 页面转换成 HTML。
+:VimwikiToggleListItem       -- 切换列表项的开关（选中/反选）
+
+:VimwikiSearch /pattern/     -- 在当前 wiki 中搜索 /pattern/。
+:VWS /pattern                -- 同上
+:cnext                       -- 命令显示下一个匹配项。
+:cprevious                   -- 命令显示上一个匹配项。
+
+:VimwikiTable                -- 创建一个 5 列 2 行的表格。
+:VimwikiTable cols rows      -- 创建一个指定列数和行数的表格。
+:VimwikiTable cols           -- 创建一个指定列数和 2 行的表格。
+
+:VimwikiTableMoveColumnLef   -- 向左移动当前列
+:VimwikiTableMoveColumnRight -- 向右移动当前列
+
+:VimwikiGenerateLinks        -- 插入所有可用的词条到当前缓冲区。
+:VimwikiDiaryNextDay         -- 如果可以，打开下一个日记词条。
+:VimwikiDiaryPrevDay         -- 如果可以，打开上一个日记词条。
+
+
+ vim:ft=txt:

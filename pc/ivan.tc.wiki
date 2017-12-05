@@ -1,0 +1,25 @@
+以官方文件为底稿进行改造
+
+totalcmd CCF
+快捷键
+图标
+注册文件
+[[tc.ini]]
+修改配置文档
+
+universal viewer
+tcmatch
+viATC
+
+plugins
+wcx\
+    Total7zip\
+wdx\
+    AnyTag\
+    CDocProp\
+    WDXforImages\
+wlx\
+    Fileinfo\
+    Imagine\
+    ULister\
+    Visualdirsize\

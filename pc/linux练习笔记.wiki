@@ -1,0 +1,46 @@
+一、文件和目录操作
+pwd
+ls
+ls -a
+ls -al
+touch
+mkdir
+cd
+mv
+ls -l
+cp
+echo
+
+df
+df -h
+df -H
+du
+du -h
+cat
+less
+head
+tail
+
+二、用户信息
+useradd
+passwd
+
+whoami
+groups
+id
+
+users
+who
+w
+
+id
+pwd
+su -
+su
+
+三、linux文件系统的要点
+ls -i
+stat
+ln
+ln -s
+

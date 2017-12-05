@@ -1,0 +1,48 @@
+
+= 1.建立目录挂载安装盘 =
+mkdir /mnt/centos_dvd
+mount –o loop –t iso9660 CentOS-6.0-i386-bin-DVD.iso /mnt/centos_dvd
+2、复制所有光盘软件
+mkdir /usr/softserver
+cp -rvf /mnt/centos_dvd/* /usr/softserver
+
+= 方法一： =
+1、编辑repo文件
+cd /etc/yum.repos.d/
+rm -f ./*
+vi local.repo
+
+[local_server](库名称)
+name=Thisis a local repo （名称描述）
+baseurl=file:///media/dvd(yum源目录，源地址)
+enabled=1（是否启用该yum源，0为禁用）
+gpgcheck=1  （检查GPG-KEY，0为不检查，1为检查）
+gpgkey=file:///etc/pki/rpm-gpg/RPM-GPG-KEY-CentOS-6（gpgcheck=0时无需配置）
+保存退出！
+
+= 方法二：使用createrepo命令创建yum仓库 =
+
+1.将所有rpm文件拷贝到一个文件夹中 cp -rv /media/光盘/Packs/*  /所建立的文件夹
+2.通过rpm命令手动安装createrepo命令创建yum仓库 rpm -ivh createrepo
+3.运行命令createrepo -v /rpm-directory
+4.如果有分组信息，则在运行命令的时候使用-g参数置顶分组文件
+makedir /localserver （建立本地文件夹）
+mount /dev/cdrom  /media/cdrom
+cp -rv /media/cdrom/光盘/Packs/*  /localserver
+cd /localserver
+rpm -ivh createrepo (若提示需要安装依赖包，根据提示安装即可）
+createrepo -v /localserver/ (创建索引信息，repodate）
+
+如若需要分组信息
+cp /media/cdrom/光盘/repodate/*.comp /comps.xml
+createrepo -g /comps.xml  /localserver (开始创建分组信息）
+
+然后编辑repo文件（同方法一编辑方法相同）
+
+= 后续工作 =
+
+yum repolist all （查看）
+yum clean all (清除缓存)
+yum makecache (建立新缓存)
+
+

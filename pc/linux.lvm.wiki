@@ -1,0 +1,93 @@
+在CentOS/RHEL 7上如何借助系统存储管理器管理LVM卷？
+
+最新版本的CentOS/RHEL 7现在随带系统存储管理器（又叫ssm），这是一种统一的命令行界面，由红帽公司开发，用于管理各种各样的存储设备。目前，有三种可供ssm使用的卷管理后端：LVM、Btrfs和Crypt。
+
+我在本教程中将演示如何借助ssm管理LVM卷。你会惊讶地发现，创建和管理LVM卷原来是多么简单的事。
+
+准备ssm
+
+在新的CentOS/RHEL 7上，你需要首先安装系统存储管理器。
+
+    $ sudo yum install system-storage-manager 
+
+首先，不妨检查关于可用硬驱和LVM卷的信息。下面这个命令将显示关于现有磁盘存储设备、存储池、LVM卷和存储快照的信息。输出结果来自新安装的CentOS 7，它在默认情况下使用了LVM和XFS文件系统。
+
+    $ sudo ssm list 
+
+在这个例子中，有两个物理设备（“/dev/sda”和“/dev/sdb”）、一个存储池（“centos”）,以及存储池中创建的两个LVM卷（“dev/centos/root”和“/dev/centos/swap”）。
+
+将物理磁盘添加到LVM池
+
+不妨将一个新的物理磁盘（比如/dev/sdb）添加到现有的存储池（比如centos）。将新的物理磁盘添加到现有存储池的命令如下：
+
+    $ sudo ssm add -p <pool-name> <device> 
+
+ 
+
+新设备添加到存储池后，存储池会自动自动扩大，扩大多少取决于设备的大小。检查名为centos的存储池的大小，如下所示。
+
+正如你所见，centos存储池已成功地由7.5GB扩大到8.5GB。不过，眼下，位于存储池中的磁盘卷（比如/dev/centos/root和/dev/centos/swap）并没有使用变大的空间。为此，我们需要扩大现有的LVM卷。
+
+扩大LVM卷
+
+如果你在存储池中有额外空间，可以扩大存储池中现有的磁盘卷。为此，使用ssm命令的resize选项。
+
+    $ sudo ssm resize -s [size] [volume] 
+
+不妨将/dev/centos/root卷的大小增加500MB。
+
+    $ sudo ssm resize -s+500M /dev/centos/root 
+
+核实现有卷增加后的大小。
+
+    $ sudo ssm list volumes 
+
+我们可以核实，/dev/centos/root卷的大小已从6.7GB增加到了7.2GB。不过，这并不意味着你立即就可以使用在卷中创建的文件系统里面的额外空间。你会发现，文件系统大小（“FS size”）仍然是6.7GB。
+
+为了让文件系统识别增加后的卷大小，你需要“扩大”现有的文件系统本身。有不同的工具可用来扩大现有的文件系统，这取决于你使用哪种文件系统。比如说，有面向EXT2/EXT3/EXT4的resize2fs、面向XFS的xfs_growfs以及面向Btrfs的btrfs，不一而足。
+
+在这个例子中，我们使用CentOS 7，XFS文件系统在默认情况下创建。因而，我们使用xfs_growfs来扩大现有的XFS文件系统。
+
+扩大XFS文件系统后，核实文件系统完全占用了整个磁盘卷的7.2GB。
+
+创建新的LVM池/卷
+
+在这个示例中，不妨看一下如何在物理磁盘驱动器上创建新的存储池和新的LVM卷。如果使用传统的LVM工具，整个过程相当复杂，需要准备分区，需要创建物理卷、卷组、逻辑卷，最后还要建立文件系统。不过，若使用ssm，整个过程一蹴而就！
+
+下面这个命令的作用是，创建一个名为mypool的存储池，创建存储池中名为disk0的500MB大小的LVM卷，使用XFS文件系统格式化卷，并将它挂载到/mnt/test下。立即就能领略到ssm的强大功能。
+
+    $ sudo ssm create -s 500M -n disk0 --fstype xfs -p mypool /dev/sdc /mnt/test 
+
+不妨核实已创建的磁盘卷。
+
+对LVM卷拍取快照
+
+使用ssm工具，你还可以对现有的磁盘卷拍取快照。请注意：只有含有卷的后端支持快照机制，快照才适用。LVM后端支持联机快照功能，这意味着我们没必要在离线状态下对卷拍取快照。另外，由于ssm的LVM后端支持LVM2，快照具有读取/写入功能。
+
+不妨对现有的LVM卷（比如/dev/mypool/disk0）拍取快照。
+
+    $ sudo ssm snapshot /dev/mypool/disk0 
+
+一旦快照拍取完毕，它将作为一个特殊的快照卷存储起来，存储了原始卷中拍取快照时的所有数据。
+
+存储快照后，你可以删除原始卷，并挂载快照卷，以访问快照中的数据。
+
+请注意：当你试图在原始卷挂载时挂载快照卷，会得到下列出错信息。
+
+    kernel: XFS (dm-3): Filesystem has duplicate UUID 27564026-faf7-46b2-9c2c-0eee80045b5b - can't mount 
+
+删除LVM卷
+
+删除现有的磁盘卷或存储池就跟创建磁盘卷或存储池来得一样容易。如果你试图删除已挂载的卷，ssm会自动先将它卸载。这方面没有麻烦。
+
+想删除LVM卷：
+
+    $ sudo ssm remove <volume> 
+
+想删除存储池：
+
+    $ sudo ssm remove <pool-name> 
+
+结束语
+
+但愿至此你已领略了ssm的强大功能。在企业存储环境中，处理一大批的存储设备、磁盘卷和文件系统是相当常见的事。现在你可以运用单单一个命令行工具ssm，让其后端为你完成任务，而不是操心运用许多不同的工具管理一整套存储配置。对任何置身于复杂存储管理环境的系统管理员来说，ssm绝对是一款必备工具。

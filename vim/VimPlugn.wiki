@@ -1,0 +1,85 @@
+= vim常用插件介绍 =
+[[vimwiki]]
+[[nerdtree]]
+[[ctags]]
+[[Taglist]]
+1. taglist.vim (依赖于ctags) -- [[taglist]]
+2. NERD_tree.vim -- [[nerdtree]]
+[[Omni completion]] --万能补全
+
+vimwiki:
+vim-twig:
+vim-swift:
+vim-slim:
+vim-scss:
+vim-scala:
+vim-rust:
+vim-ruby:
+vim-racket:
+vim-python:
+vim-php-indent:
+vim-php:
+vim-perl:
+vim-nginx:
+vim-mustache-handlebars:
+vim-markdown:
+vim-less:
+vim-julia:
+vim-jst:
+vim-json:
+vim-jinja2:
+vim-javascript:
+vim-java:
+vim-jade:
+vim-html5:
+vim-go:
+vim-fsharp:
+vim-erlang:
+vim-elixir:
+vimdoc-zh:
+vim-dlang:
+vim-dart:
+vim-css3:
+vim-csharp:
+vim-cppstl:
+vim-cpp11:
+vim-coffee-script:
+vim-clojure:
+vim-blade:
+txtbrowser:
+tlib_vim:
+taglist:
+tabular:
+syntastic:
+surround:
+snipmate:
+phpcomplete:
+nerdtree:
+  树形目录插件,在vim中输入:NERDTree，你就可以看到NERDTree的效果了
+    "NERDTree配置{{{
+                map <F1> :NERDTreeToggle<CR>
+                map <C-F1> :NERDTreeFind<CR>
+                let NERDTreeChDirMode=2 "选中root即设置为当前目录
+                let NERDTreeQuitOnOpen=1 "打开文件时关闭树
+                let NERDTreeShowBookmarks=1 "显示书签
+        "}}}
+
+3. 常用命令
+    NERDTreeToggle “打开 关闭树
+        NERDTree [<start-directory> | <bookmark>] “这个配合标签用起来很爽
+        NERDTreeFind “在树中找到当前文件
+        Bookmark <name> “mark个书签
+        BookmarkToRoot <bookmark> “打开书签并设置为root，用pwd查看当前工作目录
+        ClearBookmarks [<bookmarks>] “清除书签
+
+
+nerdcommenter:
+javascript-libraries-syntax:
+indent-guides:
+gocode:
+fencview:
+emmet:
+coloresque:
+bufexplorer:
+airline:
+addon-mw-utils:

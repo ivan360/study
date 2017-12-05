@@ -1,0 +1,216 @@
+= 6.1 一切从“/”开始 =
+/boot         开机所需文件——内核,开机菜单及所需配置文件等
+/dev          任何设备与接口都以文件形式存放在此目录
+/etc          配置文件
+/home         用户主目录
+/bin          单用户维护模式下还能够被操作的命令
+/lib          开机时用到的函数库及/bin与/sbin下面命令要调用的函数
+/sbin         开机过程中需要的
+/media        一般挂载或删除的设备
+/opt          放置第三方的软件
+/root         系统管理员的主文件夹
+/srv          一些网络服务的数据目录
+/tmp          任何人均可使用的“共享”临时目录
+/proc         虚拟文件系统，例如系统内核，进程，外部设备及网络状态等
+/usr/local    用户自行安装的软件
+/usr/sbin     非系统开机时需要的软件/命令/脚本
+/usr/share    帮助与说明文件，也可放置共享文件。
+/var          主要存放经常变化的文件，如日志。
+/lost+found   当文件系统发生错误时，将一些丢失的文件片段存放在这里
+
+路径指的是如何定位到某个文件，分为绝对路径与相对路径
+
+= 6.2 物理设备的命名规则 =
+
+系统内核的udev设备管理器会自动将硬件名称规范起来，目的是让我们可以通过设备文件的名字猜出设备大致的属性以及分区信息等
+
+udev服务会一直以守护进程的形式运行并侦听来自内核发出的信号来管理/dev目录下的设备文件
+IDE设备         /dev/hd[a-d]
+SCSI/SATA/U盘   /dev/sd[a-p]
+软驱            /dev/fd[0-1]
+打印机          /dev/lp[0-15]
+光驱            /dev/cdrom
+鼠标            /dev/mouse
+磁带机          /dev/st0或/dev/ht0(IDE设备)
+
+主分区或扩展分区的编号从1开始至4结束。
+逻辑分区从编号5开始
+
+/dev目录中sda设备之所以是a，并不是由插槽决定的，而是由系统内核的识别顺序决定的
+da3只能表示是编号为3的分区文件，而不能判断sda设备上已经存在了3个分区
+“/dev/sda5”代表的就是——“这是系统中第一块被识别到的硬件设备中分区编号为5的逻辑分区的文件”
+
+硬盘设备由大量的扇区组成，其中第一个扇区最重要，保存着主引导记录与分区表信息
+单个扇区容量为512bytes组成，主引导记录需要占用446bytes，分区表的为64bytes，结束符占用2bytes
+而其中每记录一个分区信息需要16bytes，这最多四个能有幸被写到第一个扇区中的分区信息就叫做主分区
+
+= 6.3 文件系统与数据资料 =
+文件系统的作用是将硬盘合理的规划，保证用户正常的使用需求
+
+Ext3是一款日志文件系统，能够在异常宕机中避免文件系统资料丢失的情况，自动修复数据的不一致与错误
+Ext4可以称为是Ext3的后继版本，支持更大的文件系统到1EB，另外能够批量分配block块并作"Extents"极大提高读写效率
+XFS的日志型文件管理系统的优势在意外宕机后尤其明显，可以快速的恢复可能被破坏的文件，另外经过优化后日志功能对硬盘性能影响非常小，同时最大支持18EB的存储容量满足了几乎所有需求。
+
+super block是“硬盘地图”，并不是把数据直接写入到这个“大地图”里面，而是在上面记录着整个文件系统的信息
+
+每个文件的权限与属性都会记录在inode中（每个文件都会占用一个独立的inode表格，默认为128bytes），记录着：
+    该文件的访问权限(read,write,execute)
+    该文件的所属主与组(owner,group)
+    该文件的大小(size)
+    该文件的创建或状态修改时间(ctime)
+    该文件的最后一次访问时间(atime)
+    该文件的修改时间(mtime)
+    文件的特殊权限(SUID,SGID,SBIT)
+    该文件的真实数据地址(point)
+    
+文件的实际数据内容保存在block块中（大小可以是1K、2K或4K）
+一个inode大小仅为128bytes（Ext3），记录一个block消耗4bytes，一般当把inode写满后就会取出一个block用于号码记录而不再是保存实际的文件系统。下面的说明中，我们以4K为例。
+    情况一：文件体积很小（1K），那么依然会占用一个block，潜在的浪费3K。
+    情况二：文件体积很大（5K），那么会占用两个（5K-4K剩下的1K也要占用一个block）。
+
+在Linux内核中的软件层提供了一个VFS文件系统接口(Virtual File System)，统一对虚拟文件系统进行操作啦
+`实际文件系统在VFS下隐藏了自己的特性和细节，使得我们在日常使用时觉得“文件系统都是一样的”`
+
+= 6.4 挂载硬件设备 =
+挂载操作指的是当用户需要使用硬盘设备或分区数据时，需要先将其与一个已存在的目录文件做关联，而这个动作就叫“挂载”
+
+`mount命令用于挂载文件系统，格式为：“mount 文件系统 挂载目录”`
+
+mount -a 执行后会自动检查/etc/fstab文件中有无疏漏被挂载的设备文件，然后进行自动挂载操作
+-a   挂载所有在/etc/fstab中定义的文件系统
+-t   指定文件系统的类型
+
+永久进行自动关联，就必须将挂载信息按照指定的格式写入到/etc/fstab文件中
+`填写格式如下：“设备文件 挂载目录 格式类型 权限选项 自检 优先级”`
+
+设备文件 ： 一般为设备的路径+设备名称，也可以写UUID值。
+挂载目录 ： 指定要挂载到的目录，需挂载前创建好。
+格式类型 ： 即指定文件系统的格式，比如有ext3/ext4/xfs/swap/iso9960（此为光盘设备）等等。
+权限选项 ： 默认为defaults(rw,suid,dev,exec,auto,nouser,async)，可指定acl或quota等。
+自检     ： 若为1则开机后进行磁盘自检，0为不自检。
+优先级   ： 若“自检”为1，则可对多块硬盘进行优先级设置。
+
+# vim /etc/fstab
+/dev/mapper/rhel-root                       /              xfs       defaults   1   1
+UUID=812b1f7c-8b5b-43da-8c06-b9999e0fe48b   /boot          xfs       defaults   1   2
+/dev/mapper/rhel-swap                       swap           swap      defaults   0   0
+/dev/cdrom                                  /media/cdrom   iso9660   defaults   0   0
+/dev/sdb2                                   /backup        ext4      defaults   0   0
+
+`umount命令用于撤销已经挂载的设备文件，格式为：“umount [挂载点/设备文件]”`
+
+= 6.5 添加硬盘设备 =
+`fdisk命令用于管理磁盘分区，格式为：“fdisk [磁盘名称]”`
+m   查看全部可用的参数
+n   添加新的分区
+d   删除某个分区信息
+l   列出所有可用的分区类型
+t   改变某个分区的类型
+p   查看分区表信息
+w   保存并退出
+q   不保存直接退出
+
+如果设备信息没有被抽象为文件，输入partprobe命令来手动同步信息到内核，推荐敲击两次效果更佳
+
+`存储设备格式化是mkfs命令`
+
+Shell终端中输入mkfs后再敲击两下Tab键补齐命令
+{{{
+mkfs.ext3      mkfs.gfs2      mkfs.ntfs    
+mkfs.btrfs     mkfs.ext4      mkfs.hfsplus   mkfs.reiserfs
+mkfs.cramfs    mkfs.ext4dev   mkfs.minix     mkfs.vfat    
+mkfs.ext2      mkfs.fat       mkfs.msdos     mkfs.xfs 
+  }}}
+
+`"mkfs.文件类型名称"，例如要格式分区为xfs，则命令为"mkfs.xfs/dev/sdb1"`
+
+`用df -h命令来查看下挂载状态和硬盘使用量信息`
+
+`du命令用于查看文件的数据占用量，格式为：“ du [选项] [文件]”`
+du -sh /*命令来查看在Linux系统根目录下所有一级目录分别占用的空间大小
+# du -sh /newFS/
+33M /newFS/
+
+# du -sh /*
+
+= 6.6 添加交换分区 =
+SWAP交换分区是将一部分硬盘空间虚拟成内存来使用，解决内存容量不足的情况
+1. 第一步就是再进行对/dev/sdb存储设备分区操作，取出一个大小为5GB的主存储分区然后保存退出即可：
+2. 使用SWAP交换分区专用的格式化`mkswap命令`进行格式化操作：
+3. 使用swapon命令将准备好的SWAP交换分区设备正式的挂载到系统中
+  并可以使用free -m 命令来看到交换分区大小的变化（由2047M提升至了7167M）：
+
+# swapon /dev/sdb2
+# free -m
+
+4. 写入/etc/fstab配置文件中
+  /dev/sdb2 swap swap defaults 0 0 
+
+= 6.7 磁盘容量配额 =
+磁盘配额服务帮助管理员限制某用户或某个用户组对特定文件夹可以使用的最大硬盘空间
+quota服务做磁盘配额可以限制用户的硬盘可用量或最大创建文件数量，并且还有软、硬限制的功能：
+    软限制:当达到软限制时会提示用户，但允许用户在规定额度内继续使用。
+    硬限制:当达到硬限制时会提示用户，且强制终止用户的操作。
+
+早期Linux系统或有红帽RHEL6系统,让设备支持quota磁盘配合服务的是usrquota参数,而在本系统中则是uquota参数
+然后重启系统后就能使用mount命令看到/boot目录已经支持了quota磁盘配额技术
+
+# vim /etc/fstab
+
+/dev/mapper/rhel-root                       /              xfs       defaults          1   1
+UUID=812b1f7c-8b5b-43da-8c06-b9999e0fe48b   /boot          xfs       defaults,uquota   1   2
+/dev/mapper/rhel-swap                       swap           swap      defaults          0   0
+/dev/sdb1                                   /newFS         xfs       defaults          0   0
+/dev/sdb2                                   swap           swap      defaults          0   0
+
+# reboot
+# mount | grep boot
+/dev/sda1 on /boot type xfs (rw,relatime,seclabel,attr2,inode64,usrquota)
+
+
+接下来创建一个用于检查磁盘配额效果的用户，并对/boot目录增加其他人的写权限，保证咱们的用户能够正常的写入数据：
+
+# useradd tom
+# chmod -Rf o+w /boot
+
+`xfs_quota命令用于管理XFS文件系统的quota硬盘配额，格式为：“quota [参数] 配额 文件系统”`
+
+-c参数用于以参数的形式设置要执行的命令，-x参数是专家模式
+那么我们来用xfs_quota命令设置tom用户对/boot目录的磁盘配额吧
+具体的限额控制包括有硬盘使用软限制为3M，硬盘使用硬限制为6M，创建文件数量软限制为3个，创建文件硬限制为6个。
+
+# xfs_quota -x -c 'limit bsoft=3m bhard=6m isoft=3 ihard=6 tom' /boot
+# xfs_quota -x -c report /boot
+User quota on /boot (/dev/sda1)   Blocks
+User   ID      Used   Soft   Hard   Warn/Grace
+root   95084   0      0      00     [--------]
+tom    0       3072   6144   00     [--------]
+
+`edquota命令用于编辑用户的quota配额限制，格式为：“edquota [参数] [用户]”`
+-u参数代表要针对那个用户进行的设置
+-g参数则代表要针对那个用户组进行的设置
+
+
+# edquota -u tom
+  Filesystem   blocks   soft   hard   inodes   soft   hard
+  /dev/sda1    6144     3072   8192   1        3      6
+
+$ dd if=/dev/zero of=/boot/tom bs=8M count=1
+
+= 6.8 软硬方式链接 =
+1. 硬链接(hard link)“指向原始文件inode的指针”，系统不为它分配独立的inode与文件
+硬链接文件与原始文件其实是同一个文件，只是名字不同
+每添加一个硬链接，该文件的inode连接数就会增加1，直到该文件的inode连接数归0才是彻底删除
+由于技术的局限性而不能跨文件系统也不能链接目录文件
+
+2. 软链接（symbolic link）即“仅仅包含它所要链接文件的路径名”
+能做目录链接也可以跨越文件系统，但原始文件被删除后链接文件也将失效
+性质上和Windows™系统中的“快捷方式”是一样的
+
+`ln命令用于创建链接文件，格式为：“ln [选项] 源文件 目标文件”`
+ln命令创建出两种性质不同的快捷方式文件，差别只在这个-s参数上面
+
+-s   创建"符号链接"(默认是硬链接)
+-f   强制创建文件或目录的链接
+-i   覆盖前先询问
+-v   显示创建链接的过程

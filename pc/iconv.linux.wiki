@@ -1,0 +1,26 @@
+1. 查看支持编码
+1. 查看及查找编码
+iconv -l 
+iconv -l | grep -i utf-16le
+iconv -l | grep -i utf-8
+
+2. 转换编码
+iconv -f UTF-16LE -t UTF-8 WINCMD.INI > wincmd2.ini
+
+sh文件
+d ~/workspace/XXXProject
+~/iconv_shell.sh ./ *java
+
+#!/bin/bash
+if [ "$#" != "2" ]; then
+  echo "Usage: `basename $0` dir filter"
+  exit
+fi
+dir=$1
+filter=$2
+echo $1
+for file in `find $dir -name "$2"`; do
+  echo "$file"
+  iconv -f gbk -t utf8 -o $file $file
+done
+

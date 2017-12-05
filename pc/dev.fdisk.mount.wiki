@@ -1,0 +1,32 @@
+== MBR分区表和GPT分区表 ==
+对于MBR分区表的特点（通常使用fdisk命令进行分区）
+    - 所支持的最大磁盘大小：2T
+    - 最多支持4个主分区或者是3个主分区加上一个扩展分区
+对于GPT分区表的特点（使用parted命令进行分区）
+     - 支持最大卷：18EB（1EB=1024TB）
+     - 最多支持128个分区
+
+== parted命令工具分区的介绍 ==
+fdisk -l                       -- 查看磁盘信息
+parted /dev/sdb                -- 使用parted工具操作磁盘/dev/sdb
+    mktable gpt                -- 或者 mklabel gpt 把磁盘/dev/sdb 格式化为 gpt分区表
+    mkpart primary  0MB 50MB   -- 创建一个50M大小的主分区
+    mkpart extended 50MB 100MB -- 创建一个50M大小的扩展分区
+    rm 1                       -- 删除number为1的分区
+    print                      -- 显示磁盘 /dev/sdb的相关信息
+    help                       -- 显示帮助命令
+mkfs.ext4 /dev/sdb2            -- 格式化磁盘/dev/sdb的第二个分区为ext4格式的分区
+
+== 进行磁盘扩展 ==
+parted /dev/sdc
+    mkpart extended 400MB 800MB -- 对于已经格式化分区表为gpt格式的磁盘直接扩展
+    print                       -- 查看磁盘信息
+    quit                        -- 退出
+mkfs.ext4 /dev/sdc2             -- 格式化文件系统为ext4
+
+== 实现磁盘自动挂载 ==
+ll /dev/disk/by-uuid --查看硬盘uuid
+
+vi  /etc/fstab                  -- 配置开机自动挂载磁盘
+   /dev/sdc1  /backup   ext4   default   1 2
+   /dev/sdc2  /datafile  ext4  default   1 2

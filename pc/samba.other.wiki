@@ -1,0 +1,41 @@
+== Vista系统无法查看到服务器上Samba共享的文件目录 ==
+因为Samba Server 只支持NTLM 认证，而Vista却强制使用NTLMv2认证，这时我们就需要通过一些设置来解决这一问题。
+
+首先，单击[开始]——[运行] 输入 “secpol.msc”打开管理工具，展开“本地策略（Local Policies）”。
+
+然后，单击“安全选项（Security Options）”。 双击“网络安全：LAN Manager 身份验证级别（Network Security： LAN Manager authentication level）”
+
+最后，单击列表中：发送LM和NTLMv2，如果已协商，则使用NTLMv2协议（LM and NTLM – use NTLMV2 session security if negotiated） .
+
+通过以上设置，在对方不支持NTLMv2认证的时候，系统会自动采用NTLM认证方式进行验证。如果Vista系统不能同其它服务正常连接的时，也不妨试试这个方法。
+
+== CentOS 6.3 架设的Samba服务器访问慢的问题 ==
+打开 /etc/resolv.conf 文件将里面的DNS地址删除掉即可 
+
+== samba和nfs互访速度奇慢 ==
+    下面的3行网上说可以用来解决samba和nfs互访速度奇慢问题,但是并不奏效,后来发现mount -t nfs -o nolock可以解决这个问题,如果nfs和samba之间不能拖动复制,可以使用ctrl+c 和ctrl+v组合
+    samba和nfs互相拷贝时速度奇慢的原因，但是个人不推荐locking = no,因为这样存在很大问题,如果需要windows下nfs,那么可以安装windows的nfs工具
+[gloabl]
+    strict locking = no
+    posix locking = no
+    kernel oplocks = no
+
+    配置好samba后发现上传下载的速度只有700多k，网上搜索了一下，找到两种建议：
+1.  [global]
+socket options = IPTOS_LOWDELAY TCP_NODELAY SO_RCVBUF=16384 SO_SNDBUF=16384
+
+2. 在 smb.conf 裡添加下面的語句就可以解決smb ports = 139
+
+`network`
+`cat network`
+    NETWORKING=yes
+    NETWORKING_IPV6=no
+    HOSTNAME=centos5
+ 
+`hosts`
+`cat hosts`
+# Do not remove the following line, or various programs
+# that require network functionality will fail.
+#127.0.0.1              localhost.localdomain localhost
+    127.0.0.1            centos5
+    ::1             localhost6.localdomain6 localhost6

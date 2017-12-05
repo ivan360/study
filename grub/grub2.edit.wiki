@@ -1,0 +1,53 @@
+1.grub.iso
+2.grub.mbr
+3.grub.efi
+4.grub.grldr
+
+编译
+
+1.下载Windows下的Grub2 版本
+http://alpha.gnu.org/gnu/grub/?C=M;O=D
+2.【BOOTICE: 启动维护工具】用于安装Grub2
+
+其中，方便點較為重要的我都用鼠標選中了，下面我簡單解釋下
+i386-pc文件夾是BIOS模式的所需要的
+i386-efi文件夾是UEFI模式的32Bit
+x86_64-efi文件夾是UEFI模式的64Bit
+unicode.pf2是Grub2的字體，支持简体、繁體漢字
+grub-mkimage.exe自然就是grub-mkimage命令，用於定制Grub2
+locale文件夾是語言文件，打開後看裏面文件夾名稱，就能知道有很多由各種語言簡稱命名的文件夾，不過每個文件夾裏面都是相同的名稱grub.mo，後面要自己改壹下，基本只要zh_CN、zh_TW這兩個文件夾：
+分別把裏面的grub.mo改成和文件夾相對應的名稱
+zh_CN文件夾裏面的grub.mo改名為zh_CN.mo
+zh_TW文件夾裏面的grub.mo改名為zh_TW.mo
+
+
+基本就只用到grub-mkimage命令来定制，至于更深层次的，我就没怎么了解，在Windows下可以通过命令   -?或 --help 來獲取其他參數。
+需要同時支持BIOS和UEFI模式，然後把Grub2安裝到U盤，（這個U盤只有壹個分區）這是定制目的，下面就開始重點了。
+
+目录
+boot
+    grub2
+EFI
+    boot
+
+-d, --directory=DIR
+ 使用 DIR 作为寻找的模块路径。 [default=/usr/lib/grub2/@platform@] 镜像中需要嵌入部分模块，这些模块应该在 DIR 目录下出现。
+ 
+-p, --prefix=DIR 
+设置 grub_prefix 目录 [default=/boot/grub2] prefix 目录是 grub 模块和配置文件所在的路径。
+
+-m, --memdisk=FILE 
+嵌入 FILE 镜像最为嵌入镜像。可以使用 tar 格式的文件。
+
+-c, --config=FILE 
+内嵌配置文件 FILE 。加载 memdisk 模块后，在这个配置文件中可以使用 (memdisk) 代指被嵌入的镜像。
+
+-n, --note
+add NOTE segment for CHRP Open Firmware 
+
+-o, --output=FILE 
+将输出保存到 FILE，默认输出到标准输出。
+
+-O, --format=FORMAT 
+目标平台的格式。
+可用的平台有： i386-coreboot, i386-multiboot, i386-pc, i386-pc-pxe, i386-efi, i386-ieee1275, i386-qemu, x86_64-efi, mipsel-yeeloong-flash, mipsel-yeeloong-elf, powerpc-ieee1275, sparc64-ieee1275-raw, sparc64-ieee1275-aout 

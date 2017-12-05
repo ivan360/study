@@ -1,0 +1,12 @@
+# pvs
+  PV         VG     Fmt  Attr PSize   PFree
+  /dev/sda2  centos lvm2 a--  465.27g    0 
+# vgs
+  VG     #PV #LV #SN Attr   VSize   VFree
+  centos   1   3   0 wz--n- 465.27g    0 
+# lvs -o +devices
+  LV   VG     Attr       LSize   Pool Origin Data%  Move Log Cpy%Sync Convert Devices          
+  home centos -wi-ao---- 407.50g                                              /dev/sda2(1988)  
+  root centos -wi-ao----  50.00g                                              /dev/sda2(106309)
+  swap centos -wi-ao----   7.77g                                              /dev/sda2(0)    
+

@@ -1,0 +1,16 @@
+== 第四章 ==
+安装网卡
+dmesg | grep -i eth
+lspci | grep -i net
+
+查询网卡加载模块
+lsmod | grep 1000(网卡模块)
+加载网卡模块
+modprobe eth1000
+设置每次开机自动加载
+cd /etc/modprobe.d/
+编辑配置文件
+vim eth.conf
+    alias eth0 e1000
+图形化设置网卡信息
+service NetworkManager start

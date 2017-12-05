@@ -1,0 +1,62 @@
+# cat /etc/redhat-release
+Fedora release 20 (Heisenbug)
+# mkdir /mnt/u
+# mount /dev/sdb1 /mnt/u
+# grub2-install --root-directory=/mnt/u /dev/sdb
+# grub2-mkconfig -o /mnt/u/boot/grub2/grub.cfg
+# gedit /mnt/u/boot/grub2/grub.cfg&
+
+在/mnt/u/boot/grub2/grub.cfg文件最后添加：
+
+menuentry 'Fedora LiveCD' {
+    insmod loopback
+    set root='hd0,msdos1'
+    set iso_path=/boot/iso/Fedora-Live-Desktop-x86_64-20-20140407.iso
+    loopback loop ${iso_path}
+    linux (loop)/isolinux/vmlinuz0 iso-scan/filename=${iso_path} root=live:CDLABEL=Fedora-Live-Desktop-x86_64-20-20 rootfstype=auto ro quiet rd.live.image noeject rhgb rd.luks=0 rd.md=0 rd.dm=0
+    initrd (loop)/isolinux/initrd0.img
+}
+
+menuentry 'GRUB4DOS' {
+    insmod ntfs
+    set root='hd0,msdos1'
+    linux /boot/grub4dos/grub.exe --config-file=/boot/grub4dos/menu.lst
+}
+
+CDLABEL  使用如下命令获得：
+# file /mnt/u/boot/iso/Fedora-Live-Desktop-x86_64-20-20140407.iso
+/mnt/u/boot/iso/Fedora-Live-Desktop-x86_64-20-20140407.iso: # ISO 9660 CD-ROM filesystem data 'Fedora-Live-Desktop-x86_64-20-20' (bootable)
+[root@localhost ~]#
+
+# ls /mnt/u/boot/
+grub2  grub4dos  iso
+# ls /mnt/u/boot/iso/
+Fedora-Live-Desktop-x86_64-20-20140407.iso  ylmf_ghostwin7sp1_yn2013_x86.iso
+# ls /mnt/u/boot/grub2
+fonts  grub.cfg  grubenv  i386-pc  locale
+# ls /mnt/u/boot/grub4dos/
+
+# gedit /mnt/u/boot/grub4dos/menu.lst
+
+在/mnt/u/boot/grub4dos/menu.lst文件最后添加：
+ 
+title DOS/Win9x/Me/NT/2K/XP on (hd0,0)
+chainloader (hd0,0)+1
+rootnoverify (hd0)
+ 
+title Install-Fedora
+kernel (hd0,0)/isolinux/vmlinuz
+initrd (hd0,0)/isolinux/initrd.img
+ 
+title Install-RHEL7/CentOS7
+root (hd0,10)
+kernel /isolinux/vmlinuz linux repo=hd:/dev/sda9:/
+initrd /isolinux/initrd.img
+boot
+ 
+title Windows 7 ISO
+find --set-root /boot/iso/ylmf_ghostwin7sp1_yn2013_x86.iso
+map /boot/iso/ylmf_ghostwin7sp1_yn2013_x86.iso (0xff)
+map --hook
+root (0xff)
+chainloader (0xff)

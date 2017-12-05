@@ -1,0 +1,12 @@
+在CentOS下有的时候用yum安装软件的时候最后会提示：
+
+引用
+warning: rpmts_HdrFromFdno: Header V3 DSA signature: NOKEY, key ID*****
+
+
+这是由于yum安装了旧版本的GPG keys造成的，解决办法就是
+
+引用
+rpm --import /etc/pki/rpm-gpg/RPM*
+
+再安装软件就不会有这个错误提示了。

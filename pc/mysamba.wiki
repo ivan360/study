@@ -1,0 +1,29 @@
+
+下面的3行网上说可以用来解决samba和nfs互访速度奇慢问题,但是并不奏效,后来发现mount -t nfs -o nolock可以解决这个问题,如果nfs和samba之间不能拖动复制,可以使用ctrl+c 和ctrl+v组合
+
+samba和nfs互相拷贝时速度奇慢的原因，但是个人不推荐locking = no,因为这样存在很大问题,如果需要windows下nfs,那么可以安装windows的nfs工具
+[gloabl]
+    strict locking = no
+    posix locking = no
+    kernel oplocks = no
+
+配置好samba后发现上传下载的速度只有700多k，网上搜索了一下，找到两种建议：
+1： [global]
+socket options = IPTOS_LOWDELAY TCP_NODELAY SO_RCVBUF=16384 SO_SNDBUF=16384
+
+2：在 smb.conf 裡添加下面的語句就可以解決smb ports = 139
+
+network
+ 
+[root@centos5 sysconfig]# cat network
+NETWORKING=yes
+NETWORKING_IPV6=no
+HOSTNAME=centos5
+ 
+[root@centos5 etc]# cat hosts
+# Do not remove the following line, or various programs
+# that require network functionality will fail.
+#127.0.0.1              localhost.localdomain localhost
+127.0.0.1            centos5
+::1             localhost6.localdomain6 localhost6
+

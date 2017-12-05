@@ -1,0 +1,31 @@
+== 给一般账号root权限 ==
+默认情况下，一般账号是没有root权限的。为什么不直接用root账号，而是要给一般账号root权限呢？
+    日常工作中使用root账号，是非常糟糕且危险的习惯！无论是服务器还是个人电脑都是如此。
+    安装软件时需要root权限，只能su切换到root账户再安装。对于习惯使用sudo的人来说，还是有些麻烦。
+假设账户名为seisman，要授予他root权限，则要修改配置文件/etc/sudoers
+$ su
+# echo 'seisman ALL=(ALL) ALL' >> /etc/sudoers # 向配置文件中加入语句
+# tail -1 /etc/sudoers  # 检查一下是否正确
+seisman ALL=(ALL) ALL
+
+== 添加第三方源 ==
+CentOS有很多第三方源，比如EPEL、ATrpms、ELRepo、Nux Dextop、RepoForge等。根据上面提到的软件安装原则，为了尽可能保证系统的稳定性，此处大型第三方源只添加EPEL源。
+EPEL
+EPEL即Extra Packages for Enterprise Linux，为CentOS提供了额外的10000多个软件包，而且在不替换系统组件方面下了很多功夫，因而可以放心使用。
+sudo yum install epel-release
+
+执行完该命令后，在/etc/yum.repo.d目录下会多一个epel.repo文件。
+ELRepo
+
+ELRepo包含了一些硬件相关的驱动程序，比如显卡、声卡驱动。
+
+sudo rpm --import https://www.elrepo.org/RPM-GPG-KEY-elrepo.org
+sudo rpm -Uvh http://www.elrepo.org/elrepo-release-7.0-2.el7.elrepo.noarch.rpm
+
+完成该命令后，在/etc/yum.repo.d目录下会多一个elrepo.repo文件。
+
+== 安装yum-axelget ==
+yum-axelget是EPEL提供的一个yum插件。使用该插件后用yum安装软件时可以并行下载，大大提高了软件的下载速度，减少了下载的等待时间:
+
+sudo yum install yum-axelget
+安装该插件的同时会安装另一个软件axel。axel是一个并行下载工具，在下载http、ftp等简单协议的文件时非常好用。
