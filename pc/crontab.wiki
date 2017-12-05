@@ -1,0 +1,13 @@
+当在图形界面下打开了一个终端的时候，可以这样做，每小时会出现一行提示。
+使用命令crontab -e，然后加入如下几行代码：
+
+#My add these lines
+#min hour day month week command
+#warn user to rest a while 
+0 * * * * echo 'rest a while, please.' > /dev/pts/1
+
+如果每小时想放一段mp3音乐的话，需要安装mpalyer播放器，还要有一个音乐文件，比如 music. mp3，
+然后使用命令crontab -e，加入如下几行代码：
+
+#min hour day month week command
+0 * * * * mplayer ~/music.mp3 &> /dev/null
