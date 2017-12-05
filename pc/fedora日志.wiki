@@ -50,18 +50,12 @@ Oh My Zsh 默认自带了一些默认主题，存放在~/.oh-my-zsh/plugins目�
 
 plugins=(git)
 git: oh-my-zsh 默认开启的插件，提供了大量 git 的alias。
-
 web-search : 在命令行中使用搜索引擎进行搜索。比如 baidu swift 这个命令就可以使用 baidu 搜索 swift 关键字
-
 extract : 功能强大的解压插件，所有类型的文件解压一个命令x全搞定，再也不需要去记tar后面到底是哪几个参数了
-
 z : 强大的目录自动跳转命令，会记忆你曾经进入过的目录，用模糊匹配快速进入你想要的目录。
-
 wd 能够快速的切换到常用的目录
-
 比如一个常用的目录 /usr/nginx/www/html，首先进入到这个目录中，然后输入
 wd add web
-
 这个命令相当于给当前目录做了一个标识，标识名叫做 web ，我们下次如果再想进入这个目录，只需输入：
 wd web
 
@@ -71,13 +65,9 @@ wd show 命令查看现有的映射。
 5. 更新oh-my-zsh
 
 设置自动更新oh-my-zsh
-
 默认情况下，当oh-my-zsh有更新时，都会给你提示。如果希望让oh-my-zsh自动更新，在~/.zshrc 中添加下面这句
-
 DISABLE_UPDATE_PROMPT=true
-
 要手动更新，可以执行
-
 $ upgrade_oh_my_zsh
 
 6. 卸载oh my zsh
@@ -85,5 +75,4 @@ $ upgrade_oh_my_zsh
 
 = 2017年03月04日 =
 安装htop
-
 

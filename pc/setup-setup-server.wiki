@@ -50,4 +50,3 @@ net use * \\10.200.55.25\用户名 /u:用户名 密码
 [[centos.net.set]]
 [[centos.email]]
 [[centos.net.ip]]
-[[centos.raid]]

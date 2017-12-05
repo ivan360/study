@@ -4,17 +4,18 @@
 2. samba学习
 [[samba]]
 3. linux学习
-[[git_study]]
 [[linux]]
 [[linux.命令]]
 [[linux.color256]]
 [[linux.lvm]]
+[[git]]
 
+[[crontab]]
 [[screen]]
 [[samba]]
 [[fedora学习]]
 [[fedora日志]]
-[[/raid/raid]]
+[[raid]]
 [[ssh]]
 [[在CentOS系统上配置自动安全更新]]
 == window相关 ==
