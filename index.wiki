@@ -1,3 +1,6 @@
+1. 卓有成效的管理者 manager
+2. 电子技术 electronic
+3. 农化知识 agrochemical
 [[pc/pc.study]]
 [[linux/linux就该这么学]]
 [[grub/grub]]
