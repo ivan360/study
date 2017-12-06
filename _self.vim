@@ -34,3 +34,12 @@ let study.template_ext      = '.html'
 let study.auto_export       = 0
 
 let g:vimwiki_list         = [blog, study]
+
+" /tt -- 快捷插入当前时间
+"imap <leader>tt <c-r>=strftime('%c')<cr>
+imap xdt <c-r>=strftime("20%y.%m.%d (%A)")<cr>
+nmap <F4> :up<CR>
+imap <F4> <ESC>:up<CR>
+nmap <F5> :tabnew<CR>
+imap <F5> <ESC>:tabnew<CR>
+set pastetoggle=<F11>"
