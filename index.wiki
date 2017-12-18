@@ -7,3 +7,6 @@
 [[wiki/wiki]]
 [[高效演讲]]
 [[正念的奇迹]]
+centos7安装aria2及web端 http://blog.csdn.net/yangfanv/article/details/69952065
+
+[[update_fedora27]]
