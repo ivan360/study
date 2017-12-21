@@ -1,0 +1,57 @@
+实际上，/etc/inittab文件中已经描述的很清楚，意即：
+
+　　# ln -s /lib/systemd/system/multi-user.target /etc/systemd/system/default.target #文本模式
+
+　　# ln -s /lib/systemd/system/graphical.target /etc/systemd/system/default.target #图形模式
+
+　　不过照此录入命令，会得到提示文件已存在，那是因为 /etc/systemd/system/ 目录下已经存在 default.target 文件，需要为 ln 命令加上 -f 选项强制写入，即如下：
+
+　　# ln -sf /lib/systemd/system/multi-user.target /etc/systemd/system/default.target #文字模式
+
+　　# ln -sf /lib/systemd/system/graphical.target /etc/systemd/system/default.target #图形模式
+
+= 升级到Fedora 27 =
+
+通常，服务器在没有任何桌面环境下运行 所以这部分对使用命令行升级Fedora服务器和工作站很有用。 确保在外部备份驱动器上正确备份您的数据。
+
+不要忘记：备份所有重要的数据。 系统升级具有潜在的风险，为数据丢失做好准备。
+= 步骤1 -更新Fedora系统包 =
+
+确保你正在运行最新的软件包。 您可以使用DNF命令行工具更新您的系统。
+
+$ sudo dnf upgrade --refresh
+
+= 步骤2 -安装系统升级DNF插件 =
+
+DNF需要安装系统升级插件。 所以使用下面的命令来安装系统升级dnf插件。
+
+$ sudo dnf install dnf-plugin-system-upgrade
+
+= 步骤3 -下载升级包 =
+
+成功安装系统升级插件后，下载Fedora 26的更新包。
+
+$ sudo dnf system-upgrade download --refresh --releasever=27
+
+--allowerasing 选项
+
+如果任何软件包有不满意的依赖，Fedora将拒绝升级过程。 你可以在上面的命令中使用--allowerasing选项，这将删除所有被破坏的包。 观察命令的输出以检查哪些软件包正在从系统中删除，因此您可以再次安装。
+= 步骤4 -开始升级过程 =
+
+最后，运行以下命令启动升级过程。 这将重新启动您的系统并完成升级。
+
+$ sudo dnf system-upgrade reboot
+
+让我们等待升级完成。 完成之后，您将在桌面版或服务器上运行Fedora 27。
+
+
+= 解决/etc/pki/rpm-gpg/RPM-GPG-KEY-fedora-x86_64问题 =
+
+找了一下，通过以下方法可以解决此问题：
+
+rpmkeys --import /etc/pki/rpm-gpg/RPM-GPG-KEY-fedora-20-x86_64
+
+如果还不行的话，试以下方法：
+
+rpmkeys --import /etc/pki/rpm-gpg/RPM-GPG-KEY-fedora-20-primary
+rpmkeys --import /etc/pki/rpm-gpg/RPM-GPG-KEY-rpmfusion-nonfree-fedora-20
