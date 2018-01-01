@@ -10,3 +10,5 @@
 centos7安装aria2及web端 http://blog.csdn.net/yangfanv/article/details/69952065
 
 [[update_fedora27]]
+[[vm_usb]]
+

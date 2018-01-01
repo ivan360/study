@@ -1,0 +1,43 @@
+Find out what sd the memory stick is. In the following instructions it's sdc.
+
+Unmount memory Stick
+
+su
+chmod 666 /dev/sdc1
+chmod 666 /dev/sdc
+VBoxManage internalcommands createrawvmdk -filename usb.vmdk -rawdisk /dev/sdc
+chmod 777 usb.vmdk
+chmod 666 /dev/sdc
+Attach usb.vmdk virtualbox machine
+
+chmod 666 /dev/sdc
+Start virtualbox machine
+After done, reset sdc1 permission for security:
+
+chmod 660 /dev/sdc1
+In the above you can see that I had to reset the permissions for the memory stick a few times, because it would get set back to root each time.
+
+I'm using Mandriva Linux, but it should be about the same in Ubuntu
+
+
+Boot from a USB Flash Drive in VirtualBox (Linux Host)
+The following was performed from a running Ubuntu Operating environment. The same should work for most Debian/Ubuntu Linux based environments.
+
+Open a Terminal and type sudo apt install virtualbox
+(Or you can visit the virtualbox download section for other options)
+Type sudo fdisk -l (note which device is your USB drive I.E. /dev/sdb)
+Type vboxmanage internalcommands createrawvmdk -filename ~/usb.vmdk -rawdisk /dev/sdx (replacing sdx with your actual drive letter from step 4)
+Type virtualbox to start the program, and proceed create a New Virtual Machine
+
+
+o add your user to the vboxusers group, run the following command:
+
+sudo usermod -a -G vboxusers username
+To add your user to the disk group, run the following command:
+
+Note: Adding your user to the disk group can be dangerous and a security risk. It is as dangerous as having sudo access to write to a raw disk.
+
+sudo usermod -a -G disk username
+Then you MUST REBOOT your system in order for the changes to take effect.
+
+
