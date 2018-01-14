@@ -1,0 +1,40 @@
+/var/ftp
+├── [1.0K]  ks.cfg
+└── [4.0K]  pub
+    ├── [2.0K]  EFI
+    ├── [2.0K]  images
+    ├── [2.0K]  isolinux
+    ├── [2.0K]  LiveOS
+    ├── [838K]  Packages
+
+/var/tftpboot
+├── [ 43M]  initrd.img
+├── [ 26K]  pxelinux.0
+├── [  21]  pxelinux.cfg
+│   └── [ 142]  default
+└── [5.1M]  vmlinuz
+
+# vim /etc/dhcp/dhcpd.conf
+subnet 192.168.1.0 netmask 255.255.255.0 {
+        range 192.168.1.200 192.168.1.210;
+        next-server 192.168.1.110;
+        filename "pxelinux.0";
+}
+
+# vim /var/tftpboot/pxelinux.cfg/default 
+default linux
+prompt 1
+timeout 60
+display boot.msg
+label linux
+  kernel vmlinuz
+  append initrd=initrd.img text ks=ftp://192.168.1.110/ks.cfg
+
+# vim /etc/xinetd.d/tftp
+service tftp
+{
+        ......
+        server_args             = -s /var/tftpboot
+        disable                 = no
+        ......
+}

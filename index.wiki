@@ -1,3 +1,6 @@
+[[pxe]]
+[[myusb]]
+
 1. 卓有成效的管理者 manager
 2. 电子技术 electronic
 3. 农化知识 agrochemical
@@ -12,4 +15,3 @@ centos7安装aria2及web端 http://blog.csdn.net/yangfanv/article/details/699520
 [[usb2boot]]
 [[update_fedora27]]
 [[vm_usb]]
-

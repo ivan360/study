@@ -1,0 +1,5 @@
+1. 替换ufei中的10win，修改BCD文件
+2. 编辑grub.cfg文件，指向bootmgr.efi
+menuentry "Win10_PE(64)"{
+    chainloader /EFI/microsoft/boot/bootmgr.efi
+}
