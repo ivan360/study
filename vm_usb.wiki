@@ -5,7 +5,7 @@ Unmount memory Stick
 su
 chmod 666 /dev/sdc1
 chmod 666 /dev/sdc
-VBoxManage internalcommands createrawvmdk -filename usb.vmdk -rawdisk /dev/sdc
+
 chmod 777 usb.vmdk
 chmod 666 /dev/sdc
 Attach usb.vmdk virtualbox machine
